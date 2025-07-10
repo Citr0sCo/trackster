@@ -1,0 +1,96 @@
+<div class="link" *ngIf="item && !isDeleted">
+    <a [href]="item.url">
+        <div class="link__content">
+            <div class="o-grid o-grid--static">
+                <div class="o-grid__col o-grid__col--fixed" *ngIf="isEditModeEnabled">
+                    <div class="link-icon" (click)="$event.preventDefault(); moveUp()"><i class="fa fa-arrow-up"></i></div>
+                    <div class="link-icon" style="margin-top: 5px;" (click)="$event.preventDefault(); moveDown()"><i class="fa fa-arrow-down"></i></div>
+                </div>
+                <div class="o-grid__col">
+                    <img *ngIf="showIcon" [src]="item.iconUrl" alt="{{ item.name }} Logo" (error)="handleIconError()"> {{ item.name }}
+                </div>
+                <div class="o-grid__col o-grid__col--fixed u-ml-1 remove-link-wrapper" *ngIf="isEditModeEnabled">
+                    <div class="o-grid o-grid--static">
+                        <div class="o-grid__col u-mr-1">
+                            <div class="edit-link-icon" (click)="$event.preventDefault(); isEditing = !isEditing;logoUpdated = false;">
+                                <i class="fa fa-edit"></i>
+                            </div>
+                        </div>
+                        <div class="o-grid__col u-mr-2">
+                            <div class="remove-link-icon" (click)="$event.preventDefault(); isDeleting = !isDeleting">
+                                <i class="fa fa-trash"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="o-grid__col o-grid__col--fixed">
+                    <url-health-checker [url]="item.url" [host]="item.host" [port]="item.port" [isSecure]="item.isSecure"></url-health-checker>
+                </div>
+            </div>
+        </div>
+    </a>
+
+    <plex-details *ngIf="showWidgets && item.name.toUpperCase() === 'PLEX'" [item]="item"></plex-details>
+
+    <pihole-details *ngIf="showWidgets && item.name.toUpperCase().indexOf('PIHOLE') > -1" [item]="item"></pihole-details>
+
+    <radarr-details *ngIf="showWidgets && item.name.toUpperCase() === 'RADARR'" [item]="item"></radarr-details>
+
+    <sonarr-details *ngIf="showWidgets && item.name.toUpperCase() === 'SONARR'" [item]="item"></sonarr-details>
+
+    <div *ngIf="isEditing" class="link__details">
+        <div *ngIf="successMessage" class="alert alert-success mb-0 px-2 py-0"><small>{{ successMessage }}</small></div>
+        <div *ngIf="errorMessage" class="alert alert-danger mb-0 px-2 py-0"><small>{{ errorMessage }}</small></div>
+
+        <form [formGroup]="form" (ngSubmit)="updateLink()">
+            <input class="form-control mt-1" type="text" placeholder="Name" formControlName="name">
+            <input class="form-control mt-1" type="text" placeholder="URL" formControlName="url">
+            <input class="form-control mt-1" type="text" placeholder="Host" formControlName="host">
+            <input class="form-control mt-1" type="number" placeholder="Port" formControlName="port">
+            <div class="form-group">
+                <div class="o-grid o-grid--static">
+                    <div class="o-grid__col">
+                        <label for="isSecure">Is Secure?</label>
+                    </div>
+                    <div class="o-grid__col o-grid__col--fixed">
+                        <input id="isSecure" class="mt-1" type="checkbox" placeholder="isSecure" formControlName="isSecure" [checked]="item.isSecure">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="alert alert-success" *ngIf="logoUpdated">
+                Logo uploaded!
+            </div>
+
+            <input class="form-control mt-1"
+                   type="file"
+                   placeholder="Icon URL"
+                   accept=".jpg, .jpeg, .png"
+                   (change)="handleFileUpload($event)">
+
+            <hr>
+
+            <div class="o-grid o-grid--static">
+                <div class="o-grid__col u-mr-1">
+                    <button class="btn btn-outline-danger w-100 mt-1" (click)="isEditing = !isEditing;logoUpdated = false;" [disabled]="isLoading">Close</button>
+                </div>
+                <div class="o-grid__col">
+                    <button class="btn btn-primary w-100 mt-1" [disabled]="form.invalid || isLoading"><i *ngIf="isLoading" class="fa fa-spinner fa-spin"></i> Update</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div *ngIf="isDeleting" class="link__details">
+        Are you sure you want to delete?
+        <div class="o-grid o-grid--static">
+            <div class="o-grid__col u-mr-1">
+                <button class="btn btn-outline-light w-100" (click)="isDeleting = !isDeleting">Cancel</button>
+            </div>
+            <div class="o-grid__col">
+                <button class="btn btn-danger w-100" (click)="deleteLink()"><i *ngIf="isLoading" class="fa fa-spinner fa-spin"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

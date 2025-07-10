@@ -1,0 +1,46 @@
+.o-grid {
+    display: flex;
+    flex-direction: row;
+
+    &--wrap {
+        flex-wrap: wrap;
+    }
+
+    &--vertical-align {
+        justify-content: center;
+    }
+
+    &__col {
+        flex-grow: 1;
+
+        &--fixed {
+            flex-grow: 0;
+        }
+
+        &--half {
+            flex-grow: 0;
+            flex-shrink: 0;
+            flex-basis: 50%;
+        }
+
+        &--full {
+            flex-grow: 0;
+            flex-shrink: 0;
+            flex-basis: 100%;
+        }
+
+        &--equal {
+            flex-basis: 0;
+        }
+    }
+
+    &--row {
+        flex-direction: column;
+    }
+
+    @media(max-width: $mobile-width) {
+        &:not(&--static) {
+            flex-direction: column;
+        }
+    }
+}

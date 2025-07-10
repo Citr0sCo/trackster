@@ -1,0 +1,29 @@
+<div class="radarr__details" *ngIf="activity">
+    <div class="o-grid o-grid--static">
+        <div class="o-grid__col o-grid__col--equal">
+            <div class="c-widget-stat radarr-activity">
+                {{ activity.totalNumberOfSeries }}
+                <div class="small">Total</div>
+            </div>
+        </div>
+        <div class="o-grid__col o-grid__col--equal">
+            <div class="c-widget-stat radarr-activity">
+                {{ activity.totalNumberOfQueuedEpisodes }}
+                <div class="small">Queued</div>
+            </div>
+        </div>
+        <div class="o-grid__col o-grid__col--equal">
+            <div class="c-widget-stat radarr-activity">
+                {{ activity.totalNumberOfMissingEpisodes }}
+                <div class="small">Missing</div>
+            </div>
+        </div>
+    </div>
+    <div class="o-grid o-grid--static">
+        <div class="o-grid__col o-grid__col--fixed" *ngFor="let key of Object.keys(groupedHealth)">
+            <div class="c-badge-wrapper u-mt-1" [title]="getTitle(groupedHealth[key])" *ngIf="getNumberOfType(key) > 0">
+                <div class="c-badge" [ngClass]="{'c-badge--danger': key === 'error', 'c-badge--warning': key === 'warning'}">{{ getNumberOfType(key) }} {{ key }}{{ getNumberOfType(key) === 1 ? '' : 's' }}</div>
+            </div>
+        </div>
+    </div>
+</div>

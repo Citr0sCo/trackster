@@ -1,0 +1,78 @@
+@import "../../styles/utility/variables";
+
+.link {
+    background-color: rgba(255, 255, 255, 0.05);
+    margin: 15px 0;
+    border-radius: $border-radius;
+    line-height: 32px;
+
+    a {
+        text-decoration: inherit;
+        color: inherit;
+    }
+
+    &__content {
+        padding: 15px;
+        border-radius: $border-radius;
+
+        img {
+            height: 32px;
+            margin-right: 10px;
+        }
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.10);
+            cursor: pointer;
+        }
+
+        .link-icon {
+            height: 14px;
+            overflow: hidden;
+            margin-right: 5px;
+
+            i {
+                height: 14px;
+
+                &:before {
+                    font-size: 12px;
+                    top: -10px;
+                    position: relative;
+                }
+            }
+
+            &:hover {
+                color: #15b981;
+            }
+        }
+
+        .edit-link-icon {
+            &:hover {
+                color: #ffc107;
+            }
+        }
+
+        .remove-link-icon {
+            &:hover {
+                color: #dc3545;
+            }
+        }
+    }
+
+    .remove-link-wrapper {
+        display: none;
+    }
+
+    &:hover {
+        .remove-link-wrapper {
+            display: block;
+        }
+    }
+
+    &__details {
+        padding: 15px;
+        box-shadow: 0 15px 15px inset rgba(0, 0, 0, 0.25);
+        background-color: rgba(255, 255, 255, 0.10);
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+    }
+}

@@ -1,0 +1,9 @@
+@import "variables";
+
+.u-icon-wrapper {
+  margin-right: 5px;
+
+  @media(max-width: $mobile-width) {
+    margin-right: 0;
+  }
+}

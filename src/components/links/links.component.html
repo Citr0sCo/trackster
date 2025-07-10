@@ -1,0 +1,117 @@
+<div class="links-component">
+    <div class="container">
+        <div class="o-grid o-grid--wrap">
+
+            <div class="o-grid__col o-grid__col--fixed o-grid__col--custom">
+                <div class="links__link">
+                    <div class="links__link__heading">
+                        <i class="fa fa-film"></i> Media
+                    </div>
+                    <a *ngFor="let item of mediaLinks">
+                        <custom-link [item]="item" [stats]="allStats" [isEditModeEnabled]="isEditModeEnabled"
+                                     (updated)="refreshLinkCache()" [showWidgets]="showWidgets.value"></custom-link>
+                    </a>
+                    <add-link *ngIf="isEditModeEnabled" [category]="'media'"
+                              [sortOrder]="getLastSortOrder(mediaLinks)"
+                              (item)="mediaLinks.push($event)"></add-link>
+                </div>
+            </div>
+
+            <div class="o-grid__col o-grid__col--fixed o-grid__col--custom">
+                <div class="links__link">
+                    <div class="links__link__heading">
+                        <i class="fa fa-briefcase"></i> Productivity
+                    </div>
+                    <a *ngFor="let item of productivityLinks">
+                        <custom-link [item]="item" [stats]="allStats" [isEditModeEnabled]="isEditModeEnabled"
+                                     (updated)="refreshLinkCache()" [showWidgets]="showWidgets.value"></custom-link>
+                    </a>
+                    <add-link *ngIf="isEditModeEnabled" [category]="'productivity'"
+                              [sortOrder]="getLastSortOrder(productivityLinks)"
+                              (item)="productivityLinks.push($event)"></add-link>
+                </div>
+            </div>
+
+            <div class="o-grid__col o-grid__col--fixed o-grid__col--custom">
+                <div class="links__link">
+                    <div class="links__link__heading">
+                        <i class="fa fa-cog"></i> System
+                    </div>
+                    <a *ngFor="let item of systemLinks">
+                        <custom-link [item]="item" [stats]="allStats" [isEditModeEnabled]="isEditModeEnabled"
+                                     (updated)="refreshLinkCache()" [showWidgets]="showWidgets.value"></custom-link>
+                    </a>
+                    <add-link *ngIf="isEditModeEnabled" [category]="'system'"
+                              [sortOrder]="getLastSortOrder(systemLinks)"
+                              (item)="systemLinks.push($event)"></add-link>
+                </div>
+            </div>
+
+            <div class="o-grid__col o-grid__col--fixed o-grid__col--custom">
+                <div class="links__link">
+                    <div class="links__link__heading">
+                        <i class="fa fa-wrench"></i>
+                        Tools
+                    </div>
+                    <a *ngFor="let item of toolsLinks">
+                        <custom-link [item]="item" [stats]="allStats" [isEditModeEnabled]="isEditModeEnabled"
+                                     (updated)="refreshLinkCache()" [showWidgets]="showWidgets.value"></custom-link>
+                    </a>
+                    <add-link *ngIf="isEditModeEnabled" [category]="'tools'"
+                              [sortOrder]="getLastSortOrder(toolsLinks)"
+                              (item)="toolsLinks.push($event)"></add-link>
+                </div>
+            </div>
+
+            <div class="o-grid__col o-grid__col--fixed o-grid__col--custom" *ngIf="isEditModeEnabled">
+                <div class="links__link">
+                    <div class="links__link__heading">
+                        <i class="fa fa-plus"></i>
+                        Add
+                    </div>
+                    <wide-button (click)="createColumn()" [title]="'Add Column'"
+                                 [icon]="'fas fa-plus'"></wide-button>
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="text-mobile-center">
+            <div class="text-mobile-center">
+
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <wide-button (click)="toggleWidgets()" [title]="showWidgets.value ? 'Hide Widgets' : 'Show Widgets'"
+                                     [icon]="'fas fa-magic'"></wide-button>
+                    </div>
+
+
+                    <div class="col-md-3">
+                        <wide-button (click)="isEditModeEnabled = !isEditModeEnabled" [title]="isEditModeEnabled ? 'Finish Editing' : 'Edit'"
+                                     [icon]="isEditModeEnabled ? 'fas fa-check' : 'fas fa-edit'"></wide-button>
+                    </div>
+
+
+                    <div class="col-md-3">
+                        <wide-button (click)="refreshLinkCache()" [title]="'Refresh'"
+                                     [icon]="'fas fa-sync'"></wide-button>
+                    </div>
+
+                    <div class="col-md-3 o-grid">
+                        <div class="o-grid__col import-link">
+                            <import-links></import-links>
+                        </div>
+                        <div class="o-grid__col">
+                            <export-links></export-links>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,32 @@
+<div class="header-component text-mobile-center">
+    <div class="container">
+        <div class="o-grid">
+            <div class="o-grid__col o-grid__col--fixed">
+                <i class="fa fa-home"></i> {{ getGreeting() }}, please enjoy your stay.
+            </div>
+            <div class="o-grid__col">
+                <div class="c-input-group mx-3 u-mt-2 u-mb-2 desktop--no-my">
+                    <div class="o-grid o-grid--static">
+                        <div class="o-grid__col">
+                            <input class="c-field c-field--small c-field--icon-post" type="text"
+                                   placeholder="Search the web..." (change)="searchWeb()" [(ngModel)]="webQuery">
+                        </div>
+                        <div class="o-grid__col o-grid__col--fixed">
+                            <div class="c-icon c-icon--small c-icon--post"><i class="fab fa-google"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="o-grid__col o-grid__col--fixed text-right text-mobile-center u-mr-2 mobile--no-mx">
+                <div *ngIf="isConnected" class="indicator indicator--success"
+                     title="Connected to a WebSocket."></div>
+                <div *ngIf="!isConnected" class="indicator indicator--danger"
+                     title="Not connected to a WebSocket."></div>
+            </div>
+            <div class="o-grid__col o-grid__col--fixed text-right text-mobile-center">
+                <small class="text-highlight">{{ currentTime | date : 'EEEE, d MMM, y' }}</small>
+                {{ currentTime | date : 'HH:mm:ss' }}
+            </div>
+        </div>
+    </div>
+</div>

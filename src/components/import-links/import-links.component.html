@@ -1,0 +1,19 @@
+<div class="import-links" (click)="handleClick()">
+
+    <div *ngIf="successMessage" class="alert alert-success mb-0 px-2 py-0"><small>{{ successMessage }}</small></div>
+    <div *ngIf="errorMessage" class="alert alert-danger mb-0 px-2 py-0"><small>{{ errorMessage }}</small></div>
+
+    <div class="o-grid">
+        <div class="o-grid__col">
+            <div class="o-grid o-grid--static">
+                <div class="o-grid__col o-grid__col--fixed">
+                    <div class="import-links__icon"><i class="fa fa-upload"></i></div>
+                </div>
+                <div class="o-grid__col import-links__label">
+                    Import Links
+                </div>
+            </div>
+            <input type="file" (change)="handleFileUpload($event)" accept=".json" class="import-links-action">
+        </div>
+    </div>
+</div>

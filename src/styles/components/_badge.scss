@@ -1,0 +1,36 @@
+@import "../utility/variables";
+
+.c-badge-wrapper {
+    position: relative;
+    display: inline-flex;
+    white-space: nowrap;
+
+    .c-badge {
+        display: inline-block;
+        color: var(--text-color);
+        font-weight: normal;
+        text-transform: uppercase;
+        padding: 2.5px 7.5px;
+        border-radius: $border-radius;
+        font-size: 0.6rem;
+        line-height: 0.6rem;
+        background: transparentize($brand-primary, 0.25);
+        position: relative;
+        border: 1px solid $brand-primary;
+        margin: 3px;
+
+        &:first-of-type {
+            margin-left: 0;
+        }
+
+        &--warning {
+            border-color: $warning-color;
+            background: transparentize($warning-color, 0.25);
+        }
+
+        &--danger {
+            border-color: $danger-color;
+            background: transparentize($danger-color, 0.25);
+        }
+    }
+}

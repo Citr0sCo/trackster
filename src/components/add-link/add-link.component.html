@@ -1,0 +1,31 @@
+<div class="add-link">
+    <div class="o-grid o-grid--static" *ngIf="!isAddingLink" (click)="isAddingLink = !isAddingLink">
+        <div class="o-grid__col o-grid__col--fixed">
+            <div class="add-link--icon"><i class="fa fa-plus"></i></div>
+        </div>
+        <div class="o-grid__col">
+            Add Link
+        </div>
+    </div>
+    <div *ngIf="isAddingLink">
+
+        <div *ngIf="successMessage" class="alert alert-success mb-0 px-2 py-0"><small>{{ successMessage }}</small></div>
+        <div *ngIf="errorMessage" class="alert alert-danger mb-0 px-2 py-0"><small>{{ errorMessage }}</small></div>
+
+        <form [formGroup]="form" (ngSubmit)="addLink()">
+            <input class="form-control mt-1" type="text" placeholder="Name" formControlName="name">
+            <input class="form-control mt-1" type="text" placeholder="URL" formControlName="url">
+            <input class="form-control mt-1" type="text" placeholder="Host" formControlName="host">
+            <input class="form-control mt-1" type="number" placeholder="Port" formControlName="port">
+            <input class="form-control mt-1" type="text" placeholder="Icon URL" formControlName="iconUrl">
+            <div class="o-grid o-grid--static">
+                <div class="o-grid__col u-mr-1">
+                    <button class="btn btn-outline-danger w-100 mt-1" (click)="isAddingLink = !isAddingLink" [disabled]="isLoading">Cancel</button>
+                </div>
+                <div class="o-grid__col">
+                    <button class="btn btn-primary w-100 mt-1" [disabled]="form.invalid || isLoading"><i *ngIf="isLoading" class="fa fa-spinner fa-spin"></i> Add</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

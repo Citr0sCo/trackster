@@ -1,0 +1,115 @@
+@import "../../styles/utility/variables";
+
+.c-field {
+    display: block;
+    width: 100%;
+    margin: 0;
+    border: 1px solid var(--border-color);
+    border-radius: $border-radius;
+    outline: 0;
+    font-family: inherit;
+    font-size: 0.85em;
+    font-weight: 400;
+    resize: vertical;
+    appearance: none;
+    padding: 10px;
+    color: var(--text-color);
+    caret-color: var(--text-color);
+    background-color: var(--input-background);
+    transition: all ease-in var(--animation-speed);
+
+    &--small {
+        padding: 5px;
+        font-size: 0.75em;
+    }
+
+    &:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 30px var(--autofill-color) inset !important;
+        -webkit-text-fill-color: var(--text-color) !important;
+        border: 1px solid #0a9cd0;
+    }
+
+    &:focus {
+        border-color: $brand-primary;
+        //box-shadow: var(--box-shadow);
+    }
+
+    &__select {
+        background-image: linear-gradient(45deg, transparent 50%, var(--text-color-alt) 50%), linear-gradient(135deg, var(--text-color-alt) 50%, transparent 50%);
+        background-position: calc(100% - 20px) calc(1em + 2px), calc(100% - 15px) calc(1em + 2px), calc(100% - 2.5em) 0.5em;
+        background-size: 5px 5px, 5px 5px, 1px 1.5em;
+        background-repeat: no-repeat;
+
+        &:hover {
+            background-image: linear-gradient(45deg, transparent 50%, var(--text-color) 50%), linear-gradient(135deg, var(--text-color) 50%, transparent 50%);
+            background-position: calc(100% - 20px) calc(1em + 2px), calc(100% - 15px) calc(1em + 2px), calc(100% - 2.5em) 0.5em;
+            background-size: 5px 5px, 5px 5px, 1px 1.5em;
+            background-repeat: no-repeat;
+        }
+
+        &:focus {
+            background-image: linear-gradient(45deg, var(--text-color) 50%, transparent 50%), linear-gradient(135deg, transparent 50%, var(--text-color) 50%);
+            background-position: calc(100% - 15px) 1em, calc(100% - 20px) 1em, calc(100% - 2.5em) 0.5em;
+            background-size: 5px 5px, 5px 5px, 1px 1.5em;
+            outline: 0;
+            border-color: var(--border-color);
+        }
+
+        &[multiple] {
+            &:target, &:active, &:focus {
+                position: absolute;
+                height: 350px;
+                width: 100%;
+                z-index: 9999;
+            }
+        }
+
+        option {
+            color: #000;
+        }
+    }
+
+    &[disabled] {
+        background-color: var(--border-color);
+    }
+
+    &__switch {
+        background-color: rgba(0, 0, 0, 0);
+        border-color: rgba(0, 0, 0, 0);
+    }
+
+    &--icon-post {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+}
+
+.c-icon {
+    display: block;
+    width: 100%;
+    margin: 0;
+    border: 1px solid var(--border-color);
+    border-radius: $border-radius;
+    outline: 0;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: 400;
+    resize: vertical;
+    appearance: none;
+    padding: 10px;
+    color: var(--text-color);
+    caret-color: var(--text-color);
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all ease-in var(--animation-speed);
+
+    &--post {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: none;
+    }
+
+    &--small {
+        padding: 5px;
+        font-size: 0.75em;
+    }
+}

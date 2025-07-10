@@ -1,0 +1,10 @@
+services:
+    home-app:
+        image: citr0s/home-app
+        ports:
+            - '82:80'
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Production
+            - ASPNETCORE_URLS=http://+:80
+        volumes:
+            - ./assets:/web-api/app/assets

@@ -1,0 +1,15 @@
+.c-input-group {
+    position: relative;
+
+    &:hover {
+        .c-label {
+            color: var(--text-color);
+        }
+
+        .c-field {
+            border-color: var(--border-color-alt);
+        }
+    }
+}
+
+

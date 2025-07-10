@@ -1,0 +1,19 @@
+@import "../../../../styles/utility/variables";
+
+.radarr__details {
+    padding: 15px;
+    border-radius: $border-radius;
+    line-height: 32px;
+    overflow: auto;
+
+    .radarr-activity {
+    }
+
+    .o-grid__col {
+        margin-right: 5px;
+
+        &:last-of-type {
+            margin-right: 0;
+        }
+    }
+}

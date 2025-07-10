@@ -1,0 +1,16 @@
+@import "../utility/variables";
+
+.c-widget-stat {
+    border-radius: $border-radius;
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(0, 0, 0, 0.35);
+    padding: 0 10px 5px;
+    text-align: center;
+
+    .small {
+        text-transform: uppercase;
+        font-size: 0.5rem;
+        line-height: 0.5rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+}

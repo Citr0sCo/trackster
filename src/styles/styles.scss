@@ -1,0 +1,206 @@
+@import "../../node_modules/bootstrap/dist/css/bootstrap.css";
+
+@import 'core/base';
+
+@import "utility/variables";
+@import 'utility/grid';
+@import 'utility/gutters';
+@import 'utility/fonts';
+@import 'utility/icons';
+
+@import 'components/input-field';
+@import 'components/input-label';
+@import 'components/input-group';
+@import 'components/widget-stat';
+@import 'components/badge';
+
+body {
+    background-color: #1e293c !important;
+    color: white !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.text-hover {
+    &:hover {
+        color: rgba(255, 255, 255) !important;
+    }
+}
+
+.text-small {
+    font-size: 0.75rem !important;
+}
+
+.text-highlight {
+    color: rgba(255, 255, 255, 0.60);
+
+    &--hover:hover {
+        color: rgba(255, 255, 255, 1);
+    }
+}
+
+.text-mobile-center {
+    @media(max-width: $mobile-width) {
+        text-align: center !important;
+    }
+}
+
+.hover-underline {
+    &:hover {
+        text-decoration: underline !important;
+        cursor: pointer !important;
+    }
+}
+
+.text-success-custom {
+    color: #15b981 !important;
+}
+
+.custom-progress-bar {
+    width: 100%;
+    min-height: 5px;
+    border-radius: $border-radius;
+    margin-top: 5px;
+    background-color: rgba(255, 255, 255, 0.25);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    white-space: nowrap;
+
+    &__fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.75);
+        z-index: 2;
+
+        &--dark {
+            background-color: rgba(0, 0, 0, 0.75);
+        }
+    }
+
+    .text-small {
+        position: relative;
+        z-index: 2;
+        padding: 0 15px;
+    }
+}
+
+.desktop--no-my {
+    @media(min-width: $mobile-width) {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+}
+
+.desktop--no-mx {
+    @media(min-width: $mobile-width) {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+.mobile--no-my {
+    @media(max-width: $mobile-width) {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+}
+
+.mobile--no-mx {
+    @media(max-width: $mobile-width) {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+
+.indicator {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: $border-radius;
+
+    &--glow {
+        animation: glow 2s normal infinite ease-in-out;
+    }
+
+    &--success {
+        background-color: lighten($success-color, 5%);
+        box-shadow: 0 0 30px 5px darken($success-color, 10%);
+    }
+
+    &--danger {
+        background-color: lighten($danger-color, 5%);
+        box-shadow: 0 0 30px 5px darken($danger-color, 10%);
+    }
+
+    &--warning {
+        background-color: lighten($warning-color, 5%);
+        box-shadow: 0 0 30px 5px darken($warning-color, 10%);
+    }
+}
+
+@keyframes glow {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.75;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.text-cyan {
+    color: cyan !important;
+}
+
+.text-green {
+    color: green !important;
+}
+
+.expandable-container {
+    .header {
+        cursor: pointer;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: $border-radius;
+        overflow: hidden;
+
+        &--expanded {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+    }
+}
+
+.wrapper {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: $border-radius;
+}
+
+::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+    background-color: transparent
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(var(--theme-rgba-contrast), .2);
+    border-radius: $border-radius
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--card-bg-color)
+}

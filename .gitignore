@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+.angular/
+node_modules/
+dist/
+coverage/
+examples/*
+!examples/docker-compose.yml
+!examples/.env

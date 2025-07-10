@@ -1,0 +1,11 @@
+<div class="url-health-checker o-grid o-grid--row text-right">
+    <div class="o-grid__col">
+    <i *ngIf="status && status === 'up'" class="fa fa-check-circle text-success-custom" [title]="statusDescription"></i>
+    <i *ngIf="status && status === 'warning'" class="fa fa-info-circle text-warning" [title]="statusDescription"></i>
+    <i *ngIf="status && status === 'down'" class="fa fa-times-circle text-danger" [title]="statusDescription"></i>
+    <i *ngIf="status && status === 'unknown'" class="fa fa-spin fa-spinner text-secondary" [title]="statusDescription"></i>
+    </div>
+    <div *ngIf="responseTime >= 0 && responseTime < 10000 && status !== 'down'" class="o-grid__col response-time" [ngClass]="{'response-time__slow': responseTime > 1000, 'response-time__fast': responseTime < 100}">
+    <small>{{ determineResponseTime(responseTime) }}</small>
+    </div>
+</div>
