@@ -1,7 +1,7 @@
 name: Update
 on:
     schedule:
-        -   cron: '0/15 * * * *'
+        -   cron: '15 6 * * *'
 jobs:
     renovate:
         runs-on: self-hosted

@@ -10,11 +10,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WideButtonComponent } from '../components/wide-button/wide-button.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { TimeagoModule } from 'ngx-timeago';
+import {AuthorizeTraktComponent} from "../pages/authorize-trakt-page/authorize-trakt.component";
+import {AuthenticationService} from "../services/authentication-service/authentication.service";
+import {AuthenticationRepository} from "../services/authentication-service/authentication.repository";
 
 @NgModule({
     declarations: [
         AppComponent,
         HomePageComponent,
+        AuthorizeTraktComponent,
         WideButtonComponent,
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
@@ -28,6 +32,8 @@ import { TimeagoModule } from 'ngx-timeago';
         TimeagoModule.forRoot()], providers: [
         MediaService,
         MediaRepository,
+        AuthenticationService,
+        AuthenticationRepository,
         provideHttpClient(withInterceptorsFromDi())
     ]
 })

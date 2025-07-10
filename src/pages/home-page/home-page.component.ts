@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import {Subject, takeUntil} from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 
 @Component({
@@ -23,6 +23,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
     public importFromTrakt(): void {
         this._mediaService.importFromTrakt('citr0s')
+            .pipe(takeUntil(this._destroy))
             .subscribe();
     }
 

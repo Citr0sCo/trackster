@@ -15,8 +15,8 @@ public class MediaController : ControllerBase
     }
     
     [HttpPost("import")]
-    public ImportMediaResponse ImportLinks([FromBody]ImportMediaRequest request)
+    public async Task<ImportMediaResponse> ImportLinks([FromBody]ImportMediaRequest request)
     {
-        return _service.ImportMedia(request);
+        return await _service.ImportMedia(request);
     }
 }

@@ -1,21 +1,29 @@
+using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Types;
 
 namespace Trackster.Api.Features.Media;
 
 public class MediaService
 {
-    private readonly ILinksRepository _linksRepository;
+    private readonly IMediaRepository _mediaRepository;
 
-    public MediaService(ILinksRepository linksRepository)
+    public MediaService(IMediaRepository mediaRepository)
     {
-        _linksRepository = linksRepository;
+        _mediaRepository = mediaRepository;
     }
 
-    public ImportMediaResponse ImportMedia(ImportMediaRequest request)
+    public async Task<ImportMediaResponse> ImportMedia(ImportMediaRequest request)
     {
-        var response = new HttpClient();
-        response.BaseAddress = new Uri("https://trakt.tv/");
+        if (request.Type == ImportType.Trakt && request.Username != null)
+        {
+            var provider = new TraktImportProvider();
+            var movies = await provider.GetMovies(request.Username);
+            var shows = await provider.GetShows(request.Username);
+
+            _mediaRepository.ImportMovies(request.Username, movies);
+            _mediaRepository.ImportShows(request.Username,shows);
+        }
         
-        throw new NotImplementedException();
+        return new ImportMediaResponse();
     }
 }
