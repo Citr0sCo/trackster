@@ -3,7 +3,7 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "home-box-landing": {
+        "trackster": {
             "projectType": "application",
             "schematics": {
                 "@schematics/angular:component": {
@@ -18,7 +18,7 @@
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
                         "outputPath": {
-                          "base": "dist/home-box-landing"
+                          "base": "dist/trackster"
                         },
                         "index": "src/index.html",
                         "polyfills": [
@@ -79,10 +79,10 @@
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "configurations": {
                         "production": {
-                          "buildTarget": "home-box-landing:build:production"
+                          "buildTarget": "trackster:build:production"
                         },
                         "development": {
-                          "buildTarget": "home-box-landing:build:development"
+                          "buildTarget": "trackster:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -90,7 +90,7 @@
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                      "buildTarget": "home-box-landing:build"
+                      "buildTarget": "trackster:build"
                     }
                 },
                 "test": {

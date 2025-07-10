@@ -1,6 +1,6 @@
 {
-  "name": "home-box-landing",
-  "short_name": "home-box-landing",
+  "name": "trackster",
+  "short_name": "trackster",
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
   "display": "standalone",

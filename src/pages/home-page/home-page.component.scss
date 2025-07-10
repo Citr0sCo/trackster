@@ -2,19 +2,4 @@
 
 .home-page-component {
 
-    .stat {
-        i {
-            font-size: 2rem;
-            margin-right: 15px;
-
-            @media(max-width: $mobile-width) {
-                font-size: 1rem;
-                margin-right: 0;
-            }
-        }
-
-        @media(max-width: $mobile-width) {
-            margin-bottom: 15px;
-        }
-    }
 }

@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Trackster.Api", "Trackster.Api\Trackster.Api.csproj", "{866B580D-4C4C-48C8-9342-CBCAC50F161E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{56CB241A-58DB-4D81-9388-1AA81BF7BA80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Trackster.Api.Tests", "Trackster.Api.Tests\Trackster.Api.Tests.csproj", "{E50A5D1D-285F-4814-88C0-ABB66CF2942A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{866B580D-4C4C-48C8-9342-CBCAC50F161E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{866B580D-4C4C-48C8-9342-CBCAC50F161E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{866B580D-4C4C-48C8-9342-CBCAC50F161E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{866B580D-4C4C-48C8-9342-CBCAC50F161E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E50A5D1D-285F-4814-88C0-ABB66CF2942A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E50A5D1D-285F-4814-88C0-ABB66CF2942A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E50A5D1D-285F-4814-88C0-ABB66CF2942A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E50A5D1D-285F-4814-88C0-ABB66CF2942A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E50A5D1D-285F-4814-88C0-ABB66CF2942A} = {56CB241A-58DB-4D81-9388-1AA81BF7BA80}
+	EndGlobalSection
+EndGlobal

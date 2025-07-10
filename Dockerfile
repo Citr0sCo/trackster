@@ -14,7 +14,7 @@ EXPOSE 82
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /web-api/src
 
-COPY ["/api/home-box-landing/HomeBoxLanding.Api/HomeBoxLanding.Api.csproj", "api/"]
+COPY ["/api/HomeBoxLanding.Api/HomeBoxLanding.Api.csproj", "api/"]
 
 RUN dotnet restore "api/HomeBoxLanding.Api.csproj"
 
@@ -33,6 +33,6 @@ WORKDIR /web-api/app
 
 COPY --from=publish /web-api/app/publish .
 
-COPY --from=angular-build /web-gui/dist/home-box-landing/browser /web-api/app/wwwroot
+COPY --from=angular-build /web-gui/dist/trackster/browser /web-api/app/wwwroot
 
 CMD ["dotnet", "HomeBoxLanding.Api.dll"]

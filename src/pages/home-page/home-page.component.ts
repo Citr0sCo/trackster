@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { ConfigsService } from '../../services/configs-service/configs.service';
-import { IConfigs } from '../../services/configs-service/types/configs.type';
+import { MediaService } from '../../services/media-service/media.service';
 
 @Component({
     selector: 'home-page',
@@ -12,19 +11,19 @@ import { IConfigs } from '../../services/configs-service/types/configs.type';
 export class HomePageComponent implements OnInit, OnDestroy {
 
     private readonly _destroy: Subject<void> = new Subject();
-    private readonly _configsService: ConfigsService;
-    private _configs: IConfigs | null = null;
+    private readonly _mediaService: MediaService;
 
-    constructor(configsService: ConfigsService) {
-        this._configsService = configsService;
+    constructor(mediaService: MediaService) {
+        this._mediaService = mediaService;
     }
 
     public ngOnInit(): void {
 
-        this._configsService.getAllConfigs()
-            .subscribe((configs) => {
-                this._configs = configs;
-            });
+    }
+
+    public importFromTrakt(): void {
+        this._mediaService.importFromTrakt('citr0s')
+            .subscribe();
     }
 
     public ngOnDestroy(): void {

@@ -24,11 +24,11 @@ jobs:
 
             -   name: Build Docker image
                 run: |
-                    docker build -t ${{ secrets.DOCKER_USERNAME }}/home-app:latest . --platform linux/amd64
+                    docker build -t ${{ secrets.DOCKER_USERNAME }}/trackster:latest . --platform linux/amd64
 
             -   name: Push Docker image to DockerHub
                 run: |
-                    docker push ${{ secrets.DOCKER_USERNAME }}/home-app:latest
+                    docker push ${{ secrets.DOCKER_USERNAME }}/trackster:latest
 
             -   name: Cleaning Up
                 run: |
