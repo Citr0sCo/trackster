@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Trackster.Api.Tests;
+namespace HomeBoxLanding.Api.Tests;
 
 [TestFixture]
 public class ExampleTest

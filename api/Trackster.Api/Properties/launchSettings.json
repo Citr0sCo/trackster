@@ -9,17 +9,14 @@
     }
   },
   "profiles": {
-    "HomeBoxLanding.Api": {
+    "Trackster.Api": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7058;http://localhost:5187",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_WEATHER_API_KEY": "e9d4b8c46d0fe56be84b3b2db799b4df",
-        "ASPNETCORE_MAPS_API_KEY": "pk.eyJ1IjoiY2l0cjBzIiwiYSI6ImNtOGhuMGQzdzAwcHMyanNlb2lkOTd0NHkifQ.AICl3BUit5vDy6Yxvn9Cng",
-        "ASPNETCORE_UPDATE_SCRIPT_ROOT": "/home/miloszdura/tools/updater"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "IIS Express": {
