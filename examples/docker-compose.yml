@@ -1,8 +1,8 @@
 services:
-    home-app:
-        image: citr0s/home-app
+    trackster:
+        image: citr0s/trackster
         ports:
-            - '82:80'
+            - '83:80'
         environment:
             - ASPNETCORE_ENVIRONMENT=Production
             - ASPNETCORE_URLS=http://+:80

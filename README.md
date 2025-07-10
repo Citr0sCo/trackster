@@ -51,20 +51,21 @@ Start off by showing some ❤️ and give this repo a star. Then from your comma
 
 ```yml
 services:
-    home-app:
-        image: citr0s/home-app
-        ports:
-            - '82:80'
-        environment:
-            - ASPNETCORE_ENVIRONMENT=Production
-            - ASPNETCORE_URLS=http://+:80
-        volumes:
-            - ./assets:/web-api/app/assets
+  trackster:
+    image: citr0s/trackster
+    ports:
+      - '83:80'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    volumes:
+      - ./assets:/web-api/app/assets
+
 ```
 
 ---
 
 ## 💡 Feature request?
 
-For any feedback, help or feature requests, please [open a new issue](https://github.com/citr0s/home-app/issues/new/choose).
-Before you do, please read [the wiki](https://github.com/citr0s/home-app/wiki). The question you have might be answered over there.
+For any feedback, help or feature requests, please [open a new issue](https://github.com/citr0s/trackster/issues/new/choose).
+Before you do, please read [the wiki](https://github.com/citr0s/trackster/wiki). The question you have might be answered over there.
