@@ -1,5 +1,9 @@
 <div class="home-page-component">
 
+    <a href="https://trakt.tv/oauth/authorize?response_type=code&client_id=ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011&redirect_uri=http://localhost:4200/authorize&state={session=123}">
+        <button>Auth with Trakt</button>
+    </a>
+
     <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'"></wide-button>
 
 </div>

@@ -13,6 +13,9 @@ public class MediaService
 
     public ImportMediaResponse ImportMedia(ImportMediaRequest request)
     {
+        var response = new HttpClient();
+        response.BaseAddress = new Uri("https://trakt.tv/");
+        
         throw new NotImplementedException();
     }
 }
