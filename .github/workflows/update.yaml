@@ -1,0 +1,24 @@
+name: Update
+on:
+    schedule:
+        -   cron: '0/15 * * * *'
+jobs:
+    renovate:
+        runs-on: self-hosted
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4.2.2
+
+            -   name: Self-hosted Renovate
+                uses: renovatebot/github-action@v41.0.17
+                with:
+                    configurationFile: renovate.json
+                    token: ${{ secrets.RENOVATE_TOKEN }}
+
+            -   name: Cleaning Up
+                run: |
+                    echo ${{ secrets.USERPWD }} | sudo -S docker system prune -a -f
+                    echo ${{ secrets.USERPWD }} | sudo -S rm -rf /tmp/*
+                    echo ${{ secrets.USERPWD }} | sudo -S rm -rf /usr/share/dotnet/sdk/*
+                    echo ${{ secrets.USERPWD }} | sudo -S apt-get clean

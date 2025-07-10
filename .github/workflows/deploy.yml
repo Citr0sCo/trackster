@@ -1,0 +1,38 @@
+name: Deploy
+
+on:
+    pull_request:
+        branches:
+            - main
+        types: [ closed ]
+
+jobs:
+
+    docker-build-and-push:
+        runs-on: self-hosted
+        environment: production
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v3
+
+            -   name: Log in to Docker Hub
+                uses: docker/login-action@v2
+                with:
+                    username: ${{ secrets.DOCKER_USERNAME }}
+                    password: ${{ secrets.DOCKER_PASSWORD }}
+
+            -   name: Build Docker image
+                run: |
+                    docker build -t ${{ secrets.DOCKER_USERNAME }}/home-app:latest . --platform linux/amd64
+
+            -   name: Push Docker image to DockerHub
+                run: |
+                    docker push ${{ secrets.DOCKER_USERNAME }}/home-app:latest
+
+            -   name: Cleaning Up
+                run: |
+                    echo ${{ secrets.USERPWD }} | sudo -S docker system prune -a -f
+                    echo ${{ secrets.USERPWD }} | sudo -S rm -rf /tmp/*
+                    echo ${{ secrets.USERPWD }} | sudo -S rm -rf /usr/share/dotnet/sdk/*
+                    echo ${{ secrets.USERPWD }} | sudo -S apt-get clean
