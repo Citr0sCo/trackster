@@ -26,6 +26,8 @@ public class WebhookController : ControllerBase
             var payloadString = payloadJson.ToString();
 
             var parsed = HttpUtility.ParseQueryString(payloadString);
+            
+            Console.WriteLine(JsonConvert.SerializeObject(parsed));
 
             var eventName = parsed["event"];
             var user = parsed["user"];
