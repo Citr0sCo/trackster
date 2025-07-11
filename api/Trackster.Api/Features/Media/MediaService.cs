@@ -30,20 +30,23 @@ public class MediaService
         return new ImportMediaResponse();
     }
 
-    public List<Movie> GetAllMovies(string username)
+    public GetAllMoviesResponse GetAllMovies(string username)
     {
         var movies = _mediaRepository.GetAllMovies(username);
 
-        var mappedMovies = movies.ConvertAll(x => new Movie
+        return new GetAllMoviesResponse
         {
-            Identifier = x.Identifier,
-            Title = x.Title,
-            Year = x.Year,
-            TMDB =  x.TMDB,
-            Poster = x.Poster,
-            Overview = x.Overview
-        });
-        
-        return mappedMovies;
+            Movies = movies
+        };
+    }
+
+    public GetAllShowsResponse GetAllShows(string username)
+    {
+        var shows = _mediaRepository.GetAllShows(username);
+
+        return new GetAllShowsResponse
+        {
+            Shows = shows
+        };
     }
 }

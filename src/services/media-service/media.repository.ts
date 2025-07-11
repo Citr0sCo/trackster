@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {map, Observable} from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mapNetworkError } from '../../core/map-network-error';
-import {Provider} from "../../core/providers.enum";
-import {ImportType} from "../../core/import-type.enum";
-import {IMovie} from "./types/movie.type";
+import { Provider } from "../../core/providers.enum";
+import { ImportType } from "../../core/import-type.enum";
+import { IMovie } from "./types/movie.type";
 
 @Injectable()
 export class MediaRepository {
@@ -26,7 +26,30 @@ export class MediaRepository {
                             identifier: movie.Identifier,
                             title: movie.Title,
                             year: movie.Year,
-                            tmdb: movie.TMDB
+                            tmdb: movie.TMDB,
+                            posterUrl: movie.Poster,
+                            overview: movie.Overview,
+                            watchedAt: movie.WatchedAt
+                        };
+                    });
+                })
+            );
+    }
+
+    public getAllShowsFor(username: string): Observable<Array<IMovie>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/shows?username=${username}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    return response.Shows.map((movie: any) => {
+                        return {
+                            identifier: movie.Identifier,
+                            title: movie.Title,
+                            year: movie.Year,
+                            tmdb: movie.TMDB,
+                            posterUrl: movie.Poster,
+                            overview: movie.Overview,
+                            watchedAt: movie.WatchedAt
                         };
                     });
                 })

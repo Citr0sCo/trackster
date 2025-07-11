@@ -1,9 +1,33 @@
 <div class="home-page-component">
+    <div class="container">
+        <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'"></wide-button>
 
-    <a href="https://trakt.tv/oauth/authorize?response_type=code&client_id=ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011&redirect_uri=http://localhost:4200/authorize/trakt&state={session=123}">
-        <button>Auth with Trakt</button>
-    </a>
+        <h3>Movies</h3>
+        <div *ngIf="movies.length > 0" class="o-grid o-grid--space-between">
 
-    <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'"></wide-button>
+            <div *ngFor="let movie of movies.slice(0, 5)" class="o-grid__col o-grid__col--fixed movie-poster" style="background-image: url({{movie.posterUrl}});">
+                <div class="movie-poster__title">
+                    {{ movie.title }} ({{ movie.year }})
+                </div>
+                <div class="movie-poster__watched_at">
+                    {{ movie.watchedAt | date }}
+                </div>
+            </div>
+        </div>
 
+        <hr>
+
+        <h3>TV Shows</h3>
+        <div *ngIf="shows.length > 0" class="o-grid o-grid--space-between">
+
+            <div *ngFor="let show of shows.slice(0, 5)" class="o-grid__col o-grid__col--fixed movie-poster" style="background-image: url({{show.posterUrl}});">
+                <div class="movie-poster__title">
+                    {{ show.title }} ({{ show.year }})
+                </div>
+                <div class="movie-poster__watched_at">
+                    {{ show.watchedAt | date }}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
