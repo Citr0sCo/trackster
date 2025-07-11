@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Trackster.Api.Data.Records;
 
 namespace Trackster.Api.Data;
 
@@ -30,71 +30,4 @@ public class DatabaseContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
     }
-}
-
-public class ShowRecord
-{
-    [Key]
-    public Guid Identifier { get; set; }
-
-    public string Title { get; set; }
-    public int Year { get; set; }
-    public string TMDB { get; set; }
-    public string Poster { get; set; }
-    public string Overview { get; set; }
-}
-
-public class SeasonRecord
-{
-    [Key]
-    public Guid Identifier { get; set; }
-    public int Number { get; set; }
-    public ShowRecord Show { get; set; }
-}
-
-public class EpisodeRecord
-{
-    [Key]
-    public Guid Identifier { get; set; }
-    public int Number { get; set; }
-    public SeasonRecord Season { get; set; }
-}
-
-public class MovieRecord
-{
-    [Key]
-    public Guid Identifier { get; set; }
-
-    public string Title { get; set; }
-    public int Year { get; set; }
-    public string TMDB { get; set; }
-    public string? Poster { get; set; }
-    public string? Overview { get; set; }
-}
-
-public class UserRecord
-{
-    [Key]
-    public Guid Identifier { get; set; }
-    public string Username { get; set; }
-}
-
-public class MovieUserRecord
-{
-    [Key]
-    public Guid Identifier { get; set; }
-
-    public UserRecord User { get; set; }
-    public MovieRecord Movie { get; set; }
-    public DateTime CollectedAt { get; set; }
-}
-
-public class EpisodeUserRecord
-{
-    [Key]
-    public Guid Identifier { get; set; }
-
-    public UserRecord User { get; set; }
-    public EpisodeRecord Episode { get; set; }
-    public DateTime CollectedAt { get; set; }
 }

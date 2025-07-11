@@ -1,6 +1,6 @@
 namespace Trackster.Api.Features.Media.Types;
 
-public class Movie
+public class Show
 {
     public Guid Identifier { get; set; }
     public string Title { get; set; }

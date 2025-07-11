@@ -1,4 +1,4 @@
-export interface IMovie {
+export interface IShow {
     identifier: string | null;
     title: string;
     year: number;

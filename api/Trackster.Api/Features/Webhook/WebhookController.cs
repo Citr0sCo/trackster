@@ -15,7 +15,7 @@ public class WebhookController : ControllerBase
     }
     
     [HttpPost("plex/{apiKey}")]
-    public IActionResult HandlePlexWebhook([FromBody]PlexWebhookRequest request)
+    public IActionResult HandlePlexWebhook([FromForm]PlexWebhookRequest request)
     {
         _service.HandlePlexWebhook(request);
         return Ok();

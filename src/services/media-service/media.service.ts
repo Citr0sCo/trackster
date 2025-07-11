@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {IMovie} from './types/movie.type';
 import { Observable, } from 'rxjs';
 import { MediaRepository } from './media.repository';
+import { IShow } from './types/show.type';
 
 @Injectable()
 export class MediaService {
@@ -14,6 +15,10 @@ export class MediaService {
 
     public getAllMoviesFor(username: string): Observable<Array<IMovie>> {
         return this._mediaRepository.getAllMoviesFor(username);
+    }
+
+    public getAllShowsFor(username: string): Observable<Array<IShow>> {
+        return this._mediaRepository.getAllShowsFor(username);
     }
 
     public importFromTrakt(username: string): Observable<any> {

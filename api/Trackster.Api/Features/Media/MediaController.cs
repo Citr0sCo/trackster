@@ -15,9 +15,15 @@ public class MediaController : ControllerBase
     }
     
     [HttpGet("movies")]
-    public List<Movie> GetAllMovies([FromQuery]string username)
+    public GetAllMoviesResponse GetAllMovies([FromQuery]string username)
     {
         return _service.GetAllMovies(username);
+    }
+    
+    [HttpGet("shows")]
+    public GetAllShowsResponse GetAllShows([FromQuery]string username)
+    {
+        return _service.GetAllShows(username);
     }
     
     [HttpPost("import")]

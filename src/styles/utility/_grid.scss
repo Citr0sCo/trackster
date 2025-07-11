@@ -6,6 +6,10 @@
         flex-wrap: wrap;
     }
 
+    &--space-between {
+        justify-content: space-between;
+    }
+
     &--vertical-align {
         justify-content: center;
     }
