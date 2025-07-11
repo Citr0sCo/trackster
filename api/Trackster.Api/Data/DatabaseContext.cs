@@ -40,6 +40,8 @@ public class ShowRecord
     public string Title { get; set; }
     public int Year { get; set; }
     public string TMDB { get; set; }
+    public string Poster { get; set; }
+    public string Overview { get; set; }
 }
 
 public class SeasonRecord
@@ -66,6 +68,8 @@ public class MovieRecord
     public string Title { get; set; }
     public int Year { get; set; }
     public string TMDB { get; set; }
+    public string? Poster { get; set; }
+    public string? Overview { get; set; }
 }
 
 public class UserRecord

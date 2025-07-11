@@ -1,17 +1,26 @@
 ﻿using Trackster.Api.Data;
+using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 
 namespace Trackster.Api.Features.Media;
 
 public interface IMediaRepository
 {
-    void ImportMovies(string username, List<TraktMovieResponse> movies);
-    void ImportShows(string username, List<TraktShowResponse> shows);
+    Task ImportMovies(string username, List<TraktMovieResponse> movies);
+    Task ImportShows(string username, List<TraktShowResponse> shows);
+    List<MovieRecord> GetAllMovies(string username);
 }
 
 public class MediaRepository : IMediaRepository
 {
-    public void ImportMovies(string username, List<TraktMovieResponse> movies)
+    private readonly TmdbImportProvider _detailsProvider;
+
+    public MediaRepository()
+    {
+        _detailsProvider = new TmdbImportProvider();
+    }
+    
+    public async Task ImportMovies(string username, List<TraktMovieResponse> movies)
     {
         using (var context = new DatabaseContext())
         using (var transaction = context.Database.BeginTransaction())
@@ -37,12 +46,16 @@ public class MediaRepository : IMediaRepository
 
                     if (existingMovie == null)
                     {
+                        var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB);
+                        
                         existingMovie = new MovieRecord
                         {
                             Identifier = Guid.NewGuid(),
                             Title = movie.Movie.Title,
                             Year = movie.Movie.Year,
-                            TMDB = movie.Movie.Ids.TMDB
+                            TMDB = movie.Movie.Ids.TMDB,
+                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
+                            Overview = details?.Overview,
                         };
 
                         context.Add(existingMovie);
@@ -78,7 +91,7 @@ public class MediaRepository : IMediaRepository
         }
     }
 
-    public void ImportShows(string username, List<TraktShowResponse> shows)
+    public async Task ImportShows(string username, List<TraktShowResponse> shows)
     {
         using (var context = new DatabaseContext())
         using (var transaction = context.Database.BeginTransaction())
@@ -104,12 +117,16 @@ public class MediaRepository : IMediaRepository
 
                     if (existingShow == null)
                     {
+                        var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
+                        
                         existingShow = new ShowRecord
                         {
                             Identifier = Guid.NewGuid(),
                             Title = show.Show.Title,
                             Year = show.Show.Year,
-                            TMDB = show.Show.Ids.TMDB
+                            TMDB = show.Show.Ids.TMDB,
+                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
+                            Overview = details?.Overview,
                         };
 
                         context.Add(existingShow);
@@ -183,6 +200,27 @@ public class MediaRepository : IMediaRepository
             catch (Exception exception)
             {
                 transaction.Rollback();
+            }
+        }
+    }
+
+    public List<MovieRecord> GetAllMovies(string username)
+    {
+        
+        using (var context = new DatabaseContext())
+        using (var transaction = context.Database.BeginTransaction())
+        {
+            try
+            {
+                return context.MovieUserLinks
+                    .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+                    .OrderByDescending(x => x.CollectedAt)
+                    .Select(x => x.Movie)
+                    .ToList();
+            }
+            catch (Exception exception)
+            {
+                return new List<MovieRecord>();
             }
         }
     }
