@@ -1,4 +1,5 @@
 using Trackster.Api.Features.Webhook.Types;
+using Newtonsoft.Json;
 
 namespace Trackster.Api.Features.Webhook;
 
