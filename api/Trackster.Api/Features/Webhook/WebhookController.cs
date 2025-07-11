@@ -24,6 +24,8 @@ public class WebhookController : ControllerBase
         if (form.TryGetValue("payload", out var payloadJson))
         {
             var payloadString = payloadJson.ToString();
+            
+            Console.WriteLine(payloadString);
 
             var parsedJson = JsonConvert.DeserializeObject<PlexWebhookRequest>(payloadString);
 
