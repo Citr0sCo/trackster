@@ -15,9 +15,20 @@ public class WebhookController : ControllerBase
     }
     
     [HttpPost("plex/{apiKey}")]
-    public IActionResult HandlePlexWebhook([FromForm]PlexWebhookRequest request)
+    public async Task<IActionResult> HandlePlexWebhook()
     {
-        _service.HandlePlexWebhook(request);
-        return Ok();
+        // Parse the form data
+        var form = await Request.ReadFormAsync();
+
+        // Plex sends the JSON in a form field called "payload"
+        if (form.TryGetValue("payload", out var payloadJson))
+        {
+            // Do something with the event
+            Console.WriteLine($"Received Plex payload: {payloadJson}");
+
+            return Ok();
+        }
+
+        return BadRequest("No payload found.");
     }
 }
