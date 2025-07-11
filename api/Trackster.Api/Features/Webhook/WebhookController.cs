@@ -22,10 +22,12 @@ public class WebhookController : ControllerBase
 
         if (form.TryGetValue("payload", out var payloadJson))
         {
+            var jsonString = payloadJson.ToString();
+            
             Console.WriteLine("--- Plex Event Start ---");
-            Console.WriteLine(payloadJson);
+            Console.WriteLine(jsonString);
             Console.WriteLine("--- Plex Event End ---");
-            _service.HandlePlexWebhook(JsonConvert.DeserializeObject<PlexWebhookRequest>(payloadJson));
+            _service.HandlePlexWebhook(JsonConvert.DeserializeObject<PlexWebhookRequest>(jsonString));
             return Ok();
         }
 
