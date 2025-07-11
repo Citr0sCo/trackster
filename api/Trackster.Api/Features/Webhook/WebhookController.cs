@@ -1,3 +1,4 @@
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Trackster.Api.Features.Webhook.Types;
@@ -22,12 +23,25 @@ public class WebhookController : ControllerBase
 
         if (form.TryGetValue("payload", out var payloadJson))
         {
-            var jsonString = payloadJson.ToString();
+            var payloadString = payloadJson.ToString();
+
+            var parsed = HttpUtility.ParseQueryString(payloadString);
+
+            var eventName = parsed["event"];
+            var user = parsed["user"];
+            var owner = parsed["owner"];
+            var accountJson = parsed["Account"];
+            var serverJson = parsed["Server"];
+            var playerJson = parsed["Player"];
+            var metadataJson = parsed["Metadata"];
+
+            var account = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexAccount>(accountJson);
+            var server = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexServer>(serverJson);
+            var player = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexPlayer>(playerJson);
+            var metadata = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexMetadata>(metadataJson);
+        
+            _service.HandlePlexWebhook(eventName, user, owner, account, server, player, metadata);
             
-            Console.WriteLine("--- Plex Event Start ---");
-            Console.WriteLine(jsonString);
-            Console.WriteLine("--- Plex Event End ---");
-            _service.HandlePlexWebhook(JsonConvert.DeserializeObject<PlexWebhookRequest>(jsonString));
             return Ok();
         }
 
