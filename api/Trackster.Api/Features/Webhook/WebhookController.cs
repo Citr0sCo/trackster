@@ -27,9 +27,20 @@ public class WebhookController : ControllerBase
             
             Console.WriteLine(payloadString);
 
-            var parsedJson = JsonConvert.DeserializeObject<PlexWebhookRequest>(payloadString);
+            var parsed = HttpUtility.ParseQueryString(payloadString);
 
-            _service.HandlePlexWebhook(parsedJson);
+            var webhookRequest = new PlexWebhookRequest
+            {
+                @event = parsed["event"],
+                user = bool.TryParse(parsed["user"], out var user) && user,
+                owner = bool.TryParse(parsed["owner"], out var owner) && owner,
+                Account = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexAccount>(parsed["Account"]),
+                Server = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexServer>(parsed["Server"]),
+                Player = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexPlayer>(parsed["Player"]),
+                Metadata = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexMetadata>(parsed["Metadata"])
+            };
+
+            _service.HandlePlexWebhook(webhookRequest);
 
             return Ok();
         }
