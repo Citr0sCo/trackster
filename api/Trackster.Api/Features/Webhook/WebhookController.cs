@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Trackster.Api.Features.Webhook.Types;
 
 namespace Trackster.Api.Features.Webhook;
@@ -17,15 +18,11 @@ public class WebhookController : ControllerBase
     [HttpPost("plex/{apiKey}")]
     public async Task<IActionResult> HandlePlexWebhook()
     {
-        // Parse the form data
         var form = await Request.ReadFormAsync();
 
-        // Plex sends the JSON in a form field called "payload"
         if (form.TryGetValue("payload", out var payloadJson))
         {
-            // Do something with the event
-            Console.WriteLine($"Received Plex payload: {payloadJson}");
-
+            _service.HandlePlexWebhook(JsonConvert.DeserializeObject<PlexWebhookRequest>(payloadJson));
             return Ok();
         }
 
