@@ -15,7 +15,7 @@ public class WebhookController : ControllerBase
     }
     
     [HttpPost("plex/{apiKey}")]
-    public IActionResult HandlePlexWebhook()
+    public async Task<IActionResult> HandlePlexWebhook()
     {
         // Parse the form data
         var form = await Request.ReadFormAsync();
