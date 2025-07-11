@@ -34,10 +34,10 @@ public class WebhookController : ControllerBase
                 @event = parsed["event"],
                 user = bool.TryParse(parsed["user"], out var user) && user,
                 owner = bool.TryParse(parsed["owner"], out var owner) && owner,
-                Account = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexAccount>(parsed["Account"]),
-                Server = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexServer>(parsed["Server"]),
-                Player = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexPlayer>(parsed["Player"]),
-                Metadata = JsonConvert.DeserializeObject<PlexWebhookRequest.PlexMetadata>(parsed["Metadata"])
+                Account = string.IsNullOrWhiteSpace(parsed["Account"]) ? null : JsonConvert.DeserializeObject<PlexWebhookRequest.PlexAccount>(parsed["Account"]),
+                Server = string.IsNullOrWhiteSpace(parsed["Server"]) ? null : JsonConvert.DeserializeObject<PlexWebhookRequest.PlexServer>(parsed["Server"]),
+                Player = string.IsNullOrWhiteSpace(parsed["Player"]) ? null : JsonConvert.DeserializeObject<PlexWebhookRequest.PlexPlayer>(parsed["Player"]),
+                Metadata = string.IsNullOrWhiteSpace(parsed["Metadata"]) ? null : JsonConvert.DeserializeObject<PlexWebhookRequest.PlexMetadata>(parsed["Metadata"])
             };
 
             _service.HandlePlexWebhook(webhookRequest);
