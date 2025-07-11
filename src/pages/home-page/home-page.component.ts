@@ -18,7 +18,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
-
+        this._mediaService.getAllMoviesFor('citr0s')
+            .pipe(takeUntil(this._destroy))
+            .subscribe((movies) => {
+                console.log(movies);
+            });
     }
 
     public importFromTrakt(): void {
