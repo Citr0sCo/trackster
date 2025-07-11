@@ -25,12 +25,10 @@ public class WebhookController : ControllerBase
         {
             var payloadString = payloadJson.ToString();
 
-            var parsed = HttpUtility.ParseQueryString(payloadString);
+            var parsedJson = JsonConvert.DeserializeObject<PlexWebhookRequest>(payloadString);
 
-            var parsedJson = JsonConvert.DeserializeObject<PlexWebhookRequest>(JsonConvert.SerializeObject(parsed));
-        
             _service.HandlePlexWebhook(parsedJson);
-            
+
             return Ok();
         }
 
