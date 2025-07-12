@@ -54,6 +54,6 @@
     "typescript": "~5.8.3"
   },
   "overrides": {
-    "piscina": "4.9.2"
+    "piscina": "5.1.3"
   }
 }
