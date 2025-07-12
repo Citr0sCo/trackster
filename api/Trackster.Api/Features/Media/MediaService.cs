@@ -58,21 +58,50 @@ public class MediaService
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
         var movie = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "");
         
-        _mediaRepository.ImportMovie("citr0s", new Movie
+        _mediaRepository.ImportMovie("citr0s", new MovieRecord
         {
             Identifier = Guid.NewGuid(),
             Title = title,
             TMDB = tmdbReference,
             Year = year,
             Overview = movie.Overview,
-            Poster = movie.PosterUrl,
-            WatchedAt = DateTime.Now
+            Poster = $"https://image.tmdb.org/t/p/w185{movie.PosterUrl}"
         });
     }
 
-    public void MarkEpisodeAsWatched(string episodeTitle, string seasonTitle, string showTitle, int year)
+    public async Task MarkEpisodeAsWatched(string showTitle, string episodeTitle, int year, int seasonNumber)
     {
-        throw new NotImplementedException();
+        var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
+        var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
+        var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
+        var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
+        var parsedEpisode = parsedSeason.Episodes.FirstOrDefault(x => x.Name.ToLower() == episodeTitle.ToLower());
+
+        var show = new ShowRecord
+        {
+            Identifier = Guid.NewGuid(),
+            Title = parsedShow.Title,
+            Overview = parsedShow.Overview,
+            Poster = $"https://image.tmdb.org/t/p/w185{parsedShow.PosterUrl}",
+            TMDB = parsedShow.Identifier.ToString(),
+            Year = parsedShow.FirstAirDate.Year
+        };
+
+        var season = new SeasonRecord
+        {
+            Identifier = Guid.NewGuid(),
+            Show = show,
+            Number = seasonNumber
+        };
+
+        var episode = new EpisodeRecord
+        {
+            Identifier = Guid.NewGuid(),
+            Season = season,
+            Number = parsedEpisode.EpisodeNumber
+        };
+        
+        _mediaRepository.ImportEpisode("citr0s", show, season, episode);
     }
 
     public void MarkMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)

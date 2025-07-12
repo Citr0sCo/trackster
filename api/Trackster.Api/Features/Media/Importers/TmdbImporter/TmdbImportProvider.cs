@@ -75,4 +75,57 @@ public class TmdbImportProvider
             }
         }
     }
+
+    public async Task<TmdbShowSearchResults> FindShowByTitleAndYear(string title, int year)
+    {
+        var baseAddress = new Uri("https://api.themoviedb.org/");
+
+        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        {
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
+
+            var queryParams = new Dictionary<string, string>
+            {
+                { "title", title }, 
+                { "year", year.ToString() },
+                { "include_adult", "false" },
+                { "language", "en-US" }
+            };
+            
+            var flatQueryParams = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+            
+            using(var response = await httpClient.GetAsync($"3/search/show?{flatQueryParams}"))
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+                var parsedData = JsonConvert.DeserializeObject<TmdbShowSearchResults>(responseData);
+                return parsedData ?? new TmdbShowSearchResults();
+            }
+        }
+    }
+
+    public async Task<TmdbSeasonSearchResults> GetDetailsForSeason(int showIdentifier, int seasonNumber)
+    {
+        var baseAddress = new Uri("https://api.themoviedb.org/");
+
+        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        {
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
+
+            var queryParams = new Dictionary<string, string>
+            {
+                { "language", "en-US" }
+            };
+            
+            var flatQueryParams = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+            
+            using(var response = await httpClient.GetAsync($"3/tv/{showIdentifier}/season/{seasonNumber}?{flatQueryParams}"))
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+                var parsedData = JsonConvert.DeserializeObject<TmdbSeasonSearchResults>(responseData);
+                return parsedData ?? new TmdbSeasonSearchResults();
+            }
+        }
+    }
 }
