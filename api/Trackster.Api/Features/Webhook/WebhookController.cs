@@ -35,8 +35,10 @@ public class WebhookController : ControllerBase
 
             return Ok();
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"[FATAL] - Exception thrown in Plex Webhook - {e.Message}");
+            Console.WriteLine(e);
             return StatusCode(500, "Internal server error");
         }
     }
