@@ -21,8 +21,6 @@ public class WebhookController : ControllerBase
     {
         var form = await Request.ReadFormAsync();
         
-        Console.WriteLine($"Raw request: {form}");
-
         if (!form.TryGetValue("payload", out var payloadJson))
             return BadRequest("No payload found.");
 
