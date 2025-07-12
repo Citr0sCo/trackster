@@ -24,8 +24,6 @@ public class WebhookController : ControllerBase
         if (!form.TryGetValue("payload", out var payloadJson))
             return BadRequest("No payload found.");
 
-        Console.WriteLine($"Parsed payload: {payloadJson}");
-        
         try
         {
             var webhookRequest = JsonConvert.DeserializeObject<PlexWebhookRequest>(payloadJson);

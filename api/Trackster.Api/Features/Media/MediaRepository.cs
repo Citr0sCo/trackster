@@ -12,6 +12,7 @@ public interface IMediaRepository
     Task ImportShows(string username, List<TraktShowResponse> shows);
     List<Movie> GetAllMovies(string username);
     List<Show> GetAllShows(string username);
+    void ImportMovie(string username, Movie movie);
 }
 
 public class MediaRepository : IMediaRepository
@@ -268,6 +269,73 @@ public class MediaRepository : IMediaRepository
             catch (Exception exception)
             {
                 return new List<Show>();
+            }
+        }
+    }
+
+    public void ImportMovie(string username, Movie movie)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = context.Database.BeginTransaction())
+        {
+            try
+            {
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+
+                if (existingUser == null)
+                {
+                    existingUser = new UserRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        Username = username
+                    };
+
+                    context.Add(existingUser);
+                }
+
+                var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.TMDB);
+
+                if (existingMovie == null)
+                {
+                    existingMovie = new MovieRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        Title = movie.Title,
+                        Year = movie.Year,
+                        TMDB = movie.TMDB,
+                        Poster = $"https://image.tmdb.org/t/p/w185{movie.Poster}",
+                        Overview = movie.Overview,
+                    };
+
+                    context.Add(existingMovie);
+                }
+
+                var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
+                    x.User.Username.ToUpper() == username.ToUpper() &&
+                    x.Movie.TMDB == movie.TMDB &&
+                    x.WatchedAt == movie.WatchedAt
+                );
+
+                if (existingMovieUserRecord == null)
+                {
+                    var movieUserRecord = new MovieUserRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        User = existingUser,
+                        Movie = existingMovie,
+                        WatchedAt = movie.WatchedAt
+                    };
+
+                    context.Add(movieUserRecord);
+                }
+
+                context.SaveChanges();
+                transaction.Commit();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                transaction.Rollback();
             }
         }
     }
