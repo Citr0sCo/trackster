@@ -22,6 +22,9 @@ public class PlexWebhookService
         Console.WriteLine("Metadata - " + JsonConvert.SerializeObject(parsedJson.Metadata, Formatting.Indented));
         Console.WriteLine("Player - " + JsonConvert.SerializeObject(parsedJson.Player, Formatting.Indented));
         Console.WriteLine("--- Plex Webhook Parse End ---");
+
+        if (parsedJson.Account.Title != "citr0s")
+            return;
         
         if (parsedJson.Event.ToLower() == "media.scrobble" && parsedJson.Metadata.Type.ToLower() == "movie")
             _mediaService.MarkMovieAsWatched(parsedJson.Metadata.Title, parsedJson.Metadata.Year);
@@ -29,7 +32,7 @@ public class PlexWebhookService
         if (parsedJson.Event.ToLower() == "media.scrobble" && parsedJson.Metadata.Type.ToLower() == "episode")
             _mediaService.MarkEpisodeAsWatched(parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.Title, parsedJson.Metadata.Year, parsedJson.Metadata.ParentIndex);
 
-        if (parsedJson.Event.ToLower() == "media.play")
+        if (parsedJson.Event.ToLower() == "media.play" || parsedJson.Event.ToLower() == "media.resume")
             _mediaService.MarkMediaAsWatchingNow(parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.Year);
         
         if (parsedJson.Event.ToLower() == "media.stop")
