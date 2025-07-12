@@ -1,16 +1,24 @@
 import { Injectable } from '@angular/core';
-import { ILink } from './types/link.type';
-import { Observable, of, Subject, tap } from 'rxjs';
+import {IMovie} from './types/movie.type';
+import { Observable, } from 'rxjs';
 import { MediaRepository } from './media.repository';
+import { IShow } from './types/show.type';
 
 @Injectable()
 export class MediaService {
 
     private _mediaRepository: MediaRepository;
-    private _cachedLinks: Array<ILink> | null = null;
 
     constructor(mediaRepository: MediaRepository) {
         this._mediaRepository = mediaRepository;
+    }
+
+    public getAllMoviesFor(username: string): Observable<Array<IMovie>> {
+        return this._mediaRepository.getAllMoviesFor(username);
+    }
+
+    public getAllShowsFor(username: string): Observable<Array<IShow>> {
+        return this._mediaRepository.getAllShowsFor(username);
     }
 
     public importFromTrakt(username: string): Observable<any> {

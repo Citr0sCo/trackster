@@ -14,6 +14,18 @@ public class MediaController : ControllerBase
         _service = new MediaService(new MediaRepository());
     }
     
+    [HttpGet("movies")]
+    public GetAllMoviesResponse GetAllMovies([FromQuery]string username)
+    {
+        return _service.GetAllMovies(username);
+    }
+    
+    [HttpGet("shows")]
+    public GetAllShowsResponse GetAllShows([FromQuery]string username)
+    {
+        return _service.GetAllShows(username);
+    }
+    
     [HttpPost("import")]
     public async Task<ImportMediaResponse> ImportLinks([FromBody]ImportMediaRequest request)
     {

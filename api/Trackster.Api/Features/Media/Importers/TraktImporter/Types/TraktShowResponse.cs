@@ -4,11 +4,14 @@ namespace Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 
 public class TraktShowResponse
 {
-    [JsonProperty(PropertyName = "last_collected_at")]
-    public DateTime LastCollectedAt { get; set; }
-    
+    [JsonProperty(PropertyName = "last_watched_at")]
+    public DateTime LastWatchedAt { get; set; }
+
     [JsonProperty(PropertyName = "last_updated_at")]
     public DateTime LastUpdatedAt { get; set; }
+
+    [JsonProperty(PropertyName = "plays")]
+    public string NumberOfPlays { get; set; }
     
     [JsonProperty(PropertyName = "show")]
     public TraktShow Show { get; set; }
@@ -27,7 +30,7 @@ public class TraktShowResponse
         public class TraktShowIds
         {
             [JsonProperty(PropertyName = "trakt")]
-            public int Trakt { get; set; }
+            public string Trakt { get; set; }
             
             [JsonProperty(PropertyName = "slug")]
             public string Slug { get; set; }
@@ -63,8 +66,11 @@ public class TraktShowResponse
             [JsonProperty(PropertyName = "number")]
             public int Number { get; set; }
             
-            [JsonProperty(PropertyName = "collected_at")]
-            public DateTime CollectedAt { get; set; }
+            [JsonProperty(PropertyName = "last_watched_at")]
+            public DateTime WatchedAt { get; set; }
+
+            [JsonProperty(PropertyName = "plays")]
+            public string NumberOfPlays { get; set; }
         }
     }
 }
