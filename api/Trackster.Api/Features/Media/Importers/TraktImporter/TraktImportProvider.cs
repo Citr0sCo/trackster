@@ -16,7 +16,7 @@ public class TraktImportProvider
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", "ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011");
   
-            using(var response = await httpClient.GetAsync($"users/{username}/collection/movies"))
+            using(var response = await httpClient.GetAsync($"users/{username}/watched/movies"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
                 var parsedData = JsonConvert.DeserializeObject<List<TraktMovieResponse>>(responseData);
@@ -34,7 +34,7 @@ public class TraktImportProvider
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", "ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011");
   
-            using(var response = await httpClient.GetAsync($"users/{username}/collection/shows"))
+            using(var response = await httpClient.GetAsync($"users/{username}/watched/shows"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
                 var parsedData = JsonConvert.DeserializeObject<List<TraktShowResponse>>(responseData);

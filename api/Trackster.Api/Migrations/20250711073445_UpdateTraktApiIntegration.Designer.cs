@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Trackster.Api.Data;
 
@@ -10,14 +11,16 @@ using Trackster.Api.Data;
 namespace Trackster.Api.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250711073445_UpdateTraktApiIntegration")]
+    partial class UpdateTraktApiIntegration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.EpisodeRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.EpisodeRecord", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
@@ -36,7 +39,7 @@ namespace Trackster.Api.Migrations
                     b.ToTable("Episodes");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.EpisodeUserRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.EpisodeUserRecord", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
@@ -60,7 +63,7 @@ namespace Trackster.Api.Migrations
                     b.ToTable("EpisodeUserLinks");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.MovieRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.MovieRecord", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
@@ -88,7 +91,7 @@ namespace Trackster.Api.Migrations
                     b.ToTable("Movies");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.MovieUserRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.MovieUserRecord", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
@@ -112,7 +115,7 @@ namespace Trackster.Api.Migrations
                     b.ToTable("MovieUserLinks");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.SeasonRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.SeasonRecord", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
@@ -131,16 +134,18 @@ namespace Trackster.Api.Migrations
                     b.ToTable("Seasons");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.ShowRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.ShowRecord", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Overview")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Poster")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TMDB")
@@ -159,7 +164,7 @@ namespace Trackster.Api.Migrations
                     b.ToTable("Shows");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.UserRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.UserRecord", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
@@ -174,9 +179,9 @@ namespace Trackster.Api.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.EpisodeRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.EpisodeRecord", b =>
                 {
-                    b.HasOne("Trackster.Api.Data.Records.SeasonRecord", "Season")
+                    b.HasOne("Trackster.Api.Data.SeasonRecord", "Season")
                         .WithMany()
                         .HasForeignKey("SeasonIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -185,15 +190,15 @@ namespace Trackster.Api.Migrations
                     b.Navigation("Season");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.EpisodeUserRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.EpisodeUserRecord", b =>
                 {
-                    b.HasOne("Trackster.Api.Data.Records.EpisodeRecord", "Episode")
+                    b.HasOne("Trackster.Api.Data.EpisodeRecord", "Episode")
                         .WithMany()
                         .HasForeignKey("EpisodeIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Trackster.Api.Data.Records.UserRecord", "User")
+                    b.HasOne("Trackster.Api.Data.UserRecord", "User")
                         .WithMany()
                         .HasForeignKey("UserIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -204,15 +209,15 @@ namespace Trackster.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.MovieUserRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.MovieUserRecord", b =>
                 {
-                    b.HasOne("Trackster.Api.Data.Records.MovieRecord", "Movie")
+                    b.HasOne("Trackster.Api.Data.MovieRecord", "Movie")
                         .WithMany()
                         .HasForeignKey("MovieIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Trackster.Api.Data.Records.UserRecord", "User")
+                    b.HasOne("Trackster.Api.Data.UserRecord", "User")
                         .WithMany()
                         .HasForeignKey("UserIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -223,9 +228,9 @@ namespace Trackster.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Trackster.Api.Data.Records.SeasonRecord", b =>
+            modelBuilder.Entity("Trackster.Api.Data.SeasonRecord", b =>
                 {
-                    b.HasOne("Trackster.Api.Data.Records.ShowRecord", "Show")
+                    b.HasOne("Trackster.Api.Data.ShowRecord", "Show")
                         .WithMany()
                         .HasForeignKey("ShowIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)

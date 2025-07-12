@@ -1,17 +1,29 @@
 ﻿using Trackster.Api.Data;
+using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
+using Trackster.Api.Features.Media.Types;
 
 namespace Trackster.Api.Features.Media;
 
 public interface IMediaRepository
 {
-    void ImportMovies(string username, List<TraktMovieResponse> movies);
-    void ImportShows(string username, List<TraktShowResponse> shows);
+    Task ImportMovies(string username, List<TraktMovieResponse> movies);
+    Task ImportShows(string username, List<TraktShowResponse> shows);
+    List<Movie> GetAllMovies(string username);
+    List<Show> GetAllShows(string username);
 }
 
 public class MediaRepository : IMediaRepository
 {
-    public void ImportMovies(string username, List<TraktMovieResponse> movies)
+    private readonly TmdbImportProvider _detailsProvider;
+
+    public MediaRepository()
+    {
+        _detailsProvider = new TmdbImportProvider();
+    }
+    
+    public async Task ImportMovies(string username, List<TraktMovieResponse> movies)
     {
         using (var context = new DatabaseContext())
         using (var transaction = context.Database.BeginTransaction())
@@ -37,12 +49,16 @@ public class MediaRepository : IMediaRepository
 
                     if (existingMovie == null)
                     {
+                        var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB);
+                        
                         existingMovie = new MovieRecord
                         {
                             Identifier = Guid.NewGuid(),
                             Title = movie.Movie.Title,
                             Year = movie.Movie.Year,
-                            TMDB = movie.Movie.Ids.TMDB
+                            TMDB = movie.Movie.Ids.TMDB,
+                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
+                            Overview = details?.Overview,
                         };
 
                         context.Add(existingMovie);
@@ -51,7 +67,7 @@ public class MediaRepository : IMediaRepository
                     var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
                         x.User.Username.ToUpper() == username.ToUpper() &&
                         x.Movie.TMDB == movie.Movie.Ids.TMDB &&
-                        x.CollectedAt == movie.CollectedAt
+                        x.WatchedAt == movie.LastWatchedAt
                     );
 
                     if (existingMovieUserRecord == null)
@@ -61,7 +77,7 @@ public class MediaRepository : IMediaRepository
                             Identifier = Guid.NewGuid(),
                             User = existingUser,
                             Movie = existingMovie,
-                            CollectedAt = movie.CollectedAt
+                            WatchedAt = movie.LastWatchedAt
                         };
 
                         context.Add(movieUserRecord);
@@ -73,12 +89,13 @@ public class MediaRepository : IMediaRepository
             }
             catch (Exception exception)
             {
+                Console.WriteLine(exception);
                 transaction.Rollback();
             }
         }
     }
 
-    public void ImportShows(string username, List<TraktShowResponse> shows)
+    public async Task ImportShows(string username, List<TraktShowResponse> shows)
     {
         using (var context = new DatabaseContext())
         using (var transaction = context.Database.BeginTransaction())
@@ -104,12 +121,16 @@ public class MediaRepository : IMediaRepository
 
                     if (existingShow == null)
                     {
+                        var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
+                        
                         existingShow = new ShowRecord
                         {
                             Identifier = Guid.NewGuid(),
                             Title = show.Show.Title,
                             Year = show.Show.Year,
-                            TMDB = show.Show.Ids.TMDB
+                            TMDB = show.Show.Ids.TMDB,
+                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
+                            Overview = details?.Overview,
                         };
 
                         context.Add(existingShow);
@@ -158,7 +179,7 @@ public class MediaRepository : IMediaRepository
                                 x.Episode.Number == episode.Number &&
                                 x.Episode.Season.Identifier == existingSeason.Identifier &&
                                 x.Episode.Season.Show.Identifier == existingShow.Identifier &&
-                                x.CollectedAt == episode.CollectedAt
+                                x.WatchedAt == episode.WatchedAt
                             );
 
                             if (existingEpisodeUserRecord == null)
@@ -168,7 +189,7 @@ public class MediaRepository : IMediaRepository
                                     Identifier = Guid.NewGuid(),
                                     User = existingUser,
                                     Episode = existingEpisode,
-                                    CollectedAt = episode.CollectedAt
+                                    WatchedAt = episode.WatchedAt
                                 };
 
                                 context.Add(episodeUserRecord);
@@ -182,7 +203,71 @@ public class MediaRepository : IMediaRepository
             }
             catch (Exception exception)
             {
+                Console.WriteLine(exception);
                 transaction.Rollback();
+            }
+        }
+    }
+
+    public List<Movie> GetAllMovies(string username)
+    {
+        
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                return context.MovieUserLinks
+                    .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+                    .OrderByDescending(x => x.WatchedAt)
+                    .Select(x => new Movie
+                    {
+                        Identifier = x.Identifier,
+                        Title = x.Movie.Title,
+                        Year = x.Movie.Year,
+                        TMDB =  x.Movie.TMDB,
+                        Poster = x.Movie.Poster,
+                        Overview = x.Movie.Overview,
+                        WatchedAt = x.WatchedAt
+                    })
+                    .ToList();
+            }
+            catch (Exception exception)
+            {
+                return new List<Movie>();
+            }
+        }
+    }
+
+    public List<Show> GetAllShows(string username)
+    {
+        
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                var shows = context.EpisodeUserLinks
+                    .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+                    .Select(x => new Show
+                    {
+                        Identifier = x.Identifier,
+                        Title = x.Episode.Season.Show.Title,
+                        Year = x.Episode.Season.Show.Year,
+                        TMDB =  x.Episode.Season.Show.TMDB,
+                        Poster = x.Episode.Season.Show.Poster,
+                        Overview = x.Episode.Season.Show.Overview,
+                        WatchedAt = x.WatchedAt
+                    })
+                    .GroupBy(x => x.Title)
+                    .Select(x => x.First())
+                    .ToList();
+
+                return shows
+                    .OrderByDescending(x => x.WatchedAt)
+                    .ToList();
+            }
+            catch (Exception exception)
+            {
+                return new List<Show>();
             }
         }
     }
