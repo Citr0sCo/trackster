@@ -1,3 +1,4 @@
+using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Types;
@@ -14,6 +15,7 @@ public class MediaService
     {
         _mediaRepository = mediaRepository;
         _provider = new TraktImportProvider();
+        _detailsProvider = new TmdbImportProvider();
     }
 
     public async Task<ImportMediaResponse> ImportMedia(ImportMediaRequest request)
@@ -48,5 +50,38 @@ public class MediaService
         {
             Shows = shows
         };
+    }
+
+    public async Task MarkMovieAsWatched(string title, int year)
+    {
+        var searchResults = await _detailsProvider.FindMovieByTitleAndYear(title, year);
+        var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
+        var movie = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "");
+        
+        _mediaRepository.ImportMovie("citr0s", new Movie
+        {
+            Identifier = Guid.NewGuid(),
+            Title = title,
+            TMDB = tmdbReference,
+            Year = year,
+            Overview = movie.Overview,
+            Poster = movie.PosterUrl,
+            WatchedAt = DateTime.Now
+        });
+    }
+
+    public void MarkEpisodeAsWatched(string episodeTitle, string seasonTitle, string showTitle, int year)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void MarkMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RemoveMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)
+    {
+        throw new NotImplementedException();
     }
 }
