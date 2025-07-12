@@ -15,7 +15,7 @@ public class WebhookController : ControllerBase
     {
         _service = new PlexWebhookService();
     }
-    
+
     [HttpPost("plex/{apiKey}")]
     public async Task<IActionResult> HandlePlexWebhook()
     {
@@ -24,24 +24,24 @@ public class WebhookController : ControllerBase
         if (form.TryGetValue("payload", out var payloadJson))
         {
             var payloadString = payloadJson.ToString();
-            
+
             Console.WriteLine(payloadString);
 
-            var parsed = HttpUtility.ParseQueryString(payloadString);
+            var keyValuePairs = payloadString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            
+            Console.WriteLine(JsonConvert.SerializeObject(keyValuePairs));
 
-             var keyValuePairs = payloadString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-             var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-             foreach (var pair in keyValuePairs)
-             {
-                 var separatorIndex = pair.IndexOf('=');
-                 if (separatorIndex > 0 && separatorIndex < pair.Length - 1)
-                 {
-                     var key = pair.Substring(0, separatorIndex);
-                     var value = pair.Substring(separatorIndex + 1);
-                     dict[key] = Uri.UnescapeDataString(value);
-                 }
-             }
+            var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pair in keyValuePairs)
+            {
+                var separatorIndex = pair.IndexOf('=');
+                if (separatorIndex > 0 && separatorIndex < pair.Length - 1)
+                {
+                    var key = pair.Substring(0, separatorIndex);
+                    var value = pair.Substring(separatorIndex + 1);
+                    dict[key] = Uri.UnescapeDataString(value);
+                }
+            }
 
             var webhookRequest = new PlexWebhookRequest
             {
