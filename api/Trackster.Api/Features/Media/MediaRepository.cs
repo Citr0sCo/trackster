@@ -12,7 +12,8 @@ public interface IMediaRepository
     Task ImportShows(string username, List<TraktShowResponse> shows);
     List<Movie> GetAllMovies(string username);
     List<Show> GetAllShows(string username);
-    void ImportMovie(string username, Movie movie);
+    void ImportMovie(string username, MovieRecord movie);
+    void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
 }
 
 public class MediaRepository : IMediaRepository
@@ -273,7 +274,7 @@ public class MediaRepository : IMediaRepository
         }
     }
 
-    public void ImportMovie(string username, Movie movie)
+    public void ImportMovie(string username, MovieRecord movie)
     {
         using (var context = new DatabaseContext())
         using (var transaction = context.Database.BeginTransaction())
@@ -297,23 +298,13 @@ public class MediaRepository : IMediaRepository
 
                 if (existingMovie == null)
                 {
-                    existingMovie = new MovieRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        Title = movie.Title,
-                        Year = movie.Year,
-                        TMDB = movie.TMDB,
-                        Poster = $"https://image.tmdb.org/t/p/w185{movie.Poster}",
-                        Overview = movie.Overview,
-                    };
-
+                    existingMovie = movie;
                     context.Add(existingMovie);
                 }
 
                 var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
                     x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Movie.TMDB == movie.TMDB &&
-                    x.WatchedAt == movie.WatchedAt
+                    x.Movie.TMDB == movie.TMDB
                 );
 
                 if (existingMovieUserRecord == null)
@@ -323,7 +314,82 @@ public class MediaRepository : IMediaRepository
                         Identifier = Guid.NewGuid(),
                         User = existingUser,
                         Movie = existingMovie,
-                        WatchedAt = movie.WatchedAt
+                        WatchedAt = DateTime.Now
+                    };
+
+                    context.Add(movieUserRecord);
+                }
+
+                context.SaveChanges();
+                transaction.Commit();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                transaction.Rollback();
+            }
+        }
+    }
+
+    public void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = context.Database.BeginTransaction())
+        {
+            try
+            {
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+
+                if (existingUser == null)
+                {
+                    existingUser = new UserRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        Username = username
+                    };
+
+                    context.Add(existingUser);
+                }
+
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
+
+                if (existingShow == null)
+                {
+                    existingShow = show;
+                    context.Add(existingShow);
+                }
+
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB && x.Number == season.Number);
+
+                if (existingSeason == null)
+                {
+                    existingSeason = season;
+                    context.Add(existingSeason);
+                }
+
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB && x.Number == episode.Number);
+
+                if (existingEpisode == null)
+                {
+                    existingEpisode = episode;
+                    context.Add(existingEpisode);
+                }
+
+                var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
+                    x.User.Username.ToUpper() == username.ToUpper() &&
+                    x.Episode.Number == episode.Number &&
+                    x.Episode.Season.Identifier == existingSeason.Identifier &&
+                    x.Episode.Season.Show.Identifier == existingShow.Identifier
+                );
+
+                if (existingEpisodeUserRecord == null)
+                {
+                    var movieUserRecord = new EpisodeUserRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        User = existingUser,
+                        Episode = episode,
+                        WatchedAt = DateTime.Now
                     };
 
                     context.Add(movieUserRecord);

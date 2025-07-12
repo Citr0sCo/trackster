@@ -27,7 +27,7 @@ public class PlexWebhookService
             _mediaService.MarkMovieAsWatched(parsedJson.Metadata.Title, parsedJson.Metadata.Year);
         
         if (parsedJson.Event.ToLower() == "media.scrobble" && parsedJson.Metadata.Type.ToLower() == "episode")
-            _mediaService.MarkEpisodeAsWatched(parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.Year);
+            _mediaService.MarkEpisodeAsWatched(parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.Title, parsedJson.Metadata.Year, parsedJson.Metadata.ParentIndex);
 
         if (parsedJson.Event.ToLower() == "media.play")
             _mediaService.MarkMediaAsWatchingNow(parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.Year);
