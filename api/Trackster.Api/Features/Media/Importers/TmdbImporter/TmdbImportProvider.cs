@@ -98,6 +98,9 @@ public class TmdbImportProvider
             using(var response = await httpClient.GetAsync($"3/search/show?{flatQueryParams}"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
+                
+                Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB search for show {responseData}.");
+                
                 var parsedData = JsonConvert.DeserializeObject<TmdbShowSearchResults>(responseData);
                 return parsedData ?? new TmdbShowSearchResults();
             }
