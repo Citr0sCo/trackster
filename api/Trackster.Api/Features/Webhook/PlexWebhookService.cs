@@ -23,7 +23,7 @@ public class PlexWebhookService
         Console.WriteLine("Player - " + JsonConvert.SerializeObject(parsedJson.Player, Formatting.Indented));
         Console.WriteLine("--- Plex Webhook Parse End ---");
 
-        if (parsedJson.Account.Title != "citr0s")
+        if (parsedJson.Account.Title.ToLower() != "citr0s".ToLower())
             return;
         
         if (parsedJson.Event.ToLower() == "media.scrobble" && parsedJson.Metadata.Type.ToLower() == "movie")
