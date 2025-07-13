@@ -59,7 +59,7 @@ public class TmdbImportProvider
 
             var queryParams = new Dictionary<string, string>
             {
-                { "title", title }, 
+                { "query", title }, 
                 { "year", year.ToString() },
                 { "include_adult", "false" },
                 { "language", "en-US" }
@@ -87,7 +87,7 @@ public class TmdbImportProvider
 
             var queryParams = new Dictionary<string, string>
             {
-                { "title", title }, 
+                { "query", title }, 
                 { "year", year.ToString() },
                 { "include_adult", "false" },
                 { "language", "en-US" }
