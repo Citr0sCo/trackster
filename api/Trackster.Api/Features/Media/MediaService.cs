@@ -54,6 +54,8 @@ public class MediaService
 
     public async Task MarkMovieAsWatched(string title, int year)
     {
+        Console.WriteLine($"Marking {title} as watched by {year}.");
+        
         var searchResults = await _detailsProvider.FindMovieByTitleAndYear(title, year);
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
         var movie = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "");
@@ -67,10 +69,14 @@ public class MediaService
             Overview = movie.Overview,
             Poster = $"https://image.tmdb.org/t/p/w185{movie.PosterUrl}"
         });
+        
+        Console.WriteLine($"Marked {title} as watched by {year}.");
     }
 
     public async Task MarkEpisodeAsWatched(string showTitle, string episodeTitle, int year, int seasonNumber)
     {
+        Console.WriteLine($"Marking {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
+        
         var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
         var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
@@ -102,15 +108,17 @@ public class MediaService
         };
         
         _mediaRepository.ImportEpisode("citr0s", show, season, episode);
+        
+        Console.WriteLine($"Marked {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
     }
 
     public void MarkMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)
     {
-        throw new NotImplementedException();
+        Console.WriteLine($"Marking a media as watching now. {episodeTitle}, {seasonTitle}, {showTitle}, {year}.");
     }
 
     public void RemoveMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)
     {
-        throw new NotImplementedException();
+        Console.WriteLine($"Marking a media as stopped watching. {episodeTitle}, {seasonTitle}, {showTitle}, {year}.");
     }
 }
