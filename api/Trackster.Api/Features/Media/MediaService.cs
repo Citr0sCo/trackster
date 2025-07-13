@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
@@ -79,23 +80,23 @@ public class MediaService
         
         var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
         
-        Console.WriteLine($"[DEBUG] - 2/7 - Marking {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
+        Console.WriteLine($"[DEBUG] - 2/7 - Found show {JsonConvert.SerializeObject(searchResults)}.");
         
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
         
-        Console.WriteLine($"[DEBUG] - 3/7 - Found info for show {showTitle} episode {episodeTitle}.");
+        Console.WriteLine($"[DEBUG] - 3/7 - Found info for show {showTitle} episode {episodeTitle} reference {tmdbReference}.");
         
         var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
         
-        Console.WriteLine($"[DEBUG] - 4/7 - Found details for show {tmdbReference}.");
+        Console.WriteLine($"[DEBUG] - 4/7 - Found details for show {parsedShow.Title}.");
         
         var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
         
-        Console.WriteLine($"[DEBUG] - 5/7 - Found details for show {parsedShow.Identifier} season {seasonNumber}.");
+        Console.WriteLine($"[DEBUG] - 5/7 - Found details for season {JsonConvert.SerializeObject(parsedSeason.Episodes)}.");
         
         var parsedEpisode = parsedSeason.Episodes.FirstOrDefault(x => x.Name.ToLower() == episodeTitle.ToLower());
         
-        Console.WriteLine($"[DEBUG] - 6/7 - Retrieved info.");
+        Console.WriteLine($"[DEBUG] - 6/7 - Retrieved info for episode {parsedEpisode.Name}.");
 
         var show = new ShowRecord
         {
