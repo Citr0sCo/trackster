@@ -80,15 +80,15 @@ public class MediaService
         
         var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
         
-        Console.WriteLine($"[DEBUG] - 2/7 - Marking {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
+        Console.WriteLine($"[DEBUG] - 2/7 - Found show {JsonConvert.SerializeObject(searchResults)}.");
         
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
         
-        Console.WriteLine($"[DEBUG] - 3/7 - Found info for show {showTitle} episode {episodeTitle}.");
+        Console.WriteLine($"[DEBUG] - 3/7 - Found info for show {showTitle} episode {episodeTitle} reference {tmdbReference}.");
         
         var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
         
-        Console.WriteLine($"[DEBUG] - 4/7 - Found details for show {tmdbReference}.");
+        Console.WriteLine($"[DEBUG] - 4/7 - Found details for show {parsedShow.Title}.");
         
         var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
         
