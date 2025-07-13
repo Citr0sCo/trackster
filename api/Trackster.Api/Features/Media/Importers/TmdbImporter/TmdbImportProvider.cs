@@ -95,7 +95,7 @@ public class TmdbImportProvider
             
             var flatQueryParams = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
             
-            using(var response = await httpClient.GetAsync($"3/search/show?{flatQueryParams}"))
+            using(var response = await httpClient.GetAsync($"3/search/tv?{flatQueryParams}"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
                 
