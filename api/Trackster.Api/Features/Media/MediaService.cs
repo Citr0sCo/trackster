@@ -75,13 +75,24 @@ public class MediaService
 
     public async Task MarkEpisodeAsWatched(string showTitle, string episodeTitle, int year, int seasonNumber)
     {
-        Console.WriteLine($"Marking {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
+        Console.WriteLine($"[DEBUG] - 1/6 - Marking {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
         
         var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
+        
+        Console.WriteLine($"[DEBUG] - 2/6 - Found info for show {showTitle} episode {episodeTitle}.");
+        
         var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
+        
+        Console.WriteLine($"[DEBUG] - 3/6 - Found details for show {tmdbReference}.");
+        
         var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
+        
+        Console.WriteLine($"[DEBUG] - 4/6 - Found details for show {parsedShow.Identifier} season {seasonNumber}.");
+        
         var parsedEpisode = parsedSeason.Episodes.FirstOrDefault(x => x.Name.ToLower() == episodeTitle.ToLower());
+        
+        Console.WriteLine($"[DEBUG] - 5/6 - Retrieved info.");
 
         var show = new ShowRecord
         {
@@ -109,7 +120,7 @@ public class MediaService
         
         _mediaRepository.ImportEpisode("citr0s", show, season, episode);
         
-        Console.WriteLine($"Marked {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
+        Console.WriteLine($"[DEBUG] - 6/6 - Marked {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
     }
 
     public void MarkMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)
