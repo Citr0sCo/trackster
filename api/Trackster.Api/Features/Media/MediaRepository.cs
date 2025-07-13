@@ -259,8 +259,6 @@ public class MediaRepository : IMediaRepository
                         Overview = x.Episode.Season.Show.Overview,
                         WatchedAt = x.WatchedAt
                     })
-                    .GroupBy(x => x.Title)
-                    .Select(x => x.First())
                     .ToList();
 
                 return shows
