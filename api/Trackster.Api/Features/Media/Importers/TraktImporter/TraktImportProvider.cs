@@ -5,16 +5,16 @@ namespace Trackster.Api.Features.Media.Importers.TraktImporter;
 
 public class TraktImportProvider
 {
+    private readonly string _apiKey = "ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011";
+
     public async Task<List<TraktMovieResponse>> GetMovies(string username)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
         using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
         {
-            //var traktClientId = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_ID");
-            
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", "ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011");
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
   
             using(var response = await httpClient.GetAsync($"users/{username}/watched/movies"))
             {
@@ -32,7 +32,7 @@ public class TraktImportProvider
         using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", "ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011");
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
   
             using(var response = await httpClient.GetAsync($"users/{username}/watched/shows"))
             {

@@ -10,16 +10,20 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WideButtonComponent } from '../components/wide-button/wide-button.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { TimeagoModule } from 'ngx-timeago';
-import {AuthorizeTraktComponent} from "../pages/authorize-trakt-page/authorize-trakt.component";
-import {AuthenticationService} from "../services/authentication-service/authentication.service";
-import {AuthenticationRepository} from "../services/authentication-service/authentication.repository";
+import { AuthorizeTraktComponent } from "../pages/authorize-trakt-page/authorize-trakt.component";
+import { AuthenticationService } from "../services/authentication-service/authentication.service";
+import { AuthenticationRepository } from "../services/authentication-service/authentication.repository";
+import { HistoryPageComponent } from '../pages/history-page/history-page.component';
+import { CustomSidebarComponent } from '../components/custom-sidebar/custom-sidebar.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         HomePageComponent,
+        HistoryPageComponent,
         AuthorizeTraktComponent,
         WideButtonComponent,
+        CustomSidebarComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

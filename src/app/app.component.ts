@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
     standalone: false
 })
 export class AppComponent {
-    public title = 'home-box-landing';
+    public title = 'Trackster';
 }
