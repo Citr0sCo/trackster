@@ -5,16 +5,15 @@ import { IMovie } from '../../services/media-service/types/movie.type';
 import { IShow } from '../../services/media-service/types/show.type';
 
 @Component({
-    selector: 'home-page',
-    templateUrl: './home-page.component.html',
-    styleUrls: ['./home-page.component.scss'],
+    selector: 'history-page',
+    templateUrl: './history-page.component.html',
+    styleUrls: ['./history-page.component.scss'],
     standalone: false
 })
-export class HomePageComponent implements OnInit, OnDestroy {
+export class HistoryPageComponent implements OnInit, OnDestroy {
 
     public movies: Array<IMovie> = [];
     public shows: Array<IShow> = [];
-    public isImporting: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
@@ -34,15 +33,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((shows) => {
                 this.shows = shows;
-            });
-    }
-
-    public importFromTrakt(): void {
-        this.isImporting = true;
-        this._mediaService.importFromTrakt('citr0s')
-            .pipe(takeUntil(this._destroy))
-            .subscribe(() => {
-                this.isImporting = false;
             });
     }
 
