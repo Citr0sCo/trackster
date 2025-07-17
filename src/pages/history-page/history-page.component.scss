@@ -3,6 +3,10 @@
 .history-page-component {
     padding:10px 0;
 
+    .movie-poster-wrapper{
+        overflow: auto;
+    }
+
     .movie-poster {
         width: 150px;
         height: 225px;
@@ -13,6 +17,7 @@
         overflow: hidden;
         margin: 5px;
         position: relative;
+        flex-shrink: 0;
 
         &__title {
             position: absolute;

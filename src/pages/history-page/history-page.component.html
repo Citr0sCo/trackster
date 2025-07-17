@@ -8,7 +8,7 @@
                         {{ key | date:'MMMM d, y' }}
                     </div>
                     <hr />
-                    <div class="o-grid">
+                    <div class="o-grid movie-poster-wrapper">
                         @for (mediaItem of media[key]; track mediaItem) {
                             <div class="o-grid__col o-grid__col--fixed movie-poster" style="background-image: url({{mediaItem.posterUrl}});">
                                 <div class="movie-poster__title">

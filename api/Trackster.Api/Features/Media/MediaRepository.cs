@@ -42,6 +42,7 @@ public class MediaRepository : IMediaRepository
                         Username = username
                     };
 
+                    Console.WriteLine($"[INFO] - User '{username}' doesn't exist. Creating...");
                     context.Add(existingUser);
                 }
 
@@ -62,7 +63,8 @@ public class MediaRepository : IMediaRepository
                             Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
                             Overview = details?.Overview,
                         };
-
+                        
+                        Console.WriteLine($"[INFO] - Movie '{movie.Movie.Title}' doesn't exist. Creating...");
                         context.Add(existingMovie);
                     }
 
@@ -84,6 +86,7 @@ public class MediaRepository : IMediaRepository
                             WatchedAt = movie.LastWatchedAt
                         };
 
+                        Console.WriteLine($"[INFO] - Movie-User Link '{username}'-'{movie.Movie.Title}' doesn't exist. Creating...");
                         context.Add(movieUserRecord);
                     }
                 }
@@ -116,6 +119,7 @@ public class MediaRepository : IMediaRepository
                         Username = username
                     };
 
+                    Console.WriteLine($"[INFO] - User '{username}' doesn't exist. Creating...");
                     context.Add(existingUser);
                 }
 
@@ -136,7 +140,8 @@ public class MediaRepository : IMediaRepository
                             Poster = $"https://image.tmdb.org/t/p/w185{showDetails?.PosterUrl}",
                             Overview = showDetails?.Overview,
                         };
-
+                        
+                        Console.WriteLine($"[INFO] - Show '{show.Show.Title}' doesn't exist. Creating...");
                         context.Add(existingShow);
                     }
 
@@ -162,6 +167,7 @@ public class MediaRepository : IMediaRepository
                                 Show = existingShow
                             };
 
+                            Console.WriteLine($"[INFO] - Season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
                             context.Add(existingSeason);
                         }
 
@@ -184,6 +190,7 @@ public class MediaRepository : IMediaRepository
                                     Season = existingSeason
                                 };
 
+                                Console.WriteLine($"[INFO] - Episode {episodeDetails.Title ?? episode.Number.ToString()} for season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
                                 context.Add(existingEpisode);
                             }
 
@@ -206,7 +213,8 @@ public class MediaRepository : IMediaRepository
                                     Episode = existingEpisode,
                                     WatchedAt = episode.WatchedAt
                                 };
-
+                                
+                                Console.WriteLine($"[INFO] - Episode-User Link '{username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
                                 context.Add(episodeUserRecord);
                             }
                         }
@@ -219,6 +227,7 @@ public class MediaRepository : IMediaRepository
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
+                transaction.Rollback();
             }
         }
     }
