@@ -69,7 +69,7 @@ public class MediaRepository : IMediaRepository
                     var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
                         x.User.Username.ToUpper() == username.ToUpper() &&
                         x.Movie.TMDB == movie.Movie.Ids.TMDB &&
-                        x.WatchedAt == movie.LastWatchedAt
+                        (x.WatchedAt - movie.LastWatchedAt).TotalHours < 1
                     );
 
                     if (existingMovieUserRecord == null)
@@ -181,7 +181,7 @@ public class MediaRepository : IMediaRepository
                                 x.Episode.Number == episode.Number &&
                                 x.Episode.Season.Identifier == existingSeason.Identifier &&
                                 x.Episode.Season.Show.Identifier == existingShow.Identifier &&
-                                x.WatchedAt == episode.WatchedAt
+                                (x.WatchedAt - episode.WatchedAt).TotalHours < 1
                             );
 
                             if (existingEpisodeUserRecord == null)
