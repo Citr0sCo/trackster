@@ -45,6 +45,7 @@ public class MediaRepository : IMediaRepository
                     context.Add(existingUser);
                 }
 
+                var moviesProcessed = 0;
                 foreach (var movie in movies)
                 {
                     var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.Movie.Ids.TMDB);
@@ -86,6 +87,9 @@ public class MediaRepository : IMediaRepository
 
                         context.Add(movieUserRecord);
                     }
+
+                    moviesProcessed++;
+                    Console.WriteLine($"[INFO] - Movie {moviesProcessed}/{movies.Count} processed.");
                 }
 
                 context.SaveChanges();
@@ -140,6 +144,7 @@ public class MediaRepository : IMediaRepository
                         context.Add(existingShow);
                     }
 
+                    var showsProcessed = 0;
                     foreach (var season in show.Seasons)
                     {
                         var existingSeason = context.Seasons.FirstOrDefault(x =>
@@ -202,6 +207,9 @@ public class MediaRepository : IMediaRepository
                             }
                         }
                     }
+                    
+                    showsProcessed++;
+                    Console.WriteLine($"[INFO] - Show {showsProcessed}/{shows.Count} processed.");
                 }
 
                 context.SaveChanges();
