@@ -181,7 +181,7 @@ public class MediaRepository : IMediaRepository
                                 x.Episode.Number == episode.Number &&
                                 x.Episode.Season.Identifier == existingSeason.Identifier &&
                                 x.Episode.Season.Show.Identifier == existingShow.Identifier &&
-                                (x.WatchedAt - episode.LastWatchedAt).TotalHours < 1
+                                (x.WatchedAt - episode.WatchedAt).TotalHours < 1
                             );
 
                             if (existingEpisodeUserRecord == null)
