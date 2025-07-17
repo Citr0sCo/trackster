@@ -1,5 +1,27 @@
-<div class="home-page-component">
+<div class="history-page-component">
     <div class="container">
-
+        <h3>History</h3>
+        @if (media != null) {
+            <div class="o-grid o-grid--space-between o-grid--row">
+                @for (key of visibleKeys; track key) {
+                    <div style="margin-top:15px;">
+                        {{ key | date:'MMMM d, y' }}
+                    </div>
+                    <hr />
+                    <div class="o-grid movie-poster-wrapper">
+                        @for (mediaItem of media[key]; track mediaItem) {
+                            <div class="o-grid__col o-grid__col--fixed movie-poster" style="background-image: url({{mediaItem.posterUrl}});">
+                                <div class="movie-poster__title">
+                                    {{ mediaItem.title ?? mediaItem.grandParentTitle }} ({{ mediaItem.year }})
+                                </div>
+                                <div class="movie-poster__watched_at">
+                                    {{ mediaItem.watchedAt | date }}
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
     </div>
 </div>

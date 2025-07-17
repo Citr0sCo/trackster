@@ -11,7 +11,7 @@ public class TmdbSeasonSearchResults
     public List<Episode> Episodes { get; set; }
 
     [JsonProperty("name")]
-    public string Name { get; set; }
+    public string Title { get; set; }
 
     [JsonProperty("overview")]
     public string Overview { get; set; }
@@ -79,7 +79,7 @@ public class TmdbSeasonSearchResults
         public int Id { get; set; }
 
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Title { get; set; }
 
         [JsonProperty("overview")]
         public string Overview { get; set; }

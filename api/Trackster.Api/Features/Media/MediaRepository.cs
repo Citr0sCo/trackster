@@ -42,6 +42,7 @@ public class MediaRepository : IMediaRepository
                         Username = username
                     };
 
+                    Console.WriteLine($"[INFO] - User '{username}' doesn't exist. Creating...");
                     context.Add(existingUser);
                 }
 
@@ -63,7 +64,8 @@ public class MediaRepository : IMediaRepository
                             Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
                             Overview = details?.Overview,
                         };
-
+                        
+                        Console.WriteLine($"[INFO] - Movie '{movie.Movie.Title}' doesn't exist. Creating...");
                         context.Add(existingMovie);
                     }
 
@@ -85,6 +87,7 @@ public class MediaRepository : IMediaRepository
                             WatchedAt = movie.LastWatchedAt
                         };
 
+                        Console.WriteLine($"[INFO] - Movie-User Link '{username}'-'{movie.Movie.Title}' doesn't exist. Creating...");
                         context.Add(movieUserRecord);
                     }
 
@@ -120,27 +123,29 @@ public class MediaRepository : IMediaRepository
                         Username = username
                     };
 
+                    Console.WriteLine($"[INFO] - User '{username}' doesn't exist. Creating...");
                     context.Add(existingUser);
                 }
 
                 foreach (var show in shows)
                 {
                     var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.Show.Ids.TMDB);
+                    
+                    var showDetails = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
 
                     if (existingShow == null)
                     {
-                        var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
-                        
                         existingShow = new ShowRecord
                         {
                             Identifier = Guid.NewGuid(),
                             Title = show.Show.Title,
                             Year = show.Show.Year,
                             TMDB = show.Show.Ids.TMDB,
-                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
-                            Overview = details?.Overview,
+                            Poster = $"https://image.tmdb.org/t/p/w185{showDetails?.PosterUrl}",
+                            Overview = showDetails?.Overview,
                         };
-
+                        
+                        Console.WriteLine($"[INFO] - Show '{show.Show.Title}' doesn't exist. Creating...");
                         context.Add(existingShow);
                     }
 
@@ -154,13 +159,20 @@ public class MediaRepository : IMediaRepository
 
                         if (existingSeason == null)
                         {
+                            var title = $"Season {season.Number}";
+
+                            if (season.Number > 0 && showDetails?.Seasons.Count > (season.Number - 1))
+                                title = showDetails.Seasons[season.Number - 1].Title;
+                            
                             existingSeason = new SeasonRecord
                             {
                                 Identifier = Guid.NewGuid(),
                                 Number = season.Number,
+                                Title = title,
                                 Show = existingShow
                             };
 
+                            Console.WriteLine($"[INFO] - Season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
                             context.Add(existingSeason);
                         }
 
@@ -170,6 +182,8 @@ public class MediaRepository : IMediaRepository
                                 x.Number == season.Number &&
                                 x.Season.Identifier == existingSeason.Identifier
                             );
+                            
+                            var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number);
 
                             if (existingEpisode == null)
                             {
@@ -177,9 +191,11 @@ public class MediaRepository : IMediaRepository
                                 {
                                     Identifier = Guid.NewGuid(),
                                     Number = episode.Number,
+                                    Title = episodeDetails.Title ?? show.Show.Title,
                                     Season = existingSeason
                                 };
 
+                                Console.WriteLine($"[INFO] - Episode {episodeDetails.Title ?? episode.Number.ToString()} for season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
                                 context.Add(existingEpisode);
                             }
 
@@ -202,7 +218,8 @@ public class MediaRepository : IMediaRepository
                                     Episode = existingEpisode,
                                     WatchedAt = episode.WatchedAt
                                 };
-
+                                
+                                Console.WriteLine($"[INFO] - Episode-User Link '{username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
                                 context.Add(episodeUserRecord);
                             }
                         }
@@ -265,6 +282,8 @@ public class MediaRepository : IMediaRepository
                     {
                         Identifier = x.Identifier,
                         Title = x.Episode.Season.Show.Title,
+                        ParentTitle = x.Episode.Season.Title,
+                        GrandParentTitle = x.Episode.Title,
                         Year = x.Episode.Season.Show.Year,
                         TMDB =  x.Episode.Season.Show.TMDB,
                         Poster = x.Episode.Season.Show.Poster,

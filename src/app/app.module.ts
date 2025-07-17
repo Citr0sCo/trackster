@@ -15,6 +15,7 @@ import { AuthenticationService } from "../services/authentication-service/authen
 import { AuthenticationRepository } from "../services/authentication-service/authentication.repository";
 import { HistoryPageComponent } from '../pages/history-page/history-page.component';
 import { CustomSidebarComponent } from '../components/custom-sidebar/custom-sidebar.component';
+import {EventService} from "../services/event-service/event.service";
 
 @NgModule({
     declarations: [
@@ -38,6 +39,7 @@ import { CustomSidebarComponent } from '../components/custom-sidebar/custom-side
         MediaRepository,
         AuthenticationService,
         AuthenticationRepository,
+        EventService,
         provideHttpClient(withInterceptorsFromDi())
     ]
 })
