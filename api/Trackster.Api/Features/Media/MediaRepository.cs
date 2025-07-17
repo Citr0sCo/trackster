@@ -46,6 +46,7 @@ public class MediaRepository : IMediaRepository
                     context.Add(existingUser);
                 }
 
+                var moviesProcessed = 0;
                 foreach (var movie in movies)
                 {
                     var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.Movie.Ids.TMDB);
@@ -89,6 +90,9 @@ public class MediaRepository : IMediaRepository
                         Console.WriteLine($"[INFO] - Movie-User Link '{username}'-'{movie.Movie.Title}' doesn't exist. Creating...");
                         context.Add(movieUserRecord);
                     }
+
+                    moviesProcessed++;
+                    Console.WriteLine($"[INFO] - Movie {moviesProcessed}/{movies.Count} processed.");
                 }
 
                 context.SaveChanges();
@@ -145,6 +149,7 @@ public class MediaRepository : IMediaRepository
                         context.Add(existingShow);
                     }
 
+                    var showsProcessed = 0;
                     foreach (var season in show.Seasons)
                     {
                         var existingSeason = context.Seasons.FirstOrDefault(x =>
@@ -190,7 +195,7 @@ public class MediaRepository : IMediaRepository
                                     Season = existingSeason
                                 };
 
-                                Console.WriteLine($"[INFO] - Episode {episodeDetails.Title ?? episode.Number.ToString()} for season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
+                                Console.WriteLine($"[INFO] - Episode '{episodeDetails.Title ?? episode.Number.ToString()}' for season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
                                 context.Add(existingEpisode);
                             }
 
@@ -219,6 +224,9 @@ public class MediaRepository : IMediaRepository
                             }
                         }
                     }
+                    
+                    showsProcessed++;
+                    Console.WriteLine($"[INFO] - Show {showsProcessed}/{shows.Count} processed.");
                 }
 
                 context.SaveChanges();
