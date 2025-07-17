@@ -127,6 +127,7 @@ public class MediaRepository : IMediaRepository
                     context.Add(existingUser);
                 }
 
+                var showsProcessed = 0;
                 foreach (var show in shows)
                 {
                     var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.Show.Ids.TMDB);
@@ -148,8 +149,7 @@ public class MediaRepository : IMediaRepository
                         Console.WriteLine($"[INFO] - Show '{show.Show.Title}' doesn't exist. Creating...");
                         context.Add(existingShow);
                     }
-
-                    var showsProcessed = 0;
+                    
                     foreach (var season in show.Seasons)
                     {
                         var existingSeason = context.Seasons.FirstOrDefault(x =>
