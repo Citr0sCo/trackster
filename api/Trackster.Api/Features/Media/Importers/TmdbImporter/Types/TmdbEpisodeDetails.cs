@@ -32,8 +32,8 @@ public class TmdbEpisodeDetails
     [JsonProperty("production_code")]
     public string ProductionCode { get; set; }
 
-    [JsonProperty("runtime")]
-    public int Runtime { get; set; }
+    //[JsonProperty("runtime")]
+    //public int Runtime { get; set; }
 
     [JsonProperty("season_number")]
     public int SeasonNumber { get; set; }
@@ -42,10 +42,10 @@ public class TmdbEpisodeDetails
     public string StillPath { get; set; }
 
     [JsonProperty("vote_average")]
-    public int VoteAverage { get; set; }
+    public double VoteAverage { get; set; }
 
-    [JsonProperty("vote_count")]
-    public int VoteCount { get; set; }
+    //[JsonProperty("vote_count")]
+    //public int VoteCount { get; set; }
 }
 
 public class Crew
