@@ -195,7 +195,7 @@ public class MediaRepository : IMediaRepository
                                     Season = existingSeason
                                 };
 
-                                Console.WriteLine($"[INFO] - Episode {episodeDetails.Title ?? episode.Number.ToString()} for season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
+                                Console.WriteLine($"[INFO] - Episode '{episodeDetails.Title ?? episode.Number.ToString()}' for season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
                                 context.Add(existingEpisode);
                             }
 
