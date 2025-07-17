@@ -122,19 +122,19 @@ public class MediaRepository : IMediaRepository
                 foreach (var show in shows)
                 {
                     var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.Show.Ids.TMDB);
+                    
+                    var showDetails = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
 
                     if (existingShow == null)
                     {
-                        var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
-                        
                         existingShow = new ShowRecord
                         {
                             Identifier = Guid.NewGuid(),
                             Title = show.Show.Title,
                             Year = show.Show.Year,
                             TMDB = show.Show.Ids.TMDB,
-                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
-                            Overview = details?.Overview,
+                            Poster = $"https://image.tmdb.org/t/p/w185{showDetails?.PosterUrl}",
+                            Overview = showDetails?.Overview,
                         };
 
                         context.Add(existingShow);
@@ -153,6 +153,7 @@ public class MediaRepository : IMediaRepository
                             {
                                 Identifier = Guid.NewGuid(),
                                 Number = season.Number,
+                                Title = showDetails?.Seasons[season.Number - 1].Title ?? $"Season {season.Number}",
                                 Show = existingShow
                             };
 
@@ -165,6 +166,8 @@ public class MediaRepository : IMediaRepository
                                 x.Number == season.Number &&
                                 x.Season.Identifier == existingSeason.Identifier
                             );
+                            
+                            var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number);
 
                             if (existingEpisode == null)
                             {
@@ -172,6 +175,7 @@ public class MediaRepository : IMediaRepository
                                 {
                                     Identifier = Guid.NewGuid(),
                                     Number = episode.Number,
+                                    Title = episodeDetails.Title,
                                     Season = existingSeason
                                 };
 
@@ -257,6 +261,8 @@ public class MediaRepository : IMediaRepository
                     {
                         Identifier = x.Identifier,
                         Title = x.Episode.Season.Show.Title,
+                        ParentTitle = x.Episode.Season.Title,
+                        GrandParentTitle = x.Episode.Title,
                         Year = x.Episode.Season.Show.Year,
                         TMDB =  x.Episode.Season.Show.TMDB,
                         Poster = x.Episode.Season.Show.Poster,

@@ -6,6 +6,8 @@ import { mapNetworkError } from '../../core/map-network-error';
 import { Provider } from "../../core/providers.enum";
 import { ImportType } from "../../core/import-type.enum";
 import { IMovie } from "./types/movie.type";
+import {IShow} from "./types/show.type";
+import {IMedia} from "./types/media.type";
 
 @Injectable()
 export class MediaRepository {
@@ -36,7 +38,7 @@ export class MediaRepository {
             );
     }
 
-    public getAllShowsFor(username: string): Observable<Array<IMovie>> {
+    public getAllShowsFor(username: string): Observable<Array<IShow>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/shows?username=${username}`)
             .pipe(
                 mapNetworkError(),
@@ -45,11 +47,37 @@ export class MediaRepository {
                         return {
                             identifier: movie.Identifier,
                             title: movie.Title,
+                            mediaType: movie.MediaType,
+                            parentTitle: movie.ParentTitle,
+                            grandParentTitle: movie.GrandParentTitle,
                             year: movie.Year,
                             tmdb: movie.TMDB,
                             posterUrl: movie.Poster,
                             overview: movie.Overview,
                             watchedAt: movie.WatchedAt
+                        };
+                    });
+                })
+            );
+    }
+
+    public getHistoryForUser(username: string): Observable<Array<IMedia>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/history?username=${username}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    return response.Media.map((media: any) => {
+                        return {
+                            identifier: media.Identifier,
+                            mediaType: media.MediaType,
+                            title: media.Title,
+                            parentTitle: media.ParentTitle,
+                            grandParentTitle: media.GrandParentTitle,
+                            year: media.Year,
+                            tmdb: media.TMDB,
+                            posterUrl: media.Poster,
+                            overview: media.Overview,
+                            watchedAt: media.WatchedAt
                         };
                     });
                 })

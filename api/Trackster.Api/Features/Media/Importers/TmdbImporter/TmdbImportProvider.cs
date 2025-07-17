@@ -47,6 +47,25 @@ public class TmdbImportProvider
             }
         }
     }
+    
+    public async Task<TmdbEpisodeDetails> GetEpisodeDetails(string seriesId, int seasonNumber, int episodeNumber)
+    {
+        var baseAddress = new Uri("https://api.themoviedb.org/");
+
+
+        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        {
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
+  
+            using(var response = await httpClient.GetAsync($"3/tv/{seriesId}/season/{seasonNumber}/episode/{episodeNumber}"))
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+                var parsedData = JsonConvert.DeserializeObject<TmdbEpisodeDetails>(responseData);
+                return parsedData ?? new TmdbEpisodeDetails();
+            }
+        }
+    }
 
     public async Task<TmdbMovieSearchResults> FindMovieByTitleAndYear(string title, int year)
     {
