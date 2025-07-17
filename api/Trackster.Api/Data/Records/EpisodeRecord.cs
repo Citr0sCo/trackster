@@ -8,4 +8,5 @@ public class EpisodeRecord
     public Guid Identifier { get; set; }
     public int Number { get; set; }
     public SeasonRecord Season { get; set; }
+    public string Title { get; set; }
 }

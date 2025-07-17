@@ -1,9 +1,15 @@
 using Newtonsoft.Json;
+using Trackster.Api.Data.Records;
 
 namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 
 public class TmdbShowDetails
 {
+    public TmdbShowDetails()
+    {
+        Seasons = new List<Season>();
+    }
+    
     [JsonProperty("id")] 
     public int Identifier { get; set; }
     
@@ -106,10 +112,14 @@ public class TmdbShowDetails
 
     public class Season
     {
+        [JsonProperty("id")]
+        public int Identifier { get; set; }
+        
+        [JsonProperty("name")]
+        public string Title { get; set; }
+        
         public string air_date { get; set; }
         public int episode_count { get; set; }
-        public int id { get; set; }
-        public string name { get; set; }
         public string overview { get; set; }
         public string poster_path { get; set; }
         public int season_number { get; set; }
@@ -123,4 +133,3 @@ public class TmdbShowDetails
         public string name { get; set; }
     }
 }
-

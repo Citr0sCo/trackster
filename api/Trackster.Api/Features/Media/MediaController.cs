@@ -26,9 +26,20 @@ public class MediaController : ControllerBase
         return _service.GetAllShows(username);
     }
     
+    [HttpGet("history")]
+    public GetHistoryForUserResponse GetHistoryForUser([FromQuery]string username)
+    {
+        return _service.GetHistoryForUser(username);
+    }
+    
     [HttpPost("import")]
     public async Task<ImportMediaResponse> ImportLinks([FromBody]ImportMediaRequest request)
     {
-        return await _service.ImportMedia(request);
+        await Task.Run(async () =>
+        {
+            await _service.ImportMedia(request);
+        });
+        
+        return new ImportMediaResponse();
     }
 }
