@@ -21,7 +21,7 @@ public class TmdbEpisodeDetails
     public List<object> GuestStars { get; set; }
 
     [JsonProperty("name")]
-    public string Title { get; set; }
+    public string? Title { get; set; }
 
     [JsonProperty("overview")]
     public string Overview { get; set; }

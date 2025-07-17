@@ -180,7 +180,7 @@ public class MediaRepository : IMediaRepository
                                 {
                                     Identifier = Guid.NewGuid(),
                                     Number = episode.Number,
-                                    Title = episodeDetails.Title,
+                                    Title = episodeDetails.Title ?? show.Show.Title,
                                     Season = existingSeason
                                 };
 
