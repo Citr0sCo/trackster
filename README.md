@@ -14,7 +14,7 @@
 
 ---
 
-<h4 align="center">Home App is a self-hosted web app designed to provide you with better dashboard for a homelab.</h4>
+<h4 align="center">Trackster is a simple app that allows you to track your Plex watching habits.</h4>
 
 ---
 
