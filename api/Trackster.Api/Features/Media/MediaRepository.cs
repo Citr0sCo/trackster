@@ -149,11 +149,16 @@ public class MediaRepository : IMediaRepository
 
                         if (existingSeason == null)
                         {
+                            var title = $"Season {season.Number}";
+
+                            if (season.Number > 0)
+                                title = showDetails?.Seasons[season.Number - 1].Title;
+                            
                             existingSeason = new SeasonRecord
                             {
                                 Identifier = Guid.NewGuid(),
                                 Number = season.Number,
-                                Title = showDetails?.Seasons[season.Number - 1].Title ?? $"Season {season.Number}",
+                                Title = title,
                                 Show = existingShow
                             };
 
