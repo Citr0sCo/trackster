@@ -151,8 +151,8 @@ public class MediaRepository : IMediaRepository
                         {
                             var title = $"Season {season.Number}";
 
-                            if (season.Number > 0)
-                                title = showDetails?.Seasons[season.Number - 1]?.Title;
+                            if (season.Number > 0 && showDetails?.Seasons.Count > (season.Number - 1))
+                                title = showDetails.Seasons[season.Number - 1].Title;
                             
                             existingSeason = new SeasonRecord
                             {
