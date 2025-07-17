@@ -152,7 +152,7 @@ public class MediaRepository : IMediaRepository
                             var title = $"Season {season.Number}";
 
                             if (season.Number > 0)
-                                title = showDetails?.Seasons[season.Number - 1].Title;
+                                title = showDetails?.Seasons[season.Number - 1]?.Title;
                             
                             existingSeason = new SeasonRecord
                             {
@@ -219,7 +219,6 @@ public class MediaRepository : IMediaRepository
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                transaction.Rollback();
             }
         }
     }
