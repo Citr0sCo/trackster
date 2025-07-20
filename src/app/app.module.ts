@@ -16,12 +16,14 @@ import { AuthenticationRepository } from "../services/authentication-service/aut
 import { HistoryPageComponent } from '../pages/history-page/history-page.component';
 import { CustomSidebarComponent } from '../components/custom-sidebar/custom-sidebar.component';
 import {EventService} from "../services/event-service/event.service";
+import {SettingsPageComponent} from "../pages/settings-page/settings-page.component";
 
 @NgModule({
     declarations: [
         AppComponent,
         HomePageComponent,
         HistoryPageComponent,
+        SettingsPageComponent,
         AuthorizeTraktComponent,
         WideButtonComponent,
         CustomSidebarComponent

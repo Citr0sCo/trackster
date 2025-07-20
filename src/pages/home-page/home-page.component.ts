@@ -14,7 +14,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
     public movies: Array<IMovie> = [];
     public shows: Array<IShow> = [];
-    public isImporting: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
@@ -34,15 +33,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((shows) => {
                 this.shows = shows;
-            });
-    }
-
-    public importFromTrakt(): void {
-        this.isImporting = true;
-        this._mediaService.importFromTrakt('citr0s')
-            .pipe(takeUntil(this._destroy))
-            .subscribe(() => {
-                this.isImporting = false;
             });
     }
 
