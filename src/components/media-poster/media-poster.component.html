@@ -7,8 +7,12 @@
                 </div>
             </div>
             <div class="movie-poster__title">
-                <div>{{ media.grandParentTitle ?? media.title }} @if (media.seasonNumber) { &#8226; S{{ media.seasonNumber }} &#8226; E{{ media.episodeNumber }} }</div>
-                <div>({{ media.year }})</div>
+                <div>{{ trimTitle(media) }} @if (media.seasonNumber) { ({{ media.year }}) }</div>
+                @if (media.seasonNumber) {
+                    <div>S{{ media.seasonNumber }} &#8226; E{{ media.episodeNumber }}</div>
+                } @else {
+                    <div>({{ media.year }})</div>
+                }
             </div>
         </div>
     </a>

@@ -10,6 +10,10 @@
                         </div>
                     }
                 </div>
+            } @else if (moviesLoading) {
+                Movies loading...
+            } @else {
+                No movies to display...
             }
         </div>
 
@@ -25,6 +29,10 @@
                         </div>
                     }
                 </div>
+            } @else if (showsLoading) {
+                Shows loading...
+            } @else {
+                No shows to display...
             }
         </div>
     </div>

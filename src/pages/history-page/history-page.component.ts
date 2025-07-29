@@ -17,6 +17,7 @@ export class HistoryPageComponent implements OnInit, OnDestroy {
     public visibleKeys: Array<string> = [];
     private _pageSize = 10;
     private _currentPage = 0;
+    public mediaLoading: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
@@ -28,9 +29,12 @@ export class HistoryPageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
+        this.mediaLoading = true;
+
         this._mediaService.getHistoryForUser('citr0s')
             .pipe(takeUntil(this._destroy))
             .subscribe((media) => {
+                this.mediaLoading = false;
                 this.media = this.groupByDay(media, 'watchedAt');
                 this.keys = Object.keys(this.media);
                 this.loadMore();
