@@ -17,12 +17,14 @@ import { HistoryPageComponent } from '../pages/history-page/history-page.compone
 import { CustomSidebarComponent } from '../components/custom-sidebar/custom-sidebar.component';
 import {EventService} from "../services/event-service/event.service";
 import {MediaPosterComponent} from "../components/media-poster/media-poster.component";
+import {SettingsPageComponent} from "../pages/settings-page/settings-page.component";
 
 @NgModule({
     declarations: [
         AppComponent,
         HomePageComponent,
         HistoryPageComponent,
+        SettingsPageComponent,
         AuthorizeTraktComponent,
         WideButtonComponent,
         CustomSidebarComponent,

@@ -1,7 +1,5 @@
 <div class="home-page-component">
     <div class="container">
-        <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'" [isLoading]="isImporting"></wide-button>
-
         <h3>Movies</h3>
         @if (movies.length > 0) {
             <div class="o-grid o-grid--space-between">
