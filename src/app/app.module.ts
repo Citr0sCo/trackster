@@ -16,6 +16,7 @@ import { AuthenticationRepository } from "../services/authentication-service/aut
 import { HistoryPageComponent } from '../pages/history-page/history-page.component';
 import { CustomSidebarComponent } from '../components/custom-sidebar/custom-sidebar.component';
 import {EventService} from "../services/event-service/event.service";
+import {MediaPosterComponent} from "../components/media-poster/media-poster.component";
 
 @NgModule({
     declarations: [
@@ -24,7 +25,8 @@ import {EventService} from "../services/event-service/event.service";
         HistoryPageComponent,
         AuthorizeTraktComponent,
         WideButtonComponent,
-        CustomSidebarComponent
+        CustomSidebarComponent,
+        MediaPosterComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
