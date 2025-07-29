@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import {IMedia} from "../../services/media-service/types/media.type";
 
 @Component({
     selector: 'media-poster',
@@ -9,14 +10,5 @@ import { Component, Input } from '@angular/core';
 export class MediaPosterComponent {
 
     @Input()
-    public title: string = '';
-
-    @Input()
-    public icon: string = '';
-
-    @Input()
-    public disabled: boolean = false;
-
-    @Input()
-    public isLoading: boolean = false;
+    public media: IMedia | null = null;
 }

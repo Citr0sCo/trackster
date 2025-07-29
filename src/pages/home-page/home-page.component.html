@@ -4,13 +4,8 @@
         @if (movies.length > 0) {
             <div class="o-grid o-grid--space-between">
                 @for (movie of movies.slice(0, 5); track movie) {
-                    <div class="o-grid__col o-grid__col--fixed movie-poster" style="background-image: url({{movie.posterUrl}});">
-                        <div class="movie-poster__title">
-                            {{ movie.title }} ({{ movie.year }})
-                        </div>
-                        <div class="movie-poster__watched_at">
-                            {{ movie.watchedAt | date }}
-                        </div>
+                    <div class="o-grid__col o-grid__col--fixed">
+                        <media-poster [media]="movieToMedia(movie)"></media-poster>
                     </div>
                 }
             </div>
@@ -22,13 +17,8 @@
         @if (shows.length > 0) {
             <div class="o-grid o-grid--space-between">
                 @for (show of shows.slice(0, 5); track show) {
-                    <div class="o-grid__col o-grid__col--fixed movie-poster" style="background-image: url({{show.posterUrl}});">
-                        <div class="movie-poster__title">
-                            {{ show.title }} ({{ show.year }})
-                        </div>
-                        <div class="movie-poster__watched_at">
-                            {{ show.watchedAt | date }}
-                        </div>
+                    <div class="o-grid__col o-grid__col--fixed">
+                        <media-poster [media]="showToMedia(show)"></media-poster>
                     </div>
                 }
             </div>

@@ -2,8 +2,8 @@ export interface IMedia {
     identifier: string | null;
     mediaType: MediaType;
     title: string;
-    parentTitle: string;
-    grandParentTitle: string;
+    parentTitle: string | null;
+    grandParentTitle: string | null;
     year: number;
     tmdb: string;
     posterUrl: string;

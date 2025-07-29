@@ -1,19 +1,10 @@
-<div class="wide-button" [ngClass]="{'wide-button--disabled': disabled}">
-  <div class="o-grid">
-    <div class="o-grid__col">
-      <div class="o-grid o-grid--static">
-        <div class="o-grid__col o-grid__col--fixed">
-          <div class="wide-button__icon"><i class="{{ icon }}"></i></div>
+@if (media) {
+    <div class="movie-poster" style="background-image: url({{media.posterUrl}});">
+        <div class="movie-poster__title">
+            {{ media.title ?? media.grandParentTitle }} ({{ media.year }})
         </div>
-        <div class="o-grid__col wide-button__label">
-          {{ title }}
+        <div class="movie-poster__watched_at">
+            {{ media.watchedAt | date }}
         </div>
-        @if (isLoading) {
-          <div class="o-grid__col o-grid__col--fixed spinner-icon">
-            <i class="fa fa-spinner fa-spin"></i>
-          </div>
-        }
-      </div>
     </div>
-  </div>
-</div>
+}
