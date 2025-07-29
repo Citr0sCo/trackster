@@ -88,6 +88,8 @@ public class MediaService
                 Poster = show.Poster,
                 TMDB = show.TMDB,
                 Type = MediaType.Show,
+                SeasonNumber = show.SeasonNumber,
+                EpisodeNumber = show.EpisodeNumber,
                 WatchedAt = show.WatchedAt
             });
         }
@@ -96,6 +98,55 @@ public class MediaService
         {
             Media = media.OrderByDescending(x => x.WatchedAt).ToList()
         };
+    }
+
+    public GetMediaByIdResponse? GetMediaByIdentifier(Guid identifier)
+    {
+        var movie = _mediaRepository.GetMovieByIdentifier(identifier);
+
+        if (movie != null)
+        {
+            return new GetMediaByIdResponse
+            {
+                Media = new Types.Media
+                {
+                    Identifier = movie.Identifier,
+                    Title = movie.Title,
+                    Year = movie.Year,
+                    Overview = movie.Overview,
+                    Poster = movie.Poster,
+                    TMDB = movie.TMDB,
+                    Type = MediaType.Movie,
+                    WatchedAt = movie.WatchedAt
+                }
+            };
+        }
+        
+        var show = _mediaRepository.GetShowByIdentifier(identifier);
+
+        if (show != null)
+        {
+            return new GetMediaByIdResponse
+            {
+                Media = new Types.Media
+                {
+                    Identifier = show.Identifier,
+                    Title = show.Title,
+                    ParentTitle = show.ParentTitle,
+                    GrandParentTitle = show.GrandParentTitle,
+                    Year = show.Year,
+                    Overview = show.Overview,
+                    Poster = show.Poster,
+                    TMDB = show.TMDB,
+                    Type = MediaType.Show,
+                    WatchedAt = show.WatchedAt,
+                    SeasonNumber = show.SeasonNumber,
+                    EpisodeNumber = show.EpisodeNumber,
+                }
+            };
+        }
+        
+        return null;
     }
 
     public async Task MarkMovieAsWatched(string title, int year)

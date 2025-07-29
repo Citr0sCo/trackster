@@ -1,4 +1,5 @@
-﻿using Trackster.Api.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
@@ -14,6 +15,8 @@ public interface IMediaRepository
     List<Show> GetAllShows(string username);
     void ImportMovie(string username, MovieRecord movie);
     void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
+    Movie? GetMovieByIdentifier(Guid identifier);
+    Show? GetShowByIdentifier(Guid identifier);
 }
 
 public class MediaRepository : IMediaRepository
@@ -281,14 +284,16 @@ public class MediaRepository : IMediaRepository
                     .Select(x => new Show
                     {
                         Identifier = x.Identifier,
-                        Title = x.Episode.Season.Show.Title,
+                        Title = x.Episode.Title,
                         ParentTitle = x.Episode.Season.Title,
-                        GrandParentTitle = x.Episode.Title,
+                        GrandParentTitle = x.Episode.Season.Show.Title,
                         Year = x.Episode.Season.Show.Year,
                         TMDB =  x.Episode.Season.Show.TMDB,
                         Poster = x.Episode.Season.Show.Poster,
                         Overview = x.Episode.Season.Show.Overview,
-                        WatchedAt = x.WatchedAt
+                        WatchedAt = x.WatchedAt,
+                        SeasonNumber = x.Episode.Season.Number,
+                        EpisodeNumber = x.Episode.Number,
                     })
                     .ToList();
 
@@ -299,6 +304,76 @@ public class MediaRepository : IMediaRepository
             catch (Exception exception)
             {
                 return new List<Show>();
+            }
+        }
+    }
+    
+    public Movie GetMovieByIdentifier(Guid identifier)
+    {
+        
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                var movie = context.MovieUserLinks
+                    .Include(movieUserRecord => movieUserRecord.Movie)
+                    .FirstOrDefault(x => x.Identifier.ToString().ToUpper() == identifier.ToString().ToUpper());
+
+                if (movie == null)
+                    return null;
+
+                return new Movie
+                {
+                    Identifier = movie.Identifier,
+                    Title = movie.Movie.Title,
+                    Year = movie.Movie.Year,
+                    TMDB =  movie.Movie.TMDB,
+                    Poster = movie.Movie.Poster,
+                    Overview = movie.Movie.Overview,
+                    WatchedAt = movie.WatchedAt
+                };
+            }
+            catch (Exception exception)
+            {
+                return null;
+            }
+        }
+    }
+
+    public Show GetShowByIdentifier(Guid identifier)
+    {
+        
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                var show = context.EpisodeUserLinks
+                    .Include(episodeUserRecord => episodeUserRecord.Episode)
+                    .ThenInclude(episodeRecord => episodeRecord.Season)
+                    .ThenInclude(seasonRecord => seasonRecord.Show)
+                    .FirstOrDefault(x => x.Identifier.ToString().ToUpper() == identifier.ToString().ToUpper());
+
+                if (show == null)
+                    return null;
+
+                return new Show
+                {
+                    Identifier = show.Identifier,
+                    Title = show.Episode.Title,
+                    ParentTitle = show.Episode.Season.Title,
+                    GrandParentTitle = show.Episode.Season.Show.Title,
+                    Year = show.Episode.Season.Show.Year,
+                    TMDB =  show.Episode.Season.Show.TMDB,
+                    Poster = show.Episode.Season.Show.Poster,
+                    Overview = show.Episode.Season.Show.Overview,
+                    WatchedAt = show.WatchedAt,
+                    SeasonNumber = show.Episode.Season.Number,
+                    EpisodeNumber = show.Episode.Number,
+                };
+            }
+            catch (Exception exception)
+            {
+                return null;
             }
         }
     }

@@ -42,4 +42,15 @@ public class MediaController : ControllerBase
         
         return new ImportMediaResponse();
     }
+    
+    [HttpGet("{identifier:guid}")]
+    public IActionResult GetMediaByIdentifier([FromRoute]Guid identifier)
+    {
+        var response = _service.GetMediaByIdentifier(identifier);
+        
+        if(response == null)
+            return NotFound();
+        
+        return Ok(response);
+    }
 }

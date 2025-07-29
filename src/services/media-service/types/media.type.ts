@@ -1,7 +1,7 @@
 export interface IMedia {
     identifier: string | null;
     mediaType: MediaType;
-    title: string;
+    title: string | null;
     parentTitle: string | null;
     grandParentTitle: string | null;
     year: number;
@@ -9,6 +9,8 @@ export interface IMedia {
     posterUrl: string;
     overview: string;
     watchedAt: Date;
+    seasonNumber: number;
+    episodeNumber: number;
 }
 
 export enum MediaType {

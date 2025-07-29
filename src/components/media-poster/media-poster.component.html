@@ -1,10 +1,15 @@
 @if (media) {
-    <div class="movie-poster" style="background-image: url({{media.posterUrl}});">
-        <div class="movie-poster__title">
-            {{ media.title ?? media.grandParentTitle }} ({{ media.year }})
+    <a [routerLink]="['/media', media.identifier]">
+        <div class="movie-poster-wrapper">
+            <div class="movie-poster" style="background-image: url({{media.posterUrl}});">
+                <div class="movie-poster__watched_at">
+                    {{ media.watchedAt | timeago }}
+                </div>
+            </div>
+            <div class="movie-poster__title">
+                <div>{{ media.grandParentTitle ?? media.title }} @if (media.seasonNumber) { &#8226; S{{ media.seasonNumber }} &#8226; E{{ media.episodeNumber }} }</div>
+                <div>({{ media.year }})</div>
+            </div>
         </div>
-        <div class="movie-poster__watched_at">
-            {{ media.watchedAt | date }}
-        </div>
-    </div>
+    </a>
 }

@@ -43,18 +43,20 @@ export class MediaRepository {
             .pipe(
                 mapNetworkError(),
                 map((response: any) => {
-                    return response.Shows.map((movie: any) => {
+                    return response.Shows.map((show: any) => {
                         return {
-                            identifier: movie.Identifier,
-                            title: movie.Title,
-                            mediaType: movie.MediaType,
-                            parentTitle: movie.ParentTitle,
-                            grandParentTitle: movie.GrandParentTitle,
-                            year: movie.Year,
-                            tmdb: movie.TMDB,
-                            posterUrl: movie.Poster,
-                            overview: movie.Overview,
-                            watchedAt: movie.WatchedAt
+                            identifier: show.Identifier,
+                            title: show.Title,
+                            mediaType: show.MediaType,
+                            parentTitle: show.ParentTitle,
+                            grandParentTitle: show.GrandParentTitle,
+                            year: show.Year,
+                            tmdb: show.TMDB,
+                            posterUrl: show.Poster,
+                            overview: show.Overview,
+                            watchedAt: show.WatchedAt,
+                            seasonNumber: show.SeasonNumber,
+                            episodeNumber: show.EpisodeNumber,
                         };
                     });
                 })
@@ -77,7 +79,9 @@ export class MediaRepository {
                             tmdb: media.TMDB,
                             posterUrl: media.Poster,
                             overview: media.Overview,
-                            watchedAt: media.WatchedAt
+                            watchedAt: media.WatchedAt,
+                            seasonNumber: media.SeasonNumber,
+                            episodeNumber: media.EpisodeNumber,
                         };
                     });
                 })
@@ -88,6 +92,30 @@ export class MediaRepository {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/media/import`, { Type: ImportType.Trakt, Username: username })
             .pipe(
                 mapNetworkError()
+            );
+    }
+
+    public getMediaById(identifier: string): Observable<IMedia> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/${identifier}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    const media = response.Media;
+                    return {
+                        identifier: media.Identifier,
+                        mediaType: media.MediaType,
+                        title: media.Title,
+                        parentTitle: media.ParentTitle,
+                        grandParentTitle: media.GrandParentTitle,
+                        year: media.Year,
+                        tmdb: media.TMDB,
+                        posterUrl: media.Poster,
+                        overview: media.Overview,
+                        watchedAt: media.WatchedAt,
+                        seasonNumber: media.SeasonNumber,
+                        episodeNumber: media.EpisodeNumber,
+                    };
+                })
             );
     }
 }

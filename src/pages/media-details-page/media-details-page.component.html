@@ -1,0 +1,27 @@
+<div class="media-details-component">
+    <div class="container">
+        @if (media) {
+            <div class="media-overview o-grid">
+                <div class="o-grid__col o-grid__col--fixed">
+                    <div class="media-poster">
+                        <img [src]="media.posterUrl" alt="poster card">
+                    </div>
+                </div>
+                <div class="o-grid__col">
+                    <div class="media-details">
+                        <h1>{{ media.grandParentTitle ?? media.title }}</h1>
+                        @if (media.parentTitle && media.grandParentTitle) {
+                            <h2>{{ media.parentTitle }} - {{ media.title }}</h2>
+                        }
+                        <h3>{{ media.year }}</h3>
+                        <p>{{ media.overview }}</p>
+                        <h6>Last Watched &#64; {{ media.watchedAt | date:'HH:mm dd-MM-y' }} ({{ media.watchedAt | timeago }})</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="media-background" style="background-image:url({{ media.posterUrl }});"></div>
+        } @else {
+            Media not found...
+        }
+    </div>
+</div>

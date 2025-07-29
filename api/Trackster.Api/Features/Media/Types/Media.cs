@@ -12,4 +12,6 @@ public class Media
     public DateTime WatchedAt { get; set; }
     public string ParentTitle { get; set; }
     public string GrandParentTitle { get; set; }
+    public int SeasonNumber { get; set; }
+    public int EpisodeNumber { get; set; }
 }

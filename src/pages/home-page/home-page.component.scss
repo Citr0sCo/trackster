@@ -2,4 +2,10 @@
 
 .home-page-component {
     padding:10px 0;
+
+    .media-container{
+        max-width:100%;
+        overflow-y:hidden;
+        overflow-x:scroll;
+    }
 }

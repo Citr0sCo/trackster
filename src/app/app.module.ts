@@ -18,6 +18,7 @@ import { CustomSidebarComponent } from '../components/custom-sidebar/custom-side
 import {EventService} from "../services/event-service/event.service";
 import {MediaPosterComponent} from "../components/media-poster/media-poster.component";
 import {SettingsPageComponent} from "../pages/settings-page/settings-page.component";
+import {MediaDetailsPageComponent} from "../pages/media-details-page/media-details-page.component";
 
 @NgModule({
     declarations: [
@@ -28,9 +29,11 @@ import {SettingsPageComponent} from "../pages/settings-page/settings-page.compon
         AuthorizeTraktComponent,
         WideButtonComponent,
         CustomSidebarComponent,
-        MediaPosterComponent
+        MediaPosterComponent,
+        MediaDetailsPageComponent
     ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+    bootstrap: [AppComponent], imports: [
+        BrowserModule,
         AppRoutingModule,
         ReactiveFormsModule,
         FormsModule,
@@ -38,7 +41,8 @@ import {SettingsPageComponent} from "../pages/settings-page/settings-page.compon
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000'
         }),
-        TimeagoModule.forRoot()], providers: [
+        TimeagoModule.forRoot()
+    ], providers: [
         MediaService,
         MediaRepository,
         AuthenticationService,

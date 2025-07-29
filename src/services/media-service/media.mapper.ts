@@ -15,6 +15,8 @@ export class MediaMapper {
             posterUrl: movie.posterUrl,
             tmdb: movie.tmdb,
             year: movie.year,
+            seasonNumber: 0,
+            episodeNumber: 0,
         };
     }
 
@@ -30,6 +32,8 @@ export class MediaMapper {
             posterUrl: show.posterUrl,
             tmdb: show.tmdb,
             year: show.year,
+            seasonNumber: show.seasonNumber,
+            episodeNumber: show.episodeNumber
         };
     }
 }

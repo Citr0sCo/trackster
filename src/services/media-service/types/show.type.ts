@@ -8,4 +8,6 @@ export interface IShow {
     posterUrl: string;
     overview: string;
     watchedAt: Date;
+    seasonNumber: number;
+    episodeNumber: number;
 }
