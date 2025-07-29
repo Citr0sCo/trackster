@@ -11,4 +11,16 @@ export class MediaPosterComponent {
 
     @Input()
     public media: IMedia | null = null;
+
+    public trimTitle(media: IMedia) : string {
+
+        const maxLength = 15;
+        let title = media.grandParentTitle ?? media.title ?? '';
+
+        if (title.length > maxLength) {
+        return `${title.substring(0, maxLength).trim()}...`;
+        }
+
+        return title;
+    }
 }

@@ -204,3 +204,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--card-bg-color)
 }
+
+.btn-primary {
+    background-color: $brand-primary !important;
+    border-color: darken($brand-primary, 5%) !important;
+}

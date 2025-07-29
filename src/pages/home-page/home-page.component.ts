@@ -17,6 +17,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     public movies: Array<IMovie> = [];
     public shows: Array<IShow> = [];
 
+    public moviesLoading: boolean = false;
+    public showsLoading: boolean = false;
+
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
 
@@ -25,16 +28,21 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
+        this.moviesLoading = true;
+        this.showsLoading = true;
+
         this._mediaService.getAllMoviesFor('citr0s')
             .pipe(takeUntil(this._destroy))
             .subscribe((movies) => {
                 this.movies = movies;
+                this.moviesLoading = false;
             });
 
         this._mediaService.getAllShowsFor('citr0s')
             .pipe(takeUntil(this._destroy))
             .subscribe((shows) => {
                 this.shows = shows;
+                this.showsLoading = false;
             });
     }
 

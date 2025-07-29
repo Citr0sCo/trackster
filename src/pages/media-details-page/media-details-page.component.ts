@@ -35,6 +35,10 @@ export class MediaDetailsPageComponent implements OnInit, OnDestroy {
         });
     }
 
+    public redirectBack():void {
+        window.history.back();
+    }
+
     public ngOnDestroy(): void {
         this._destroy.next();
     }
