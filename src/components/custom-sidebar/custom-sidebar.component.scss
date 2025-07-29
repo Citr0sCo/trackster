@@ -24,11 +24,11 @@
 
         &:hover {
             cursor: pointer;
-            background-color: lighten($brand-primary, 5%);
+            background-color: $brand-primary;
         }
 
         &--active {
-            background-color: $brand-primary;
+            background: linear-gradient(45deg, $brand-primary, $brand-primary-alt);
         }
 
 
