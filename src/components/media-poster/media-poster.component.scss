@@ -1,0 +1,49 @@
+@import "../../styles/utility/variables";
+
+a {
+    color: unset;
+    text-decoration: unset;
+}
+
+.movie-poster-wrapper {
+    position: relative;
+    transition: transform 100ms ease-in;
+    margin: 5px;
+    width: 200px;
+
+    &:hover {
+        transform:scale(1.05);
+    }
+
+    .movie-poster {
+        width: 100%;
+        background-position: center;
+        background-size: 100%;
+        background-repeat: no-repeat;
+        border-radius: $border-radius $border-radius 0 0;
+        overflow: hidden;
+        position: relative;
+        aspect-ratio: 2 / 3;
+
+        &__watched_at {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        &__title {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            border-radius: 0 0 $border-radius $border-radius;
+            text-align:center;
+            font-size:1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+}

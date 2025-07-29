@@ -29,4 +29,8 @@ export class MediaService {
     public importFromTrakt(username: string): Observable<any> {
         return this._mediaRepository.importFromTrakt(username);
     }
+
+    public getMediaById(identifier: string): Observable<IMedia> {
+        return this._mediaRepository.getMediaById(identifier);
+    }
 }

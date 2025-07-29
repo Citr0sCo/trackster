@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace Trackster.Api.Core.Types;
 
-public class CommunicationResponse
+public class CommunicationResponse : OkResult
 {
     public bool HasError { get; set; }
     public Error? Error { get; set; }

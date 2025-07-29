@@ -10,13 +10,8 @@
                     <hr />
                     <div class="o-grid movie-poster-wrapper">
                         @for (mediaItem of media[key]; track mediaItem) {
-                            <div class="o-grid__col o-grid__col--fixed movie-poster" style="background-image: url({{mediaItem.posterUrl}});">
-                                <div class="movie-poster__title">
-                                    {{ mediaItem.title ?? mediaItem.grandParentTitle }} ({{ mediaItem.year }})
-                                </div>
-                                <div class="movie-poster__watched_at">
-                                    {{ mediaItem.watchedAt | date }}
-                                </div>
+                            <div class="o-grid__col o-grid__col--fixed">
+                                <media-poster [media]="mediaItem"></media-poster>
                             </div>
                         }
                     </div>
