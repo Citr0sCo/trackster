@@ -4,7 +4,6 @@ using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
-using Trackster.Api.Features.WebSockets.Types;
 
 namespace Trackster.Api.Features.Media;
 

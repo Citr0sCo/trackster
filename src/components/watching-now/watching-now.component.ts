@@ -16,6 +16,7 @@ export class WatchingNowComponent implements OnInit {
     public year: number = 0;
     public progress: number = 0;
     public duration: number = 0;
+    public isPaused: boolean = false;
     public isVisible: boolean = false;
     public isDesktop: boolean = false;
 
@@ -59,6 +60,19 @@ export class WatchingNowComponent implements OnInit {
 
             if (payload.Response.Data.Action === "Start") {
                 this.isVisible = true;
+                this.isPaused = false;
+
+                this.title = payload.Response.Data.Episode.Title;
+                this.parentTitle = payload.Response.Data.Episode.Season.Title;
+                this.grandParentTitle = payload.Response.Data.Episode.Season.Show.Title;
+                this.year = payload.Response.Data.Episode.Season.Show.Year;
+                this.progress = payload.Response.Data.MillisecondsWatched;
+                this.duration = payload.Response.Data.Duration;
+            }
+
+            if (payload.Response.Data.Action === "Paused") {
+                this.isVisible = true;
+                this.isPaused = true;
 
                 this.title = payload.Response.Data.Episode.Title;
                 this.parentTitle = payload.Response.Data.Episode.Season.Title;
@@ -76,7 +90,7 @@ export class WatchingNowComponent implements OnInit {
 
         setInterval(() => {
             this.progress += 1000;
-        }, 1000 * 60);
+        }, 1000);
     }
 
     public getTimeFromDuration(duration: number): string {

@@ -1,4 +1,3 @@
-using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Trackster.Api.Features.Webhook.Types;

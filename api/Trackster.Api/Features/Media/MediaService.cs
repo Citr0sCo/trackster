@@ -1,10 +1,7 @@
-using Newtonsoft.Json;
-using Trackster.Api.Core.Events.Types;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Types;
-using Trackster.Api.Features.WebSockets.Types;
 
 namespace Trackster.Api.Features.Media;
 
@@ -250,16 +247,31 @@ public class MediaService
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
-            var movie = await SearchForMovieBy(title, year);
             _watchingNowService.MarkAsStoppedWatchingMovie("citr0s");
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
-            var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
             _watchingNowService.MarkAsStoppedWatchingEpisode("citr0s");
         }
             
         Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
+    }
+
+    public async void PauseMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration)
+    {
+        if (mediaType == MOVIE_MEDIA_TYPE)
+        {
+            var movie = await SearchForMovieBy(title, year);
+            _watchingNowService.MarkAsPausedWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
+        }
+
+        if (mediaType == EPISODE_MEDIA_TYPE)
+        {
+            var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
+            _watchingNowService.MarkAsPausedWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
+        }
+            
+        Console.WriteLine($"Marking a media as paused watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
     }
 }

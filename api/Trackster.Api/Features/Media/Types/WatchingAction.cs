@@ -4,5 +4,6 @@ public enum WatchingAction
 {
     Unknown,
     Start,
-    Stop
+    Stop,
+    Paused
 }
