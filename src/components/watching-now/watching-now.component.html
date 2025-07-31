@@ -1,0 +1,30 @@
+@if (isVisible) {
+    <div class="watching-now {{ !isDesktop ? 'watching-now--mobile' : '' }}">
+        <div class="o-grid o-grid--static o-grid--horizontal-align">
+            <div class="o-grid__col o-grid__col--fixed me-2">
+                <i class="fa fa-play"></i>
+            </div>
+            <div class="o-grid__col">
+                @if (grandParentTitle) {
+                    {{ trimTitle(grandParentTitle) }} &bull;
+                }
+                @if (isDesktop) {
+                    @if (parentTitle) {
+                        {{ parentTitle }} &bull;
+                    }
+                }
+                {{ title }}
+                ({{ year }})
+            </div>
+            @if (isDesktop) {
+                <div class="o-grid__col o-grid__col--fixed">
+                    {{ getTimeFromDuration(progress) }} / {{ getTimeFromDuration(duration) }}
+                </div>
+            }
+            <div class="o-grid__col o-grid__col--fixed watching-now--percentage">
+                {{ getPercentage(progress, duration) }}%
+            </div>
+        </div>
+        <div class="watching-now--progress-bar" style="width:{{ getPercentage(progress, duration) }}%;"></div>
+    </div>
+}
