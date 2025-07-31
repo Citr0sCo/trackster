@@ -1,10 +1,10 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
-import {MediaService} from '../../services/media-service/media.service';
-import {IMovie} from '../../services/media-service/types/movie.type';
-import {IShow} from '../../services/media-service/types/show.type';
-import {IMedia, MediaType} from "../../services/media-service/types/media.type";
-import {MediaMapper} from "../../services/media-service/media.mapper";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { MediaService } from '../../services/media-service/media.service';
+import { IMovie } from '../../services/media-service/types/movie.type';
+import { IShow } from '../../services/media-service/types/show.type';
+import { IMedia, MediaType } from "../../services/media-service/types/media.type";
+import { MediaMapper } from "../../services/media-service/media.mapper";
 
 @Component({
     selector: 'home-page',
@@ -46,12 +46,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
             });
     }
 
-    public movieToMedia(movie: IMovie) : IMedia {
+    public movieToMedia(movie: IMovie): IMedia {
         return MediaMapper.fromMovie(movie);
     }
 
-    public showToMedia(show: IShow) : IMedia {
+    public showToMedia(show: IShow): IMedia {
         return MediaMapper.fromShow(show);
+    }
+
+    public bustCache(): void {
+        this._mediaService.bustCache();
+        this.ngOnInit();
     }
 
     public ngOnDestroy(): void {

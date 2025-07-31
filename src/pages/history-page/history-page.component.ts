@@ -1,8 +1,8 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
-import {IMedia} from "../../services/media-service/types/media.type";
-import {EventService} from "../../services/event-service/event.service";
+import { IMedia } from "../../services/media-service/types/media.type";
+import { EventService } from "../../services/event-service/event.service";
 
 @Component({
     selector: 'history-page',
@@ -64,6 +64,14 @@ export class HistoryPageComponent implements OnInit, OnDestroy {
         const nextItems = this.keys.slice(this._currentPage * this._pageSize, (this._currentPage + 1) * this._pageSize);
         this.visibleKeys = [...this.visibleKeys, ...nextItems];
         this._currentPage++;
+    }
+
+    public bustCache(): void {
+        this._mediaService.bustCache();
+        this.visibleKeys = [];
+        this._pageSize = 10;
+        this._currentPage = 0;
+        this.ngOnInit();
     }
 
     public ngOnDestroy(): void {
