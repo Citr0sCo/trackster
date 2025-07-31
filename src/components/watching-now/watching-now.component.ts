@@ -89,7 +89,9 @@ export class WatchingNowComponent implements OnInit {
 
 
         setInterval(() => {
-            this.progress += 1000;
+            if (!this.isPaused && this.isVisible) {
+                this.progress += 1000;
+            }
         }, 1000);
     }
 
