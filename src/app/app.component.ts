@@ -33,11 +33,21 @@ export class AppComponent implements AfterViewInit {
         });
 
         this._webSocketService.subscribe(WebSocketKey.WatchingNowMovie, (payload) => {
-            console.log('Received Data Watching Now Movie', payload);
+            if (payload.Response.Data.Action === "Start") {
+                console.log(`Started watching: ${payload.Response.Data.Movie.Title} @ ${payload.Response.Data.StartedAt} ${payload.Response.Data.MillisecondsWatched}ms into it.`);
+            }
+            if (payload.Response.Data.Action === "Stop") {
+                console.log(`Stopped watching movie.`);
+            }
         });
 
         this._webSocketService.subscribe(WebSocketKey.WatchingNowEpisode, (payload) => {
-            console.log('Received Data Watching Now Episode', payload);
+            if (payload.Response.Data.Action === "Start") {
+                console.log(`Started watching: ${payload.Response.Data.Episode.Title} @ ${payload.Response.Data.StartedAt} ${payload.Response.Data.MillisecondsWatched}ms into it.`);
+            }
+            if (payload.Response.Data.Action === "Stop") {
+                console.log(`Stopped watching episode.`);
+            }
         });
     }
 }
