@@ -230,15 +230,19 @@ public class MediaService : ISubscriber
 
     public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber, int startedAt, int watchedAmountInMilliseconds)
     {
-        var parsedDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Local);
-        parsedDate = parsedDate.AddSeconds(startedAt).ToLocalTime();
+        var gmt = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+        var parsedDate = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        var utcTime = TimeZoneInfo.ConvertTimeToUtc(parsedDate, gmt);
+        var converted = TimeZoneInfo.ConvertTime(utcTime, TimeZoneInfo.Utc, gmt);
+        
+        parsedDate = converted.AddSeconds(startedAt);
         
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
             var movie = await SearchForMovieBy(title, year);
             _mediaRepository.MarkAsWatchingMovie("citr0s", movie, parsedDate, watchedAmountInMilliseconds);
         }
-
+        
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
