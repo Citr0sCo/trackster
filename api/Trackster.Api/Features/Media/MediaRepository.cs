@@ -182,14 +182,13 @@ public class MediaRepository : IMediaRepository
                         foreach (var episode in season.Episodes)
                         {
                             var existingEpisode = context.Episodes.FirstOrDefault(x =>
-                                x.Number == season.Number &&
+                                x.Number == episode.Number &&
                                 x.Season.Identifier == existingSeason.Identifier
                             );
-                            
-                            var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number);
 
                             if (existingEpisode == null)
                             {
+                                var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number); 
                                 existingEpisode = new EpisodeRecord
                                 {
                                     Identifier = Guid.NewGuid(),
