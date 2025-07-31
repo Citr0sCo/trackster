@@ -20,6 +20,7 @@ import { MediaPosterComponent } from "../components/media-poster/media-poster.co
 import { SettingsPageComponent } from "../pages/settings-page/settings-page.component";
 import { MediaDetailsPageComponent } from "../pages/media-details-page/media-details-page.component";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { WatchingNowComponent } from '../components/watching-now/watching-now.component';
 
 @NgModule({
     declarations: [
@@ -31,7 +32,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
         WideButtonComponent,
         CustomSidebarComponent,
         MediaPosterComponent,
-        MediaDetailsPageComponent
+        MediaDetailsPageComponent,
+        WatchingNowComponent
     ],
     bootstrap: [AppComponent],
     imports: [
