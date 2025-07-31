@@ -169,8 +169,7 @@ public class WatchingNowService : ISubscriber
                 
                 if(currentlyWatchingMovie != null)
                 {
-                    var diff = DateTime.Now - currentlyWatchingMovie.LastUpdatedAt;
-                    currentlyWatchingMovie.MillisecondsWatched += diff.Milliseconds;
+                    currentlyWatchingMovie.MillisecondsWatched += 5000;
                     MarkAsWatchingMovie("citr0s", currentlyWatchingMovie.Movie, currentlyWatchingMovie.MillisecondsWatched, currentlyWatchingMovie.Duration);
                     
                     WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
@@ -186,8 +185,7 @@ public class WatchingNowService : ISubscriber
                 
                 if(currentlyWatchingEpisode != null)
                 {
-                    var diff = DateTime.Now - currentlyWatchingEpisode.LastUpdatedAt;
-                    currentlyWatchingEpisode.MillisecondsWatched += diff.Milliseconds;
+                    currentlyWatchingEpisode.MillisecondsWatched += 5000;
                     MarkAsWatchingEpisode("citr0s", currentlyWatchingEpisode.Episode, currentlyWatchingEpisode.MillisecondsWatched, currentlyWatchingEpisode.Duration);
                     
                     WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
