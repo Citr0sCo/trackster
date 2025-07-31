@@ -281,11 +281,7 @@ public class MediaService : ISubscriber
                     {
                         Response = new
                         {
-                            Data = new
-                            {
-                                Action = "start",
-                                Movie = currentlyWatchingMovie
-                            }
+                            Data = currentlyWatchingMovie
                         }
                     });
                 }
@@ -298,11 +294,7 @@ public class MediaService : ISubscriber
                     {
                         Response = new
                         {
-                            Data = new
-                            {
-                                Action = "start",
-                                Episode = currentlyWatchingEpisode
-                            }
+                            Data = currentlyWatchingEpisode
                         }
                     });
                 }

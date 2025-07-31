@@ -524,6 +524,7 @@ public class MediaRepository : IMediaRepository
     {
         _watchingNowMovies[username] = new WatchingMovieRecord
         {
+            Action = "start",
             Movie = movie,
             StartedAt = startedAt,
             MillisecondsWatched = millisecondsWatched
@@ -533,11 +534,7 @@ public class MediaRepository : IMediaRepository
         {
             Response = new
             {
-                Data = new
-                {
-                    Action = "start",
-                    movie
-                }
+                Data = _watchingNowMovies[username]
             }
         });
     }
@@ -546,6 +543,7 @@ public class MediaRepository : IMediaRepository
     {
         _watchingNowEpisodes[username] = new WatchingEpisodeRecord
         {
+            Action = "start",
             Episode = episode,
             StartedAt = startedAt,
             MillisecondsWatched = millisecondsWatched
@@ -555,11 +553,7 @@ public class MediaRepository : IMediaRepository
         {
             Response = new
             {
-                Data = new
-                {
-                    Action = "start",
-                    episode
-                }
+                Data = _watchingNowEpisodes[username]
             }
         });
     }
@@ -575,8 +569,7 @@ public class MediaRepository : IMediaRepository
             {
                 Data = new
                 {
-                    Action = "stop",
-                    Movie = movie
+                    Action = "stop"
                 }
             }
         });
@@ -593,8 +586,7 @@ public class MediaRepository : IMediaRepository
             {
                 Data = new
                 {
-                    Action = "stop",
-                    Episode = episode
+                    Action = "stop"
                 }
             }
         });
