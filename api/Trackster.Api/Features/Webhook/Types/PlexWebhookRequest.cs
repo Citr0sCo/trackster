@@ -166,6 +166,12 @@ public class Metadata
     [JsonProperty("duration")]
     public int Duration { get; set; }
 
+    [JsonProperty("viewOffset")]
+    public int ViewOffsetInMilliseconds { get; set; }
+
+    [JsonProperty("lastViewedAt")]
+    public int LastViewedAt { get; set; }
+
     [JsonProperty("originallyAvailableAt")]
     public string OriginallyAvailableAt { get; set; }
 

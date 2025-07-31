@@ -36,9 +36,9 @@ public class PlexWebhookService
             await _mediaService.MarkMediaAsWatched(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
 
         if (eventType == "media.play" || eventType == "media.resume")
-            _mediaService.MarkMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+            _mediaService.MarkMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.LastViewedAt, parsedJson.Metadata.ViewOffsetInMilliseconds);
         
         if (eventType == "media.stop")
-            _mediaService.RemoveMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+            _mediaService.RemoveMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.LastViewedAt, parsedJson.Metadata.ViewOffsetInMilliseconds);
     }
 }

@@ -18,21 +18,20 @@ public interface IMediaRepository
     void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Movie? GetMovieByIdentifier(Guid identifier);
     Show? GetShowByIdentifier(Guid identifier);
-    void MarkAsWatchingMovie(string username, MovieRecord movie);
-    void MarkAsWatchingEpisode(string username, EpisodeRecord episode);
+    void MarkAsWatchingMovie(string username, MovieRecord movie, DateTime startedAt, int millisecondsWatched);
+    void MarkAsWatchingEpisode(string username, EpisodeRecord episode, DateTime startedAt, int millisecondsWatched);
     void MarkAsStoppedWatchingMovie(string username, MovieRecord movie);
     void MarkAsStoppedWatchingEpisode(string username, EpisodeRecord movie);
-
-     MovieRecord? GetCurrentlyWatchingMovie();
-     EpisodeRecord? GetCurrentlyWatchingEpisode();
+    WatchingMovieRecord? GetCurrentlyWatchingMovie();
+    WatchingEpisodeRecord? GetCurrentlyWatchingEpisode();
 }
 
 public class MediaRepository : IMediaRepository
 {
     private readonly TmdbImportProvider _detailsProvider;
 
-    private readonly Dictionary<string, MovieRecord> _watchingNowMovies = new Dictionary<string, MovieRecord>();
-    private readonly Dictionary<string, EpisodeRecord> _watchingNowEpisodes = new Dictionary<string, EpisodeRecord>();
+    private readonly Dictionary<string, WatchingMovieRecord> _watchingNowMovies = new Dictionary<string, WatchingMovieRecord>();
+    private readonly Dictionary<string, WatchingEpisodeRecord> _watchingNowEpisodes = new Dictionary<string, WatchingEpisodeRecord>();
 
     public MediaRepository()
     {
@@ -521,9 +520,15 @@ public class MediaRepository : IMediaRepository
         }
     }
     
-    public void MarkAsWatchingMovie(string username, MovieRecord movie)
+    public void MarkAsWatchingMovie(string username, MovieRecord movie, DateTime startedAt, int millisecondsWatched)
     {
-        _watchingNowMovies[username] = movie;
+        _watchingNowMovies[username] = new WatchingMovieRecord
+        {
+            Movie = movie,
+            StartedAt = startedAt,
+            MillisecondsWatched = millisecondsWatched
+        };
+        
         WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
         {
             Response = new
@@ -537,9 +542,15 @@ public class MediaRepository : IMediaRepository
         });
     }
 
-    public void MarkAsWatchingEpisode(string username, EpisodeRecord episode)
+    public void MarkAsWatchingEpisode(string username, EpisodeRecord episode, DateTime startedAt, int millisecondsWatched)
     {
-        _watchingNowEpisodes[username] = episode;
+        _watchingNowEpisodes[username] = new WatchingEpisodeRecord
+        {
+            Episode = episode,
+            StartedAt = startedAt,
+            MillisecondsWatched = millisecondsWatched
+        };
+        
         WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
         {
             Response = new
@@ -589,7 +600,7 @@ public class MediaRepository : IMediaRepository
         });
     }
 
-    public MovieRecord? GetCurrentlyWatchingMovie()
+    public WatchingMovieRecord? GetCurrentlyWatchingMovie()
     {
         if (_watchingNowMovies.ContainsKey("citr0s"))
             return _watchingNowMovies["citr0s"];
@@ -597,7 +608,7 @@ public class MediaRepository : IMediaRepository
         return null;
     }
 
-    public EpisodeRecord? GetCurrentlyWatchingEpisode()
+    public WatchingEpisodeRecord? GetCurrentlyWatchingEpisode()
     {
         if (_watchingNowEpisodes.ContainsKey("citr0s"))
             return _watchingNowEpisodes["citr0s"];

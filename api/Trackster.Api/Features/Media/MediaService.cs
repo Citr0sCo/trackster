@@ -228,24 +228,27 @@ public class MediaService : ISubscriber
         };
     }
 
-    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber)
+    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber, int startedAt, int watchedAmountInMilliseconds)
     {
+        var parsedDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        parsedDate = parsedDate.AddSeconds(startedAt).ToLocalTime();
+        
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
             var movie = await SearchForMovieBy(title, year);
-            _mediaRepository.MarkAsWatchingMovie("citr0s", movie);
+            _mediaRepository.MarkAsWatchingMovie("citr0s", movie, parsedDate, watchedAmountInMilliseconds);
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
-            _mediaRepository.MarkAsWatchingEpisode("citr0s", episode);
+            _mediaRepository.MarkAsWatchingEpisode("citr0s", episode, parsedDate, watchedAmountInMilliseconds);
         }
             
         Console.WriteLine($"Marking a media as watching now. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
     }
 
-    public async void RemoveMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber)
+    public async void RemoveMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber, int startedAt, int watchedAmountInMilliseconds)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
