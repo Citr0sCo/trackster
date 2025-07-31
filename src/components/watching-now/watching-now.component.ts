@@ -70,12 +70,20 @@ export class WatchingNowComponent implements OnInit {
                 this.duration = payload.Response.Data.Duration;
             }
 
-            if (payload.Response.Data.Action === "Stop") {
-                this.isVisible = false;
+            if (payload.Response.Data.Action === "Paused") {
+                this.isVisible = true;
+                this.isPaused = true;
+
+                this.title = payload.Response.Data.Episode.Title;
+                this.parentTitle = payload.Response.Data.Episode.Season.Title;
+                this.grandParentTitle = payload.Response.Data.Episode.Season.Show.Title;
+                this.year = payload.Response.Data.Episode.Season.Show.Year;
+                this.progress = payload.Response.Data.MillisecondsWatched;
+                this.duration = payload.Response.Data.Duration;
             }
 
-            if (payload.Response.Data.Action === "Paused") {
-                this.isPaused = true;
+            if (payload.Response.Data.Action === "Stop") {
+                this.isVisible = false;
             }
         });
 
