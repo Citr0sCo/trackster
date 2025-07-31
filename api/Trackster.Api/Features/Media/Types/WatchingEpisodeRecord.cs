@@ -4,7 +4,7 @@ namespace Trackster.Api.Features.Media.Types;
 
 public class WatchingEpisodeRecord
 {
-    public string Action { get; set; }
+    public WatchingAction Action { get; set; }
     public EpisodeRecord Episode { get; set; }
     public DateTime StartedAt { get; set; }
     public int MillisecondsWatched { get; set; }
