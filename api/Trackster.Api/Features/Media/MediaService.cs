@@ -1,16 +1,22 @@
 using Newtonsoft.Json;
+using Trackster.Api.Core.Events.Types;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Types;
+using Trackster.Api.Features.WebSockets.Types;
 
 namespace Trackster.Api.Features.Media;
 
-public class MediaService
+public class MediaService : ISubscriber
 {
     private readonly IMediaRepository _mediaRepository;
     private TraktImportProvider _provider;
     private TmdbImportProvider _detailsProvider;
+    
+    private const string MOVIE_MEDIA_TYPE = "movie";
+    private string EPISODE_MEDIA_TYPE = "episode";
+    private bool _isStarted = false;
 
     public MediaService(IMediaRepository mediaRepository)
     {
@@ -149,15 +155,34 @@ public class MediaService
         return null;
     }
 
+    public async Task MarkMediaAsWatched(string mediaType, int year, string title, string? parentTitle = null, int seasonNumber = 0)
+    {
+        if (mediaType == MOVIE_MEDIA_TYPE)
+            await MarkMovieAsWatched(title, year);
+        
+        if (mediaType == EPISODE_MEDIA_TYPE)
+            await MarkEpisodeAsWatched(parentTitle!, title, year, seasonNumber);
+    }
+
     public async Task MarkMovieAsWatched(string title, int year)
     {
-        Console.WriteLine($"Marking {title} as watched by {year}.");
-        
+        var movie = await SearchForMovieBy(title, year);
+        _mediaRepository.ImportMovie("citr0s", movie);
+    }
+
+    public async Task MarkEpisodeAsWatched(string showTitle, string episodeTitle, int year, int seasonNumber)
+    {
+        var episode = await SearchForEpisode(showTitle, episodeTitle, year, seasonNumber);
+        _mediaRepository.ImportEpisode("citr0s", episode.Season.Show, episode.Season, episode);
+    }
+    
+    public async Task<MovieRecord> SearchForMovieBy(string title, int year)
+    {
         var searchResults = await _detailsProvider.FindMovieByTitleAndYear(title, year);
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
         var movie = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "");
         
-        _mediaRepository.ImportMovie("citr0s", new MovieRecord
+        return new MovieRecord
         {
             Identifier = Guid.NewGuid(),
             Title = title,
@@ -165,35 +190,17 @@ public class MediaService
             Year = year,
             Overview = movie.Overview,
             Poster = $"https://image.tmdb.org/t/p/w185{movie.PosterUrl}"
-        });
-        
-        Console.WriteLine($"Marked {title} as watched by {year}.");
+        };
     }
-
-    public async Task MarkEpisodeAsWatched(string showTitle, string episodeTitle, int year, int seasonNumber)
+    
+    public async Task<EpisodeRecord> SearchForEpisode(string showTitle, string episodeTitle, int year, int seasonNumber)
     {
-        Console.WriteLine($"[DEBUG] - 1/7 - Marking {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
-        
         var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
-        
-        Console.WriteLine($"[DEBUG] - 2/7 - Found show {JsonConvert.SerializeObject(searchResults)}.");
-        
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
-        
-        Console.WriteLine($"[DEBUG] - 3/7 - Found info for show {showTitle} episode {episodeTitle} reference {tmdbReference}.");
-        
         var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
-        
-        Console.WriteLine($"[DEBUG] - 4/7 - Found details for show {parsedShow.Title}.");
-        
         var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
-        
-        Console.WriteLine($"[DEBUG] - 5/7 - Found details for season {JsonConvert.SerializeObject(parsedSeason.Episodes)}.");
-        
         var parsedEpisode = parsedSeason.Episodes.FirstOrDefault(x => x.Title.ToLower() == episodeTitle.ToLower());
         
-        Console.WriteLine($"[DEBUG] - 6/7 - Retrieved info for episode {parsedEpisode.Title}.");
-
         var show = new ShowRecord
         {
             Identifier = Guid.NewGuid(),
@@ -212,26 +219,103 @@ public class MediaService
             Title = parsedSeason.Title
         };
 
-        var episode = new EpisodeRecord
+        return new EpisodeRecord
         {
             Identifier = Guid.NewGuid(),
             Season = season,
             Number = parsedEpisode.EpisodeNumber,
-            Title = parsedEpisode.Title
+            Title = parsedEpisode.Title,
         };
-        
-        _mediaRepository.ImportEpisode("citr0s", show, season, episode);
-        
-        Console.WriteLine($"[DEBUG] - 7/7 - Marked {showTitle} episode {episodeTitle} as watched by {year} season number {seasonNumber}.");
     }
 
-    public void MarkMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)
+    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber)
     {
-        Console.WriteLine($"Marking a media as watching now. {episodeTitle}, {seasonTitle}, {showTitle}, {year}.");
+        if (mediaType == MOVIE_MEDIA_TYPE)
+        {
+            var movie = await SearchForMovieBy(title, year);
+            _mediaRepository.MarkAsWatchingMovie("citr0s", movie);
+        }
+
+        if (mediaType == EPISODE_MEDIA_TYPE)
+        {
+            var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
+            _mediaRepository.MarkAsWatchingEpisode("citr0s", episode);
+        }
+            
+        Console.WriteLine($"Marking a media as watching now. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
     }
 
-    public void RemoveMediaAsWatchingNow(string episodeTitle, string seasonTitle, string showTitle, int year)
+    public async void RemoveMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber)
     {
-        Console.WriteLine($"Marking a media as stopped watching. {episodeTitle}, {seasonTitle}, {showTitle}, {year}.");
+        if (mediaType == MOVIE_MEDIA_TYPE)
+        {
+            var movie = await SearchForMovieBy(title, year);
+            _mediaRepository.MarkAsStoppedWatchingMovie("citr0s", movie);
+        }
+
+        if (mediaType == EPISODE_MEDIA_TYPE)
+        {
+            var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
+            _mediaRepository.MarkAsStoppedWatchingEpisode("citr0s", episode);
+        }
+            
+        Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
+    }
+
+    public void OnStarted()
+    {
+        _isStarted = true;
+
+        Task.Run(() =>
+        {
+            while (_isStarted)
+            {
+                var currentlyWatchingMovie = _mediaRepository.GetCurrentlyWatchingMovie();
+                
+                if(currentlyWatchingMovie != null)
+                {
+                    WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
+                    {
+                        Response = new
+                        {
+                            Data = new
+                            {
+                                Action = "start",
+                                Movie = currentlyWatchingMovie
+                            }
+                        }
+                    });
+                }
+                
+                var currentlyWatchingEpisode = _mediaRepository.GetCurrentlyWatchingEpisode();
+                
+                if(currentlyWatchingEpisode != null)
+                {
+                    WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
+                    {
+                        Response = new
+                        {
+                            Data = new
+                            {
+                                Action = "start",
+                                Episode = currentlyWatchingEpisode
+                            }
+                        }
+                    });
+                }
+                
+                Thread.Sleep(5000);
+            }
+        }, CancellationToken.None);
+    }
+
+    public void OnStopping()
+    {
+        _isStarted = false;
+    }
+
+    public void OnStopped()
+    {
+        // Do nothing
     }
 }

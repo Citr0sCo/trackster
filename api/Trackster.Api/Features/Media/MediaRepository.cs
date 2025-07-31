@@ -4,6 +4,7 @@ using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
+using Trackster.Api.Features.WebSockets.Types;
 
 namespace Trackster.Api.Features.Media;
 
@@ -17,11 +18,21 @@ public interface IMediaRepository
     void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Movie? GetMovieByIdentifier(Guid identifier);
     Show? GetShowByIdentifier(Guid identifier);
+    void MarkAsWatchingMovie(string username, MovieRecord movie);
+    void MarkAsWatchingEpisode(string username, EpisodeRecord episode);
+    void MarkAsStoppedWatchingMovie(string username, MovieRecord movie);
+    void MarkAsStoppedWatchingEpisode(string username, EpisodeRecord movie);
+
+     MovieRecord? GetCurrentlyWatchingMovie();
+     EpisodeRecord? GetCurrentlyWatchingEpisode();
 }
 
 public class MediaRepository : IMediaRepository
 {
     private readonly TmdbImportProvider _detailsProvider;
+
+    private readonly Dictionary<string, MovieRecord> _watchingNowMovies = new Dictionary<string, MovieRecord>();
+    private readonly Dictionary<string, EpisodeRecord> _watchingNowEpisodes = new Dictionary<string, EpisodeRecord>();
 
     public MediaRepository()
     {
@@ -508,5 +519,89 @@ public class MediaRepository : IMediaRepository
                 transaction.Rollback();
             }
         }
+    }
+    
+    public void MarkAsWatchingMovie(string username, MovieRecord movie)
+    {
+        _watchingNowMovies[username] = movie;
+        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
+        {
+            Response = new
+            {
+                Data = new
+                {
+                    Action = "start",
+                    movie
+                }
+            }
+        });
+    }
+
+    public void MarkAsWatchingEpisode(string username, EpisodeRecord episode)
+    {
+        _watchingNowEpisodes[username] = episode;
+        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
+        {
+            Response = new
+            {
+                Data = new
+                {
+                    Action = "start",
+                    episode
+                }
+            }
+        });
+    }
+
+    public void MarkAsStoppedWatchingMovie(string username, MovieRecord movie)
+    {
+        if (_watchingNowMovies.ContainsKey(username))
+            _watchingNowMovies.Remove(username);
+        
+        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
+        {
+            Response = new
+            {
+                Data = new
+                {
+                    Action = "stop",
+                    Movie = movie
+                }
+            }
+        });
+    }
+
+    public void MarkAsStoppedWatchingEpisode(string username, EpisodeRecord episode)
+    {
+        if (_watchingNowEpisodes.ContainsKey(username))
+            _watchingNowEpisodes.Remove(username);
+        
+        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
+        {
+            Response = new
+            {
+                Data = new
+                {
+                    Action = "stop",
+                    Episode = episode
+                }
+            }
+        });
+    }
+
+    public MovieRecord? GetCurrentlyWatchingMovie()
+    {
+        if (_watchingNowMovies.ContainsKey("citr0s"))
+            return _watchingNowMovies["citr0s"];
+
+        return null;
+    }
+
+    public EpisodeRecord? GetCurrentlyWatchingEpisode()
+    {
+        if (_watchingNowEpisodes.ContainsKey("citr0s"))
+            return _watchingNowEpisodes["citr0s"];
+        
+        return null;
     }
 }
