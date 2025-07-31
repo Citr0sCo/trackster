@@ -76,7 +76,7 @@ export class WatchingNowComponent implements OnInit {
 
         setInterval(() => {
             this.progress += 1000;
-        }, 1000 * 60);
+        }, 1000);
     }
 
     public getTimeFromDuration(duration: number): string {
