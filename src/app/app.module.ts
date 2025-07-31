@@ -15,10 +15,11 @@ import { AuthenticationService } from "../services/authentication-service/authen
 import { AuthenticationRepository } from "../services/authentication-service/authentication.repository";
 import { HistoryPageComponent } from '../pages/history-page/history-page.component';
 import { CustomSidebarComponent } from '../components/custom-sidebar/custom-sidebar.component';
-import {EventService} from "../services/event-service/event.service";
-import {MediaPosterComponent} from "../components/media-poster/media-poster.component";
-import {SettingsPageComponent} from "../pages/settings-page/settings-page.component";
-import {MediaDetailsPageComponent} from "../pages/media-details-page/media-details-page.component";
+import { EventService } from "../services/event-service/event.service";
+import { MediaPosterComponent } from "../components/media-poster/media-poster.component";
+import { SettingsPageComponent } from "../pages/settings-page/settings-page.component";
+import { MediaDetailsPageComponent } from "../pages/media-details-page/media-details-page.component";
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
     declarations: [
@@ -32,7 +33,8 @@ import {MediaDetailsPageComponent} from "../pages/media-details-page/media-detai
         MediaPosterComponent,
         MediaDetailsPageComponent
     ],
-    bootstrap: [AppComponent], imports: [
+    bootstrap: [AppComponent],
+    imports: [
         BrowserModule,
         AppRoutingModule,
         ReactiveFormsModule,
@@ -41,7 +43,8 @@ import {MediaDetailsPageComponent} from "../pages/media-details-page/media-detai
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000'
         }),
-        TimeagoModule.forRoot()
+        TimeagoModule.forRoot(),
+        BrowserAnimationsModule
     ], providers: [
         MediaService,
         MediaRepository,

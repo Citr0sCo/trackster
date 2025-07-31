@@ -1,14 +1,25 @@
 <div class="history-page-component">
     <div class="container">
-        <h3>History</h3>
+        <div class="o-grid o-grid--static">
+            <div class="o-grid__col">
+                <h3>History</h3>
+            </div>
+            <div class="o-grid__col o-grid__col--fixed">
+                <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
+                    <div class="custom-sidebar__button__icon">
+                        <i class="fa fa-sync" [ngClass]="{'fa-spin': mediaLoading}"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
         @if (media != null) {
             <div class="o-grid o-grid--space-between o-grid--row">
                 @for (key of visibleKeys; track key) {
                     <div style="margin-top:15px;">
                         {{ key | date:'MMMM d, y' }}
                     </div>
-                    <hr />
-                    <div class="o-grid movie-poster-wrapper">
+                    <hr/>
+                    <div class="o-grid o-grid--static movie-poster-wrapper">
                         @for (mediaItem of media[key]; track mediaItem) {
                             <div class="o-grid__col o-grid__col--fixed">
                                 <media-poster [media]="mediaItem"></media-poster>
