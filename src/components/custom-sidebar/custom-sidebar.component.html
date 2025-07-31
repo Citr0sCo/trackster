@@ -1,6 +1,6 @@
 <div class="custom-sidebar" [ngClass]="{'custom-sidebar--hidden': !showMenu}" [@slideInFromLeft]="showMenu ? 'visible' : 'hidden'">
 
-    <div class="custom-sidebar__button" (click)="showMenu = !showMenu;" [routerLink]="'/home'" [routerLinkActive]="'custom-sidebar__button--active'">
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/home'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-home"></i>
         </div>
@@ -9,7 +9,7 @@
         </div>
     </div>
 
-    <div class="custom-sidebar__button" (click)="showMenu = !showMenu;" [routerLink]="'/history'" [routerLinkActive]="'custom-sidebar__button--active'">
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/history'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-history"></i>
         </div>
@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <div class="custom-sidebar__button" (click)="showMenu = !showMenu;" [routerLink]="'/settings'" [routerLinkActive]="'custom-sidebar__button--active'">
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/settings'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-cog"></i>
         </div>
@@ -30,7 +30,7 @@
 </div>
 
 @if (!isDesktop) {
-    <div class="custom-sidebar--action-button" (click)="showMenu = !showMenu;">
+    <div class="custom-sidebar--action-button" (click)="toggleMenu();">
         <i class="fa fa-bars"></i>
     </div>
 }

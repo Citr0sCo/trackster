@@ -47,4 +47,14 @@ export class CustomSidebarComponent implements OnInit {
         });
     }
 
+    public toggleMenu(): void {
+
+        if (this.isDesktop) {
+            return;
+        }
+
+
+        this.showMenu = !this.showMenu;
+    }
+
 }
