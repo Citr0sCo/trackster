@@ -29,7 +29,7 @@ Console.WriteLine("Done");
 
 Console.WriteLine("Registering EventBus...");
 EventBus.Register(WebSocketManager.Instance());
-EventBus.Register(new MediaService(new MediaRepository()));
+EventBus.Register(WatchingNowService.Instance());
 Console.WriteLine("Done");
 
 if (app.Environment.IsDevelopment())

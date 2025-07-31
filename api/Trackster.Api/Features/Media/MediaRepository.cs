@@ -18,20 +18,11 @@ public interface IMediaRepository
     void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Movie? GetMovieByIdentifier(Guid identifier);
     Show? GetShowByIdentifier(Guid identifier);
-    void MarkAsWatchingMovie(string username, MovieRecord movie, int millisecondsWatched, int duration);
-    void MarkAsWatchingEpisode(string username, EpisodeRecord episode, int millisecondsWatched, int duration);
-    void MarkAsStoppedWatchingMovie(string username, MovieRecord movie);
-    void MarkAsStoppedWatchingEpisode(string username, EpisodeRecord movie);
-    WatchingMovieRecord? GetCurrentlyWatchingMovie();
-    WatchingEpisodeRecord? GetCurrentlyWatchingEpisode();
 }
 
 public class MediaRepository : IMediaRepository
 {
     private readonly TmdbImportProvider _detailsProvider;
-
-    private readonly Dictionary<string, WatchingMovieRecord> _watchingNowMovies = new Dictionary<string, WatchingMovieRecord>();
-    private readonly Dictionary<string, WatchingEpisodeRecord> _watchingNowEpisodes = new Dictionary<string, WatchingEpisodeRecord>();
 
     public MediaRepository()
     {
@@ -518,93 +509,5 @@ public class MediaRepository : IMediaRepository
                 transaction.Rollback();
             }
         }
-    }
-    
-    public void MarkAsWatchingMovie(string username, MovieRecord movie, int millisecondsWatched, int duration)
-    {
-        _watchingNowMovies[username] = new WatchingMovieRecord
-        {
-            Action = WatchingAction.Start.ToString(),
-            Movie = movie,
-            MillisecondsWatched = millisecondsWatched,
-            Duration = duration
-        };
-        
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
-        {
-            Response = new
-            {
-                Data = _watchingNowMovies[username]
-            }
-        });
-    }
-
-    public void MarkAsWatchingEpisode(string username, EpisodeRecord episode, int millisecondsWatched, int duration)
-    {
-        _watchingNowEpisodes[username] = new WatchingEpisodeRecord
-        {
-            Action = WatchingAction.Start.ToString(),
-            Episode = episode,
-            MillisecondsWatched = millisecondsWatched,
-            Duration = duration
-        };
-        
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
-        {
-            Response = new
-            {
-                Data = _watchingNowEpisodes[username]
-            }
-        });
-    }
-
-    public void MarkAsStoppedWatchingMovie(string username, MovieRecord movie)
-    {
-        if (_watchingNowMovies.ContainsKey(username))
-            _watchingNowMovies.Remove(username);
-        
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
-        {
-            Response = new
-            {
-                Data = new
-                {
-                    Action = WatchingAction.Stop.ToString()
-                }
-            }
-        });
-    }
-
-    public void MarkAsStoppedWatchingEpisode(string username, EpisodeRecord episode)
-    {
-        if (_watchingNowEpisodes.ContainsKey(username))
-            _watchingNowEpisodes.Remove(username);
-        
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
-        {
-            Response = new
-            {
-                Data = new
-                {
-                    Action = WatchingAction.Stop.ToString()
-                }
-            }
-        });
-    }
-
-    public WatchingMovieRecord? GetCurrentlyWatchingMovie()
-    {
-        if (_watchingNowMovies.ContainsKey("citr0s"))
-            return _watchingNowMovies["citr0s"];
-
-        return null;
-    }
-
-    public WatchingEpisodeRecord? GetCurrentlyWatchingEpisode()
-    {
-        if (_watchingNowEpisodes.ContainsKey("citr0s"))
-            return _watchingNowEpisodes["citr0s"];
-        
-        return null;
     }
 }

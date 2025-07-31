@@ -8,21 +8,22 @@ using Trackster.Api.Features.WebSockets.Types;
 
 namespace Trackster.Api.Features.Media;
 
-public class MediaService : ISubscriber
+public class MediaService
 {
     private readonly IMediaRepository _mediaRepository;
-    private TraktImportProvider _provider;
-    private TmdbImportProvider _detailsProvider;
+    private readonly TraktImportProvider _provider;
+    private readonly TmdbImportProvider _detailsProvider;
+    private readonly WatchingNowService _watchingNowService;
     
     private const string MOVIE_MEDIA_TYPE = "movie";
     private string EPISODE_MEDIA_TYPE = "episode";
-    private bool _isStarted = false;
 
     public MediaService(IMediaRepository mediaRepository)
     {
         _mediaRepository = mediaRepository;
         _provider = new TraktImportProvider();
         _detailsProvider = new TmdbImportProvider();
+        _watchingNowService = WatchingNowService.Instance();
     }
 
     public async Task<ImportMediaResponse> ImportMedia(ImportMediaRequest request)
@@ -233,13 +234,13 @@ public class MediaService : ISubscriber
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
             var movie = await SearchForMovieBy(title, year);
-            _mediaRepository.MarkAsWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
         }
         
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
-            _mediaRepository.MarkAsWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
         }
             
         Console.WriteLine($"Marking a media as watching now. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
@@ -250,64 +251,15 @@ public class MediaService : ISubscriber
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
             var movie = await SearchForMovieBy(title, year);
-            _mediaRepository.MarkAsStoppedWatchingMovie("citr0s", movie);
+            _watchingNowService.MarkAsStoppedWatchingMovie("citr0s", movie);
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
-            _mediaRepository.MarkAsStoppedWatchingEpisode("citr0s", episode);
+            _watchingNowService.MarkAsStoppedWatchingEpisode("citr0s", episode);
         }
             
         Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
-    }
-
-    public void OnStarted()
-    {
-        _isStarted = true;
-
-        Task.Run(() =>
-        {
-            while (_isStarted)
-            {
-                var currentlyWatchingMovie = _mediaRepository.GetCurrentlyWatchingMovie();
-                
-                if(currentlyWatchingMovie != null)
-                {
-                    WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
-                    {
-                        Response = new
-                        {
-                            Data = currentlyWatchingMovie
-                        }
-                    });
-                }
-                
-                var currentlyWatchingEpisode = _mediaRepository.GetCurrentlyWatchingEpisode();
-                
-                if(currentlyWatchingEpisode != null)
-                {
-                    WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
-                    {
-                        Response = new
-                        {
-                            Data = currentlyWatchingEpisode
-                        }
-                    });
-                }
-                
-                Thread.Sleep(5000);
-            }
-        }, CancellationToken.None);
-    }
-
-    public void OnStopping()
-    {
-        _isStarted = false;
-    }
-
-    public void OnStopped()
-    {
-        // Do nothing
     }
 }
