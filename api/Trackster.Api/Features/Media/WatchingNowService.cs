@@ -129,7 +129,7 @@ public class WatchingNowService : ISubscriber
                 
                 if(currentlyWatchingMovie != null)
                 {
-                    var diff = currentlyWatchingMovie.LastUpdatedAt - DateTime.Now;
+                    var diff = DateTime.Now - currentlyWatchingMovie.LastUpdatedAt;
                     currentlyWatchingMovie.MillisecondsWatched += diff.Milliseconds;
                     MarkAsWatchingMovie("citr0s", currentlyWatchingMovie.Movie, currentlyWatchingMovie.MillisecondsWatched, currentlyWatchingMovie.Duration);
                     
@@ -146,7 +146,7 @@ public class WatchingNowService : ISubscriber
                 
                 if(currentlyWatchingEpisode != null)
                 {
-                    var diff = currentlyWatchingEpisode.LastUpdatedAt - DateTime.Now;
+                    var diff = DateTime.Now - currentlyWatchingEpisode.LastUpdatedAt;
                     currentlyWatchingEpisode.MillisecondsWatched += diff.Milliseconds;
                     MarkAsWatchingEpisode("citr0s", currentlyWatchingEpisode.Episode, currentlyWatchingEpisode.MillisecondsWatched, currentlyWatchingEpisode.Duration);
                     
