@@ -23,8 +23,14 @@
                 </div>
             </div>
             <div class="media-background" style="background-image:url({{ media.posterUrl }});"></div>
+        } @else if (isLoading) {
+            <div class="media-overview">
+                Media loading...
+            </div>
         } @else {
-            Media not found...
+            <div class="media-overview">
+                Media not found...
+            </div>
         }
     </div>
 </div>

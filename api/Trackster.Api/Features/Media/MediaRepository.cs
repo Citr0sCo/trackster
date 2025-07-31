@@ -237,7 +237,8 @@ public class MediaRepository : IMediaRepository
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                Console.WriteLine($"[FATAL] - Failed to add a show. Exception below:");
+                Console.WriteLine(exception.Message, exception.StackTrace);
                 transaction.Rollback();
             }
         }

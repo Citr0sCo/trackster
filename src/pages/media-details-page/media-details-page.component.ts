@@ -13,6 +13,7 @@ import {IMedia} from "../../services/media-service/types/media.type";
 export class MediaDetailsPageComponent implements OnInit, OnDestroy {
 
     public media: IMedia | null = null;
+    public isLoading: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
     private _activatedRoute: ActivatedRoute;
@@ -24,12 +25,15 @@ export class MediaDetailsPageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
+        this.isLoading = true;
+
         this._activatedRoute.params
             .pipe(takeUntil(this._destroy))
             .subscribe((params) => {
                 this._mediaService.getMediaById(params['id'])
                     .pipe(takeUntil(this._destroy))
                     .subscribe((media: IMedia) => {
+                        this.isLoading = false;
                         this.media = media;
                     });
         });
