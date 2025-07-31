@@ -230,7 +230,7 @@ public class MediaService : ISubscriber
 
     public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, int seasonNumber, int startedAt, int watchedAmountInMilliseconds)
     {
-        var parsedDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        var parsedDate = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Local);
         parsedDate = parsedDate.AddSeconds(startedAt).ToLocalTime();
         
         if (mediaType == MOVIE_MEDIA_TYPE)

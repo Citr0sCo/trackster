@@ -524,7 +524,7 @@ public class MediaRepository : IMediaRepository
     {
         _watchingNowMovies[username] = new WatchingMovieRecord
         {
-            Action = WatchingAction.Start,
+            Action = WatchingAction.Start.ToString(),
             Movie = movie,
             StartedAt = startedAt,
             MillisecondsWatched = millisecondsWatched
@@ -543,7 +543,7 @@ public class MediaRepository : IMediaRepository
     {
         _watchingNowEpisodes[username] = new WatchingEpisodeRecord
         {
-            Action = WatchingAction.Start,
+            Action = WatchingAction.Start.ToString(),
             Episode = episode,
             StartedAt = startedAt,
             MillisecondsWatched = millisecondsWatched
@@ -569,7 +569,7 @@ public class MediaRepository : IMediaRepository
             {
                 Data = new
                 {
-                    Action = WatchingAction.Stop
+                    Action = WatchingAction.Stop.ToString()
                 }
             }
         });
@@ -586,7 +586,7 @@ public class MediaRepository : IMediaRepository
             {
                 Data = new
                 {
-                    Action = WatchingAction.Stop
+                    Action = WatchingAction.Stop.ToString()
                 }
             }
         });
