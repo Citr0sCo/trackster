@@ -9,16 +9,21 @@
                 }
             </div>
             <div class="o-grid__col">
-                @if (grandParentTitle) {
-                    {{ trimTitle(grandParentTitle) }} &bull;
-                }
                 @if (isDesktop) {
+                    @if (grandParentTitle) {
+                        {{ trimTitle(grandParentTitle) }} &bull;
+                    }
                     @if (parentTitle) {
                         {{ parentTitle }} &bull;
                     }
+                    {{ title }} ({{ year }})
+                } @else {
+                    @if (grandParentTitle) {
+                        S{{ seasonNumber }} &bull; E{{ episodeNumber }}
+                    } @else {
+                        {{ trimTitle(title) }} ({{ year }})
+                    }
                 }
-                {{ title }}
-                ({{ year }})
             </div>
             @if (isDesktop) {
                 <div class="o-grid__col o-grid__col--fixed">
