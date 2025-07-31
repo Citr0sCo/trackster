@@ -6,6 +6,6 @@ public class WatchingMovieRecord
 {
     public string Action { get; set; }
     public MovieRecord Movie { get; set; }
-    public DateTime StartedAt { get; set; }
     public int MillisecondsWatched { get; set; }
+    public int Duration { get; set; }
 }
