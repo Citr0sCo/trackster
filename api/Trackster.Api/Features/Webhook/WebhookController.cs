@@ -31,7 +31,7 @@ public class WebhookController : ControllerBase
             if (webhookRequest == null)
                 return BadRequest("Invalid payload");
 
-            _service.HandlePlexWebhook(webhookRequest);
+            await _service.HandlePlexWebhook(webhookRequest);
 
             return Ok();
         }

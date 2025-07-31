@@ -1,6 +1,7 @@
 using Trackster.Api.Core.Events;
 using Trackster.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using Trackster.Api.Features.Media;
 using WebSocketManager = Trackster.Api.Features.WebSockets.WebSocketManager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,7 @@ Console.WriteLine("Done");
 
 Console.WriteLine("Registering EventBus...");
 EventBus.Register(WebSocketManager.Instance());
-//EventBus.Register(DockerAutoUpdate.Instance());
+EventBus.Register(new MediaService(new MediaRepository()));
 Console.WriteLine("Done");
 
 if (app.Environment.IsDevelopment())
