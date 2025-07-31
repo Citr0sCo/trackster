@@ -34,7 +34,7 @@ export class AppComponent implements AfterViewInit {
 
         this._webSocketService.subscribe(WebSocketKey.WatchingNowMovie, (payload) => {
             if (payload.Response.Data.Action === "Start") {
-                console.log(`Started watching: ${payload.Response.Data.Movie.Title} @ ${payload.Response.Data.StartedAt} ${payload.Response.Data.MillisecondsWatched}ms into it.`);
+                console.log(`Started watching: ${payload.Response.Data.Movie.Title} - ${this.getTimeFromDuration(payload.Response.Data.Duration)} - ${this.getTimeFromDuration(payload.Response.Data.MillisecondsWatched)}`);
             }
             if (payload.Response.Data.Action === "Stop") {
                 console.log(`Stopped watching movie.`);
@@ -43,11 +43,39 @@ export class AppComponent implements AfterViewInit {
 
         this._webSocketService.subscribe(WebSocketKey.WatchingNowEpisode, (payload) => {
             if (payload.Response.Data.Action === "Start") {
-                console.log(`Started watching: ${payload.Response.Data.Episode.Title} @ ${payload.Response.Data.StartedAt} ${payload.Response.Data.MillisecondsWatched}ms into it.`);
+                console.log(`Started watching: ${payload.Response.Data.Episode.Season.Show.Title} - ${this.getTimeFromDuration(payload.Response.Data.Duration)} - ${this.getTimeFromDuration(payload.Response.Data.MillisecondsWatched)}`);
             }
             if (payload.Response.Data.Action === "Stop") {
                 console.log(`Stopped watching episode.`);
             }
         });
+    }
+
+    public getTimeFromDuration(duration: number): string {
+
+        const date = new Date(duration);
+
+        let displayText = '';
+
+        const hours = date.getUTCHours();
+        if (hours > 0) {
+            displayText += `${hours}:`;
+        }
+
+        const minutes = date.getMinutes();
+        if (minutes < 10) {
+            displayText += `0${minutes}:`;
+        } else {
+            displayText += `${minutes}:`;
+        }
+
+        const seconds = date.getSeconds();
+        if (seconds < 10) {
+            displayText += `0${seconds}`;
+        } else {
+            displayText += `${seconds}`;
+        }
+
+        return displayText;
     }
 }

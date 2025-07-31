@@ -18,8 +18,8 @@ public interface IMediaRepository
     void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Movie? GetMovieByIdentifier(Guid identifier);
     Show? GetShowByIdentifier(Guid identifier);
-    void MarkAsWatchingMovie(string username, MovieRecord movie, DateTime startedAt, int millisecondsWatched);
-    void MarkAsWatchingEpisode(string username, EpisodeRecord episode, DateTime startedAt, int millisecondsWatched);
+    void MarkAsWatchingMovie(string username, MovieRecord movie, int millisecondsWatched, int duration);
+    void MarkAsWatchingEpisode(string username, EpisodeRecord episode, int millisecondsWatched, int duration);
     void MarkAsStoppedWatchingMovie(string username, MovieRecord movie);
     void MarkAsStoppedWatchingEpisode(string username, EpisodeRecord movie);
     WatchingMovieRecord? GetCurrentlyWatchingMovie();
@@ -520,14 +520,14 @@ public class MediaRepository : IMediaRepository
         }
     }
     
-    public void MarkAsWatchingMovie(string username, MovieRecord movie, DateTime startedAt, int millisecondsWatched)
+    public void MarkAsWatchingMovie(string username, MovieRecord movie, int millisecondsWatched, int duration)
     {
         _watchingNowMovies[username] = new WatchingMovieRecord
         {
             Action = WatchingAction.Start.ToString(),
             Movie = movie,
-            StartedAt = startedAt,
-            MillisecondsWatched = millisecondsWatched
+            MillisecondsWatched = millisecondsWatched,
+            Duration = duration
         };
         
         WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
@@ -539,14 +539,14 @@ public class MediaRepository : IMediaRepository
         });
     }
 
-    public void MarkAsWatchingEpisode(string username, EpisodeRecord episode, DateTime startedAt, int millisecondsWatched)
+    public void MarkAsWatchingEpisode(string username, EpisodeRecord episode, int millisecondsWatched, int duration)
     {
         _watchingNowEpisodes[username] = new WatchingEpisodeRecord
         {
             Action = WatchingAction.Start.ToString(),
             Episode = episode,
-            StartedAt = startedAt,
-            MillisecondsWatched = millisecondsWatched
+            MillisecondsWatched = millisecondsWatched,
+            Duration = duration
         };
         
         WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
