@@ -34,7 +34,8 @@ public class WatchingNowService : ISubscriber
             Action = WatchingAction.Start.ToString(),
             Movie = movie,
             MillisecondsWatched = millisecondsWatched,
-            Duration = duration
+            Duration = duration,
+            LastUpdatedAt = DateTime.Now
         };
         
         WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
@@ -53,7 +54,8 @@ public class WatchingNowService : ISubscriber
             Action = WatchingAction.Start.ToString(),
             Episode = episode,
             MillisecondsWatched = millisecondsWatched,
-            Duration = duration
+            Duration = duration,
+            LastUpdatedAt = DateTime.Now
         };
         
         WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
@@ -65,7 +67,7 @@ public class WatchingNowService : ISubscriber
         });
     }
 
-    public void MarkAsStoppedWatchingMovie(string username, MovieRecord movie)
+    public void MarkAsStoppedWatchingMovie(string username)
     {
         if (_watchingNowMovies.ContainsKey(username))
             _watchingNowMovies.Remove(username);
@@ -82,7 +84,7 @@ public class WatchingNowService : ISubscriber
         });
     }
 
-    public void MarkAsStoppedWatchingEpisode(string username, EpisodeRecord episode)
+    public void MarkAsStoppedWatchingEpisode(string username)
     {
         if (_watchingNowEpisodes.ContainsKey(username))
             _watchingNowEpisodes.Remove(username);
@@ -127,6 +129,10 @@ public class WatchingNowService : ISubscriber
                 
                 if(currentlyWatchingMovie != null)
                 {
+                    var diff = DateTime.Now - currentlyWatchingMovie.LastUpdatedAt;
+                    currentlyWatchingMovie.MillisecondsWatched += diff.Milliseconds;
+                    MarkAsWatchingMovie("citr0s", currentlyWatchingMovie.Movie, currentlyWatchingMovie.MillisecondsWatched, currentlyWatchingMovie.Duration);
+                    
                     WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
                     {
                         Response = new
@@ -140,6 +146,10 @@ public class WatchingNowService : ISubscriber
                 
                 if(currentlyWatchingEpisode != null)
                 {
+                    var diff = DateTime.Now - currentlyWatchingEpisode.LastUpdatedAt;
+                    currentlyWatchingEpisode.MillisecondsWatched += diff.Milliseconds;
+                    MarkAsWatchingEpisode("citr0s", currentlyWatchingEpisode.Episode, currentlyWatchingEpisode.MillisecondsWatched, currentlyWatchingEpisode.Duration);
+                    
                     WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
                     {
                         Response = new

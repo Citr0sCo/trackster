@@ -8,4 +8,5 @@ public class WatchingEpisodeRecord
     public EpisodeRecord Episode { get; set; }
     public int MillisecondsWatched { get; set; }
     public int Duration { get; set; }
+    public DateTime LastUpdatedAt { get; set; }
 }

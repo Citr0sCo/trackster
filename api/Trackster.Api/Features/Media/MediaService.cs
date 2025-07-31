@@ -251,13 +251,13 @@ public class MediaService
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
             var movie = await SearchForMovieBy(title, year);
-            _watchingNowService.MarkAsStoppedWatchingMovie("citr0s", movie);
+            _watchingNowService.MarkAsStoppedWatchingMovie("citr0s");
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
-            _watchingNowService.MarkAsStoppedWatchingEpisode("citr0s", episode);
+            _watchingNowService.MarkAsStoppedWatchingEpisode("citr0s");
         }
             
         Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
