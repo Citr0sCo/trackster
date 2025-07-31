@@ -1,6 +1,6 @@
 <div class="home-page-component">
     <div class="container">
-        <div class="o-grid">
+        <div class="o-grid o-grid--static">
             <div class="o-grid__col">
                 <h3>Movies</h3>
             </div>
@@ -14,7 +14,7 @@
         </div>
         <div class="media-container">
             @if (movies.length > 0) {
-                <div class="o-grid o-grid--space-between">
+                <div class="o-grid o-grid--static o-grid--space-between">
                     @for (movie of movies.slice(0, 10); track movie) {
                         <div class="o-grid__col o-grid__col--fixed">
                             <media-poster [media]="movieToMedia(movie)"></media-poster>
@@ -33,7 +33,7 @@
         <h3>TV Shows</h3>
         <div class="media-container">
             @if (shows.length > 0) {
-                <div class="o-grid o-grid--space-between">
+                <div class="o-grid o-grid--static o-grid--space-between">
                     @for (show of shows.slice(0, 10); track show) {
                         <div class="o-grid__col o-grid__col--fixed">
                             <media-poster [media]="showToMedia(show)"></media-poster>

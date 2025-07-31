@@ -1,6 +1,6 @@
 <div class="history-page-component">
     <div class="container">
-        <div class="o-grid">
+        <div class="o-grid o-grid--static">
             <div class="o-grid__col">
                 <h3>History</h3>
             </div>
@@ -18,8 +18,8 @@
                     <div style="margin-top:15px;">
                         {{ key | date:'MMMM d, y' }}
                     </div>
-                    <hr />
-                    <div class="o-grid movie-poster-wrapper">
+                    <hr/>
+                    <div class="o-grid o-grid--static movie-poster-wrapper">
                         @for (mediaItem of media[key]; track mediaItem) {
                             <div class="o-grid__col o-grid__col--fixed">
                                 <media-poster [media]="mediaItem"></media-poster>
