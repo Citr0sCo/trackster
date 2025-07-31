@@ -31,7 +31,7 @@ public class MediaRepository : IMediaRepository
     public async Task ImportMovies(string username, List<TraktMovieResponse> movies)
     {
         using (var context = new DatabaseContext())
-        using (var transaction = context.Database.BeginTransaction())
+        using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
@@ -98,13 +98,13 @@ public class MediaRepository : IMediaRepository
                     Console.WriteLine($"[INFO] - Movie {moviesProcessed}/{movies.Count} processed.");
                 }
 
-                context.SaveChanges();
-                transaction.Commit();
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                transaction.Rollback();
+                await transaction.RollbackAsync();
             }
         }
     }
@@ -112,7 +112,7 @@ public class MediaRepository : IMediaRepository
     public async Task ImportShows(string username, List<TraktShowResponse> shows)
     {
         using (var context = new DatabaseContext())
-        using (var transaction = context.Database.BeginTransaction())
+        using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
@@ -232,14 +232,14 @@ public class MediaRepository : IMediaRepository
                     Console.WriteLine($"[INFO] - Show {showsProcessed}/{shows.Count} processed.");
                 }
 
-                context.SaveChanges();
-                transaction.Commit();
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch (Exception exception)
             {
                 Console.WriteLine($"[FATAL] - Failed to add a show. Exception below:");
                 Console.WriteLine(exception.Message, exception.StackTrace);
-                transaction.Rollback();
+                await transaction.RollbackAsync();
             }
         }
     }
