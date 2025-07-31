@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Trackster.Api.Data.Records;
 
 namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 

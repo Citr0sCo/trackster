@@ -1,10 +1,7 @@
-using Newtonsoft.Json;
-using Trackster.Api.Core.Events.Types;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Types;
-using Trackster.Api.Features.WebSockets.Types;
 
 namespace Trackster.Api.Features.Media;
 
@@ -272,7 +269,7 @@ public class MediaService
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await SearchForEpisode(grandParentTitle,  title, year, seasonNumber);
-            _watchingNowService.MarkAsPausedWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration;
+            _watchingNowService.MarkAsPausedWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
         }
             
         Console.WriteLine($"Marking a media as paused watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
