@@ -19,7 +19,7 @@
                     {{ title }} ({{ year }})
                 } @else {
                     @if (grandParentTitle) {
-                        S{{ seasonNumber }} &bull; E{{ episodeNumber }}
+                        {{ trimTitle(grandParentTitle) }} &bull; S{{ seasonNumber }} &bull; E{{ episodeNumber }}
                     } @else {
                         {{ trimTitle(title) }} ({{ year }})
                     }
