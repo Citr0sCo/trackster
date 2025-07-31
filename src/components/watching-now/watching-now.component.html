@@ -2,7 +2,11 @@
     <div class="watching-now {{ !isDesktop ? 'watching-now--mobile' : '' }}">
         <div class="o-grid o-grid--static o-grid--horizontal-align">
             <div class="o-grid__col o-grid__col--fixed me-2">
-                <i class="fa fa-play"></i>
+                @if (isPaused) {
+                    <i class="fa fa-pause"></i>
+                } @else {
+                    <i class="fa fa-play"></i>
+                }
             </div>
             <div class="o-grid__col">
                 @if (grandParentTitle) {

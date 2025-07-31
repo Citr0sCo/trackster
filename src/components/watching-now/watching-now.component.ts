@@ -16,6 +16,7 @@ export class WatchingNowComponent implements OnInit {
     public year: number = 0;
     public progress: number = 0;
     public duration: number = 0;
+    public isPaused: boolean = false;
     public isVisible: boolean = false;
     public isDesktop: boolean = false;
 
@@ -59,6 +60,7 @@ export class WatchingNowComponent implements OnInit {
 
             if (payload.Response.Data.Action === "Start") {
                 this.isVisible = true;
+                this.isPaused = false;
 
                 this.title = payload.Response.Data.Episode.Title;
                 this.parentTitle = payload.Response.Data.Episode.Season.Title;
@@ -70,6 +72,10 @@ export class WatchingNowComponent implements OnInit {
 
             if (payload.Response.Data.Action === "Stop") {
                 this.isVisible = false;
+            }
+
+            if (payload.Response.Data.Action === "Paused") {
+                this.isPaused = true;
             }
         });
 

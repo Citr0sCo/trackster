@@ -101,6 +101,46 @@ public class WatchingNowService : ISubscriber
         });
     }
 
+    public void MarkAsPausedWatchingMovie(string username, MovieRecord movie, int millisecondsWatched, int duration)
+    {
+        _watchingNowMovies[username] = new WatchingMovieRecord
+        {
+            Action = WatchingAction.Paused.ToString(),
+            Movie = movie,
+            MillisecondsWatched = millisecondsWatched,
+            Duration = duration,
+            LastUpdatedAt = DateTime.Now
+        };
+        
+        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
+        {
+            Response = new
+            {
+                Data = _watchingNowMovies[username]
+            }
+        });
+    }
+
+    public void MarkAsPausedWatchingEpisode(string username, EpisodeRecord episode, int millisecondsWatched, int duration)
+    {
+        _watchingNowEpisodes[username] = new WatchingEpisodeRecord
+        {
+            Action = WatchingAction.Paused.ToString(),
+            Episode = episode,
+            MillisecondsWatched = millisecondsWatched,
+            Duration = duration,
+            LastUpdatedAt = DateTime.Now
+        };
+        
+        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
+        {
+            Response = new
+            {
+                Data = _watchingNowEpisodes[username]
+            }
+        });
+    }
+
     public WatchingMovieRecord? GetCurrentlyWatchingMovie()
     {
         if (_watchingNowMovies.TryGetValue("citr0s", out var movie))

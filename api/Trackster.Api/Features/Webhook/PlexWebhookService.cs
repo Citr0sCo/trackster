@@ -40,5 +40,8 @@ public class PlexWebhookService
         
         if (eventType == "media.stop" || eventType == "media.pause")
             _mediaService.RemoveMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+        
+        if (eventType == "media.pause")
+            _mediaService.PauseMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
     }
 }
