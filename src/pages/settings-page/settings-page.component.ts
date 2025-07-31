@@ -11,6 +11,7 @@ import { MediaService } from '../../services/media-service/media.service';
 export class SettingsPageComponent implements OnInit, OnDestroy {
 
     public isImporting: boolean = false;
+    public username: string = 'citr0s';
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
@@ -20,15 +21,21 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
+
     }
 
     public importFromTrakt(): void {
         this.isImporting = true;
+
         this._mediaService.importFromTrakt('citr0s')
             .pipe(takeUntil(this._destroy))
             .subscribe(() => {
                 this.isImporting = false;
             });
+    }
+
+    public saveSettings(): void {
+
     }
 
     public ngOnDestroy(): void {

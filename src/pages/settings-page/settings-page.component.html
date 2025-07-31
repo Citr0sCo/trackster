@@ -1,5 +1,11 @@
 <div class="settings-page-component">
     <div class="container">
         <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'" [isLoading]="isImporting"></wide-button>
+
+        <hr>
+
+        <input type="text" placeholder="Username" class="c-field" [(ngModel)]="username">
+
+        <button class="btn btn-primary w-100 mt-3" (click)="saveSettings()">Save</button>
     </div>
 </div>
