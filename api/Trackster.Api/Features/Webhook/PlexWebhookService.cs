@@ -32,9 +32,6 @@ public class PlexWebhookService
         var eventType = parsedJson.Event.ToLower();
         
         if (eventType == "media.scrobble")
-            await _mediaService.MarkMediaAsWatched(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title);
-        
-        if (eventType == "media.scrobble")
             await _mediaService.MarkMediaAsWatched(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
 
         if (eventType == "media.play" || eventType == "media.resume")
