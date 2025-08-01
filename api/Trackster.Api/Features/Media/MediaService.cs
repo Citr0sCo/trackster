@@ -83,7 +83,8 @@ public class MediaService
                 TMDB = show.Show.TMDB,
                 Type = MediaType.Show.ToString(),
                 SeasonNumber = show.Season.Number,
-                EpisodeNumber = show.Episode.Number
+                EpisodeNumber = show.Episode.Number,
+                WatchedAt = show.WatchedAt,
             });
         }
         
