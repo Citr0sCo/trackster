@@ -1,7 +1,8 @@
 export interface IMedia {
     identifier: string | null;
-    mediaType: MediaType;
+    mediaType: string;
     title: string | null;
+    slug: string | null;
     parentTitle: string | null;
     grandParentTitle: string | null;
     year: number;
@@ -14,7 +15,7 @@ export interface IMedia {
 }
 
 export enum MediaType {
-    Unknown,
-    Movie,
-    Episode
+    Unknown = 'Unknown',
+    Movie = 'Movie',
+    Episode = 'Episode'
 }

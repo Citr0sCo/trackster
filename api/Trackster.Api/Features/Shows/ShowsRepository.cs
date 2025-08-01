@@ -1,112 +1,30 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
-using Trackster.Api.Features.Media.Types;
+using Trackster.Api.Features.Shows.Types;
 
-namespace Trackster.Api.Features.Media;
+namespace Trackster.Api.Features.Shows;
 
 public interface IMediaRepository
 {
-    Task ImportMovies(string username, List<TraktMovieResponse> movies);
     Task ImportShows(string username, List<TraktShowResponse> shows);
-    List<Movie> GetAllMovies(string username);
-    List<Show> GetAllShows(string username);
-    void ImportMovie(string username, MovieRecord movie);
+    List<WatchedShow> GetAllWatchedShows(string username);
     void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
-    Movie? GetMovieByIdentifier(Guid identifier);
-    Show? GetShowByIdentifier(Guid identifier);
+    Show? GetShowBySlug(string slug);
+    Season? GetSeasonByNumber(string slug, int seasonNumber);
+    Episode? GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber);
+    List<WatchedEpisode> GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber);
 }
 
-public class MediaRepository : IMediaRepository
+public class ShowsRepository : IMediaRepository
 {
     private readonly TmdbImportProvider _detailsProvider;
 
-    public MediaRepository()
+    public ShowsRepository()
     {
         _detailsProvider = new TmdbImportProvider();
-    }
-    
-    public async Task ImportMovies(string username, List<TraktMovieResponse> movies)
-    {
-        using (var context = new DatabaseContext())
-        using (var transaction = await context.Database.BeginTransactionAsync())
-        {
-            try
-            {
-                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
-
-                if (existingUser == null)
-                {
-                    existingUser = new UserRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        Username = username
-                    };
-
-                    Console.WriteLine($"[INFO] - User '{username}' doesn't exist. Creating...");
-                    context.Add(existingUser);
-                }
-
-                var moviesProcessed = 0;
-                foreach (var movie in movies)
-                {
-                    var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.Movie.Ids.TMDB);
-
-                    if (existingMovie == null)
-                    {
-                        var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB);
-                        
-                        existingMovie = new MovieRecord
-                        {
-                            Identifier = Guid.NewGuid(),
-                            Title = movie.Movie.Title,
-                            Year = movie.Movie.Year,
-                            TMDB = movie.Movie.Ids.TMDB,
-                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
-                            Overview = details?.Overview,
-                        };
-                        
-                        Console.WriteLine($"[INFO] - Movie '{movie.Movie.Title}' doesn't exist. Creating...");
-                        context.Add(existingMovie);
-                    }
-
-                    var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
-                        x.User.Username.ToUpper() == username.ToUpper() &&
-                        x.Movie.TMDB == movie.Movie.Ids.TMDB
-                    );
-                    
-                    if ((existingMovieUserRecord?.WatchedAt - movie.LastWatchedAt)?.TotalHours > 1)
-                        existingMovieUserRecord = null;
-
-                    if (existingMovieUserRecord == null)
-                    {
-                        var movieUserRecord = new MovieUserRecord
-                        {
-                            Identifier = Guid.NewGuid(),
-                            User = existingUser,
-                            Movie = existingMovie,
-                            WatchedAt = movie.LastWatchedAt
-                        };
-
-                        Console.WriteLine($"[INFO] - Movie-User Link '{username}'-'{movie.Movie.Title}' doesn't exist. Creating...");
-                        context.Add(movieUserRecord);
-                    }
-
-                    moviesProcessed++;
-                    Console.WriteLine($"[INFO] - Movie {moviesProcessed}/{movies.Count} processed.");
-                }
-
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                await transaction.RollbackAsync();
-            }
-        }
     }
 
     public async Task ImportShows(string username, List<TraktShowResponse> shows)
@@ -143,6 +61,7 @@ public class MediaRepository : IMediaRepository
                         {
                             Identifier = Guid.NewGuid(),
                             Title = show.Show.Title,
+                            Slug = SlugHelper.GenerateSlugFor(show.Show.Title),
                             Year = show.Show.Year,
                             TMDB = show.Show.Ids.TMDB,
                             Poster = $"https://image.tmdb.org/t/p/w185{showDetails?.PosterUrl}",
@@ -243,115 +162,81 @@ public class MediaRepository : IMediaRepository
         }
     }
 
-    public List<Movie> GetAllMovies(string username)
+    public List<WatchedShow> GetAllWatchedShows(string username)
     {
         
         using (var context = new DatabaseContext())
+        using (var transaction = context.Database.BeginTransaction())
         {
             try
             {
-                return context.MovieUserLinks
+                var watchedShows = context.EpisodeUserLinks
                     .Where(x => x.User.Username.ToUpper() == username.ToUpper())
-                    .OrderByDescending(x => x.WatchedAt)
-                    .Select(x => new Movie
+                    .Select(x => new WatchedShow
                     {
-                        Identifier = x.Identifier,
-                        Title = x.Movie.Title,
-                        Year = x.Movie.Year,
-                        TMDB =  x.Movie.TMDB,
-                        Poster = x.Movie.Poster,
-                        Overview = x.Movie.Overview,
+                        Show = new Show
+                        {
+                            Identifier = x.Episode.Season.Show.Identifier,
+                            Title = x.Episode.Season.Show.Title,
+                            Slug = x.Episode.Season.Show.Slug,
+                            Year = x.Episode.Season.Show.Year,
+                            TMDB =  x.Episode.Season.Show.TMDB,
+                            Poster = x.Episode.Season.Show.Poster,
+                            Overview = x.Episode.Season.Show.Overview,
+                        },
+                        Season = new Season
+                        {
+                            Identifier = x.Episode.Season.Identifier,
+                            Number = x.Episode.Season.Number,
+                            Title = x.Episode.Season.Title,
+                        },
+                        Episode = new Episode
+                        {
+                            Identifier = x.Episode.Identifier,
+                            Number = x.Episode.Number,
+                            Title = x.Episode.Title,
+                        },
                         WatchedAt = x.WatchedAt
                     })
                     .ToList();
-            }
-            catch (Exception exception)
-            {
-                return new List<Movie>();
-            }
-        }
-    }
+                
+                foreach (var watchedShow in watchedShows)
+                {
+                    if (!string.IsNullOrEmpty(watchedShow.Show.Slug))
+                        continue;
+                    
+                    watchedShow.Show.Slug = SlugHelper.GenerateSlugFor(watchedShow.Show.Title);
+                    
+                    var show = context.Shows.FirstOrDefault(x => x.Identifier == watchedShow.Show.Identifier);
+                    show.Slug = watchedShow.Show.Slug;
+                    context.Update(show);
+                }
+            
+                context.SaveChanges();
+                transaction.Commit();
 
-    public List<Show> GetAllShows(string username)
-    {
-        
-        using (var context = new DatabaseContext())
-        {
-            try
-            {
-                var shows = context.EpisodeUserLinks
-                    .Where(x => x.User.Username.ToUpper() == username.ToUpper())
-                    .Select(x => new Show
-                    {
-                        Identifier = x.Identifier,
-                        Title = x.Episode.Title,
-                        ParentTitle = x.Episode.Season.Title,
-                        GrandParentTitle = x.Episode.Season.Show.Title,
-                        Year = x.Episode.Season.Show.Year,
-                        TMDB =  x.Episode.Season.Show.TMDB,
-                        Poster = x.Episode.Season.Show.Poster,
-                        Overview = x.Episode.Season.Show.Overview,
-                        WatchedAt = x.WatchedAt,
-                        SeasonNumber = x.Episode.Season.Number,
-                        EpisodeNumber = x.Episode.Number,
-                    })
-                    .ToList();
-
-                return shows
+                return watchedShows
                     .OrderByDescending(x => x.WatchedAt)
                     .ToList();
             }
             catch (Exception exception)
             {
-                return new List<Show>();
+                Console.WriteLine(exception);
+                transaction.Rollback();
             }
         }
+
+        return new List<WatchedShow>();
     }
-    
-    public Movie GetMovieByIdentifier(Guid identifier)
+
+    public Show? GetShowBySlug(string slug)
     {
-        
         using (var context = new DatabaseContext())
         {
             try
             {
-                var movie = context.MovieUserLinks
-                    .Include(movieUserRecord => movieUserRecord.Movie)
-                    .FirstOrDefault(x => x.Identifier.ToString().ToUpper() == identifier.ToString().ToUpper());
-
-                if (movie == null)
-                    return null;
-
-                return new Movie
-                {
-                    Identifier = movie.Identifier,
-                    Title = movie.Movie.Title,
-                    Year = movie.Movie.Year,
-                    TMDB =  movie.Movie.TMDB,
-                    Poster = movie.Movie.Poster,
-                    Overview = movie.Movie.Overview,
-                    WatchedAt = movie.WatchedAt
-                };
-            }
-            catch (Exception exception)
-            {
-                return null;
-            }
-        }
-    }
-
-    public Show GetShowByIdentifier(Guid identifier)
-    {
-        
-        using (var context = new DatabaseContext())
-        {
-            try
-            {
-                var show = context.EpisodeUserLinks
-                    .Include(episodeUserRecord => episodeUserRecord.Episode)
-                    .ThenInclude(episodeRecord => episodeRecord.Season)
-                    .ThenInclude(seasonRecord => seasonRecord.Show)
-                    .FirstOrDefault(x => x.Identifier.ToString().ToUpper() == identifier.ToString().ToUpper());
+                var show = context.Shows
+                    .FirstOrDefault(x => x.Slug.ToUpper() == slug.ToUpper());
 
                 if (show == null)
                     return null;
@@ -359,16 +244,12 @@ public class MediaRepository : IMediaRepository
                 return new Show
                 {
                     Identifier = show.Identifier,
-                    Title = show.Episode.Title,
-                    ParentTitle = show.Episode.Season.Title,
-                    GrandParentTitle = show.Episode.Season.Show.Title,
-                    Year = show.Episode.Season.Show.Year,
-                    TMDB =  show.Episode.Season.Show.TMDB,
-                    Poster = show.Episode.Season.Show.Poster,
-                    Overview = show.Episode.Season.Show.Overview,
-                    WatchedAt = show.WatchedAt,
-                    SeasonNumber = show.Episode.Season.Number,
-                    EpisodeNumber = show.Episode.Number,
+                    Title = show.Title,
+                    Slug = show.Slug,
+                    Year = show.Year,
+                    TMDB =  show.TMDB,
+                    Poster = show.Poster,
+                    Overview = show.Overview
                 };
             }
             catch (Exception exception)
@@ -378,59 +259,88 @@ public class MediaRepository : IMediaRepository
         }
     }
 
-    public void ImportMovie(string username, MovieRecord movie)
+    public Season? GetSeasonByNumber(string slug, int seasonNumber)
     {
         using (var context = new DatabaseContext())
-        using (var transaction = context.Database.BeginTransaction())
         {
             try
             {
-                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+                var season = context.Seasons
+                    .Where(x => x.Show.Slug.ToUpper() == slug.ToUpper())
+                    .FirstOrDefault(x => x.Number == seasonNumber);
 
-                if (existingUser == null)
+                if (season == null)
+                    return null;
+
+                return new Season
                 {
-                    existingUser = new UserRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        Username = username
-                    };
-
-                    context.Add(existingUser);
-                }
-
-                var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.TMDB);
-
-                if (existingMovie == null)
-                {
-                    existingMovie = movie;
-                    context.Add(existingMovie);
-                }
-
-                var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
-                    x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Movie.TMDB == movie.TMDB
-                );
-
-                if (existingMovieUserRecord == null)
-                {
-                    var movieUserRecord = new MovieUserRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        User = existingUser,
-                        Movie = existingMovie,
-                        WatchedAt = DateTime.Now
-                    };
-
-                    context.Add(movieUserRecord);
-                }
-
-                context.SaveChanges();
-                transaction.Commit();
+                    Identifier = season.Identifier,
+                    Title = season.Title,
+                    Number = season.Number
+                };
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
-                transaction.Rollback();
+                return null;
+            }
+        }
+    }
+
+    public Episode? GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                var episode = context.Episodes
+                    .Where(x => x.Season.Show.Slug.ToUpper() == slug.ToUpper())
+                    .Where(x => x.Season.Number == seasonNumber)
+                    .FirstOrDefault(x => x.Number == episodeNumber);
+
+                if (episode == null)
+                    return null;
+
+                return new Episode
+                {
+                    Identifier = episode.Identifier,
+                    Title = episode.Title,
+                    Number = episode.Number
+                };
+            }
+            catch (Exception exception)
+            {
+                return null;
+            }
+        }
+    }
+
+    public List<WatchedEpisode> GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                var watchHistory = context.EpisodeUserLinks
+                    .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+                    .Where(x => x.Episode.Season.Show.Slug.ToUpper() == slug.ToUpper())
+                    .Where(x => x.Episode.Season.Number == seasonNumber)
+                    .Where(x => x.Episode.Number == episodeNumber)
+                    .ToList();
+
+                if (watchHistory == null)
+                    return null;
+
+                return watchHistory.ConvertAll((episode) =>
+                {
+                    return new WatchedEpisode
+                    {
+                        WatchedAt = episode.WatchedAt
+                    };
+                });
+            }
+            catch (Exception exception)
+            {
+                return new  List<WatchedEpisode>();
             }
         }
     }

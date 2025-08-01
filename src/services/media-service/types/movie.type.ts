@@ -1,9 +1,9 @@
 export interface IMovie {
-    identifier: string | null;
+    identifier: string;
     title: string;
+    slug: string;
     year: number;
     tmdb: string;
     posterUrl: string;
     overview: string;
-    watchedAt: Date;
 }

@@ -18,9 +18,10 @@ import { CustomSidebarComponent } from '../components/custom-sidebar/custom-side
 import { EventService } from "../services/event-service/event.service";
 import { MediaPosterComponent } from "../components/media-poster/media-poster.component";
 import { SettingsPageComponent } from "../pages/settings-page/settings-page.component";
-import { MediaDetailsPageComponent } from "../pages/media-details-page/media-details-page.component";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { WatchingNowComponent } from '../components/watching-now/watching-now.component';
+import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
+import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
 
 @NgModule({
     declarations: [
@@ -32,8 +33,9 @@ import { WatchingNowComponent } from '../components/watching-now/watching-now.co
         WideButtonComponent,
         CustomSidebarComponent,
         MediaPosterComponent,
-        MediaDetailsPageComponent,
-        WatchingNowComponent
+        WatchingNowComponent,
+        ShowDetailsPageComponent,
+        MovieDetailsPageComponent
     ],
     bootstrap: [AppComponent],
     imports: [

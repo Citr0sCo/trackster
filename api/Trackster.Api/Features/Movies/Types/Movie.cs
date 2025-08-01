@@ -1,12 +1,8 @@
-using System.ComponentModel.DataAnnotations;
+namespace Trackster.Api.Features.Movies.Types;
 
-namespace Trackster.Api.Data.Records;
-
-public class MovieRecord
+public class Movie
 {
-    [Key]
     public Guid Identifier { get; set; }
-
     public string Title { get; set; }
     public int Year { get; set; }
     public string TMDB { get; set; }

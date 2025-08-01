@@ -4,21 +4,26 @@ import { Observable, of, tap, } from 'rxjs';
 import { MediaRepository } from './media.repository';
 import { IShow } from './types/show.type';
 import { IMedia } from "./types/media.type";
+import {IWatchedMovie} from "./types/watched-movie.type";
+import {IWatchedShow} from "./types/watched-show.type";
+import {ISeason} from "./types/season.type";
+import {IEpisode} from "./types/episode.type";
+import {IWatchedEpisode} from "./types/watched-episode.type";
 
 @Injectable()
 export class MediaService {
 
     private _mediaRepository: MediaRepository;
 
-    private _cachedAllMovies: Array<IMovie> = [];
-    private _cachedAllShows: Array<IShow> = [];
+    private _cachedAllMovies: Array<IWatchedMovie> = [];
+    private _cachedAllShows: Array<IWatchedShow> = [];
     private _cachedHistory: Array<IMedia> = [];
 
     constructor(mediaRepository: MediaRepository) {
         this._mediaRepository = mediaRepository;
     }
 
-    public getAllMoviesFor(username: string): Observable<Array<IMovie>> {
+    public getAllMoviesFor(username: string): Observable<Array<IWatchedMovie>> {
 
         if (this._cachedAllMovies.length > 0) {
             return of(this._cachedAllMovies);
@@ -32,7 +37,7 @@ export class MediaService {
             );
     }
 
-    public getAllShowsFor(username: string): Observable<Array<IShow>> {
+    public getAllShowsFor(username: string): Observable<Array<IWatchedShow>> {
 
         if (this._cachedAllShows.length > 0) {
             return of(this._cachedAllShows);
@@ -64,8 +69,28 @@ export class MediaService {
         return this._mediaRepository.importFromTrakt(username);
     }
 
-    public getMediaById(identifier: string): Observable<IMedia> {
-        return this._mediaRepository.getMediaById(identifier);
+    public getMovieBySlug(slug: string): Observable<IMovie> {
+        return this._mediaRepository.getMovieBySlug(slug);
+    }
+
+    public getMovieWatchHistoryById(username: string, identifier: any) {
+        return this._mediaRepository.getMovieWatchHistoryById(username, identifier);
+    }
+
+    public getShowBySlug(slug: string): Observable<IShow> {
+        return this._mediaRepository.getShowBySlug(slug);
+    }
+
+    public getSeasonByNumber(identifier: string, seasonNumber: number): Observable<ISeason> {
+        return this._mediaRepository.getSeasonById(identifier, seasonNumber);
+    }
+
+    public getEpisodeByNumber(identifier: string, seasonNumber: number, episodeNumber: number): Observable<IEpisode> {
+        return this._mediaRepository.getEpisodeById(identifier, seasonNumber, episodeNumber);
+    }
+
+    public getEpisodeWatchHistory(username: string, identifier: string, seasonNumber: number, episodeNumber: number): Observable<Array<IWatchedEpisode>> {
+        return this._mediaRepository.getEpisodeWatchHistory(username, identifier, seasonNumber, episodeNumber);
     }
 
     public bustCache(): void {

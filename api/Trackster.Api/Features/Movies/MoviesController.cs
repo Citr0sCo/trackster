@@ -1,0 +1,44 @@
+using Microsoft.AspNetCore.Mvc;
+using Trackster.Api.Features.Movies.Types;
+
+namespace Trackster.Api.Features.Movies;
+
+[ApiController]
+[Route("api/[controller]")]
+public class MoviesController : ControllerBase
+{
+    private readonly MoviesService _service;
+
+    public MoviesController()
+    {
+        _service = new MoviesService(new MoviesRepository());
+    }
+    
+    [HttpGet("")]
+    public GetAllMoviesResponse GetAllWatchedMovies([FromQuery]string username)
+    {
+        return _service.GetAllWatchedMovies(username);
+    }
+    
+    [HttpGet("{slug}")]
+    public IActionResult GetMediaByIdentifier([FromRoute]string slug)
+    {
+        var response = _service.GetMovieBySlug(slug);
+        
+        if(response == null)
+            return NotFound();
+        
+        return Ok(response);
+    }
+    
+    [HttpGet("{slug}/history")]
+    public IActionResult GetWatchedHistoryBySlug([FromQuery]string username, [FromRoute]string slug)
+    {   
+        var response = _service.GetWatchedHistoryBySlug(username, slug);
+        
+        if(response == null)
+            return NotFound();
+        
+        return Ok(response);
+    }
+}

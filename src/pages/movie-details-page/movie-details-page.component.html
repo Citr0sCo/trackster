@@ -3,26 +3,26 @@
 
         <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
 
-        @if (media) {
+        @if (movie) {
             <div class="media-overview o-grid">
                 <div class="o-grid__col o-grid__col--fixed">
                     <div class="media-poster">
-                        <img [src]="media.posterUrl" alt="poster card">
+                        <img [src]="movie.posterUrl" alt="poster card">
                     </div>
                 </div>
                 <div class="o-grid__col">
                     <div class="media-details">
-                        <h1>{{ media.grandParentTitle ?? media.title }}</h1>
-                        @if (media.parentTitle && media.grandParentTitle) {
-                            <h2>{{ media.parentTitle }} - {{ media.title }}</h2>
+                        <h1>{{ movie.title }}</h1>
+                        <h3>{{ movie.year }}</h3>
+                        <p>{{ movie.overview }}</p>
+
+                        @for (episode of watchHistory; track episode) {
+                            <h6>Last Watched &#64; {{ episode.watchedAt | date:'HH:mm dd-MM-y' }} ({{ episode.watchedAt | timeago }})</h6>
                         }
-                        <h3>{{ media.year }}</h3>
-                        <p>{{ media.overview }}</p>
-                        <h6>Last Watched &#64; {{ media.watchedAt | date:'HH:mm dd-MM-y' }} ({{ media.watchedAt | timeago }})</h6>
                     </div>
                 </div>
             </div>
-            <div class="media-background" style="background-image:url({{ media.posterUrl }});"></div>
+            <div class="media-background" style="background-image:url({{ movie.posterUrl }});"></div>
         } @else if (isLoading) {
             <div class="media-overview">
                 Media loading...

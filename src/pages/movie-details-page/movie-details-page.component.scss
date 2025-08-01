@@ -8,11 +8,20 @@
         position: relative;
 
         .media-poster{
-
+            img {
+                @media(max-width: $mobile-width) {
+                    width:100%;
+                }
+            }
         }
 
         .media-details{
             margin-left:15px;
+
+            @media(max-width: $mobile-width) {
+                margin-top:15px;
+                margin-left:0;
+            }
 
             h1 {
 

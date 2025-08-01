@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import {IMedia} from "../../services/media-service/types/media.type";
+import {IMedia, MediaType} from "../../services/media-service/types/media.type";
 
 @Component({
     selector: 'media-poster',

@@ -1,0 +1,41 @@
+<div class="media-details-component">
+    <div class="container">
+
+        <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
+
+        @if (show) {
+            <div class="media-overview o-grid">
+                <div class="o-grid__col o-grid__col--fixed">
+                    <div class="media-poster">
+                        <img [src]="show.posterUrl" alt="poster card">
+                    </div>
+                </div>
+                <div class="o-grid__col">
+                    <div class="media-details">
+                        <h1>{{ show.title }}</h1>
+
+                        @if (season && episode) {
+                            <h2>{{ season.title }} &bull; {{ episode.title }}</h2>
+                        }
+
+                        <h3>{{ show.year }}</h3>
+                        <p>{{ show.overview }}</p>
+
+                        @for (episode of watchHistory; track episode) {
+                            <h6>Last Watched &#64; {{ episode.watchedAt | date:'HH:mm dd-MM-y' }} ({{ episode.watchedAt | timeago }})</h6>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="media-background" style="background-image:url({{ show.posterUrl }});"></div>
+        } @else if (isLoading) {
+            <div class="media-overview">
+                Media loading...
+            </div>
+        } @else {
+            <div class="media-overview">
+                Media not found...
+            </div>
+        }
+    </div>
+</div>

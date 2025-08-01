@@ -4,7 +4,8 @@ import { HomePageComponent } from '../pages/home-page/home-page.component';
 import {AuthorizeTraktComponent} from "../pages/authorize-trakt-page/authorize-trakt.component";
 import { HistoryPageComponent } from '../pages/history-page/history-page.component';
 import {SettingsPageComponent} from "../pages/settings-page/settings-page.component";
-import {MediaDetailsPageComponent} from "../pages/media-details-page/media-details-page.component";
+import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
+import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
 
 const routes: Routes = [
     {
@@ -24,8 +25,12 @@ const routes: Routes = [
         component: AuthorizeTraktComponent
     },
     {
-        path: 'media/:id',
-        component: MediaDetailsPageComponent
+        path: 'movies/:slug',
+        component: MovieDetailsPageComponent
+    },
+    {
+        path: 'shows/:slug/seasons/:seasonId/episodes/:episodeId',
+        component: ShowDetailsPageComponent
     },
     { path: '**', pathMatch: 'full', redirectTo: 'home' }
 ];
