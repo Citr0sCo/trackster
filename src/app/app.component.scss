@@ -1,5 +1,11 @@
+@import "../styles/utility/variables";
+
 .main-content {
-  margin: 0;
-  height: 100vh;
-  overflow: auto;
+    margin: 0;
+    height: 100vh;
+    overflow: auto;
+
+    @media(max-width: $mobile-width) {
+        padding-bottom: 75px;
+    }
 }
