@@ -56,7 +56,7 @@ public class TmdbMovieDetails
     public string ReleaseDate { get; set; }
 
     //[JsonProperty("revenue")]
-    //public int Revenue { get; set; }
+    //public int64 Revenue { get; set; }
 
     [JsonProperty("runtime")]
     public int Runtime { get; set; }
