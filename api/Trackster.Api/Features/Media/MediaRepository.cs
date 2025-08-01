@@ -64,7 +64,7 @@ public class MediaRepository : IMediaRepository
                             Title = movie.Movie.Title,
                             Year = movie.Movie.Year,
                             TMDB = movie.Movie.Ids.TMDB,
-                            Poster = $"https://image.tmdb.org/t/p/w185{details?.PosterUrl}",
+                            Poster = $"https://image.tmdb.org/t/p/w185{details.PosterUrl}",
                             Overview = details?.Overview,
                         };
                         
