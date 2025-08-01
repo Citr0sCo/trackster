@@ -12,4 +12,5 @@ public class ShowRecord
     public string TMDB { get; set; }
     public string? Poster { get; set; }
     public string? Overview { get; set; }
+    public string Slug { get; set; }
 }

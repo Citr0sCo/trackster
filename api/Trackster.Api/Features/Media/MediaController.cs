@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Trackster.Api.Features.Media.Types;
+using Trackster.Api.Features.Movies;
+using Trackster.Api.Features.Shows; 
 
 namespace Trackster.Api.Features.Media;
 
@@ -11,19 +13,7 @@ public class MediaController : ControllerBase
 
     public MediaController()
     {
-        _service = new MediaService(new MediaRepository());
-    }
-    
-    [HttpGet("movies")]
-    public GetAllMoviesResponse GetAllMovies([FromQuery]string username)
-    {
-        return _service.GetAllMovies(username);
-    }
-    
-    [HttpGet("shows")]
-    public GetAllShowsResponse GetAllShows([FromQuery]string username)
-    {
-        return _service.GetAllShows(username);
+        _service = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()));
     }
     
     [HttpGet("history")]
@@ -41,16 +31,5 @@ public class MediaController : ControllerBase
         });
         
         return new ImportMediaResponse();
-    }
-    
-    [HttpGet("{identifier:guid}")]
-    public IActionResult GetMediaByIdentifier([FromRoute]Guid identifier)
-    {
-        var response = _service.GetMediaByIdentifier(identifier);
-        
-        if(response == null)
-            return NotFound();
-        
-        return Ok(response);
     }
 }

@@ -1,6 +1,4 @@
-using Trackster.Api.Data.Records;
-
-namespace Trackster.Api.Features.Media.Types;
+namespace Trackster.Api.Data.Records;
 
 public class WatchingMovieRecord
 {

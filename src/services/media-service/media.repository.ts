@@ -8,6 +8,11 @@ import { ImportType } from "../../core/import-type.enum";
 import { IMovie } from "./types/movie.type";
 import {IShow} from "./types/show.type";
 import {IMedia} from "./types/media.type";
+import {IWatchedMovie} from "./types/watched-movie.type";
+import {IWatchedShow} from "./types/watched-show.type";
+import {IEpisode} from "./types/episode.type";
+import {ISeason} from "./types/season.type";
+import {IWatchedEpisode} from "./types/watched-episode.type";
 
 @Injectable()
 export class MediaRepository {
@@ -18,19 +23,22 @@ export class MediaRepository {
         this._httpClient = httpClient;
     }
 
-    public getAllMoviesFor(username: string): Observable<Array<IMovie>> {
-        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/movies?username=${username}`)
+    public getAllMoviesFor(username: string): Observable<Array<IWatchedMovie>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/movies?username=${username}`)
             .pipe(
                 mapNetworkError(),
                 map((response: any) => {
-                    return response.Movies.map((movie: any) => {
+                    return response.WatchedMovies.map((movie: any) => {
                         return {
-                            identifier: movie.Identifier,
-                            title: movie.Title,
-                            year: movie.Year,
-                            tmdb: movie.TMDB,
-                            posterUrl: movie.Poster,
-                            overview: movie.Overview,
+                            movie: {
+                                identifier: movie.Movie.Identifier,
+                                title: movie.Movie.Title,
+                                slug: movie.Movie.Slug,
+                                year: movie.Movie.Year,
+                                tmdb: movie.Movie.TMDB,
+                                posterUrl: movie.Movie.Poster,
+                                overview: movie.Movie.Overview,
+                            },
                             watchedAt: movie.WatchedAt
                         };
                     });
@@ -38,25 +46,33 @@ export class MediaRepository {
             );
     }
 
-    public getAllShowsFor(username: string): Observable<Array<IShow>> {
-        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/shows?username=${username}`)
+    public getAllShowsFor(username: string): Observable<Array<IWatchedShow>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/shows?username=${username}`)
             .pipe(
                 mapNetworkError(),
                 map((response: any) => {
-                    return response.Shows.map((show: any) => {
+                    return response.WatchedShows.map((show: any) => {
                         return {
-                            identifier: show.Identifier,
-                            title: show.Title,
-                            mediaType: show.MediaType,
-                            parentTitle: show.ParentTitle,
-                            grandParentTitle: show.GrandParentTitle,
-                            year: show.Year,
-                            tmdb: show.TMDB,
-                            posterUrl: show.Poster,
-                            overview: show.Overview,
-                            watchedAt: show.WatchedAt,
-                            seasonNumber: show.SeasonNumber,
-                            episodeNumber: show.EpisodeNumber,
+                            show: {
+                                identifier: show.Show.Identifier,
+                                title: show.Show.Title,
+                                slug: show.Show.Slug,
+                                year: show.Show.Year,
+                                tmdb: show.Show.TMDB,
+                                posterUrl: show.Show.Poster,
+                                overview: show.Show.Overview,
+                            },
+                            season: {
+                                identifier: show.Season.Identifier,
+                                title: show.Season.Title,
+                                number: show.Season.Number
+                            },
+                            episode: {
+                                identifier: show.Episode.Identifier,
+                                title: show.Episode.Title,
+                                number: show.Episode.Number
+                            },
+                            watchedAt: show.WatchedAt
                         };
                     });
                 })
@@ -71,8 +87,9 @@ export class MediaRepository {
                     return response.Media.map((media: any) => {
                         return {
                             identifier: media.Identifier,
-                            mediaType: media.MediaType,
+                            mediaType: media.Type,
                             title: media.Title,
+                            slug: media.Slug,
                             parentTitle: media.ParentTitle,
                             grandParentTitle: media.GrandParentTitle,
                             year: media.Year,
@@ -95,26 +112,105 @@ export class MediaRepository {
             );
     }
 
-    public getMediaById(identifier: string): Observable<IMedia> {
-        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/${identifier}`)
+    public getMovieBySlug(slug: string): Observable<IMovie> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${slug}`)
             .pipe(
                 mapNetworkError(),
                 map((response: any) => {
-                    const media = response.Media;
+                    const media = response.Movie;
                     return {
                         identifier: media.Identifier,
                         mediaType: media.MediaType,
                         title: media.Title,
+                        slug: media.Slug,
                         parentTitle: media.ParentTitle,
                         grandParentTitle: media.GrandParentTitle,
                         year: media.Year,
                         tmdb: media.TMDB,
                         posterUrl: media.Poster,
                         overview: media.Overview,
-                        watchedAt: media.WatchedAt,
                         seasonNumber: media.SeasonNumber,
                         episodeNumber: media.EpisodeNumber,
                     };
+                })
+            );
+    }
+
+    public getShowBySlug(slug: string): Observable<IShow> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${slug}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    const show = response.Show;
+                    return {
+                        identifier: show.Identifier,
+                        title: show.Title,
+                        slug: show.Slug,
+                        year: show.Year,
+                        tmdb: show.TMDB,
+                        posterUrl: show.Poster,
+                        overview: show.Overview,
+                    };
+                })
+            );
+    }
+
+    public getSeasonById(identifier: string, seasonNumber: number): Observable<ISeason> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    const season = response.Season;
+                    return {
+                        identifier: season.Identifier,
+                        title: season.Title,
+                        number: season.Number
+                    };
+                })
+            );
+    }
+
+    public getEpisodeById(identifier: string, seasonNumber: number, episodeNumber: number): Observable<IEpisode> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    const episode = response.Episode;
+                    return {
+                        identifier: episode.Identifier,
+                        title: episode.Title,
+                        number: episode.Number
+                    };
+                })
+            );
+    }
+
+    public getEpisodeWatchHistory(username:string, identifier: string, seasonNumber: number, episodeNumber: number): Observable<Array<IWatchedEpisode>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}/history?username=${username}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    const episodes = response.WatchedEpisodes;
+                    return episodes.map((episode: any) => {
+                        return {
+                            watchedAt: episode.WatchedAt
+                        };
+                    });
+                })
+            );
+    }
+
+    public getMovieWatchHistoryById(username:string, identifier: string): Observable<Array<IWatchedMovie>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${identifier}/history?username=${username}`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    const episodes = response.WatchHistory;
+                    return episodes.map((episode: any) => {
+                        return {
+                            watchedAt: episode.WatchedAt
+                        };
+                    });
                 })
             );
     }

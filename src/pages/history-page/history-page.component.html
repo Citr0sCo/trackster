@@ -12,7 +12,8 @@
                 </div>
             </div>
         </div>
-        @if (media != null) {
+
+        @if (media != null && keys.length > 0) {
             <div class="o-grid o-grid--space-between o-grid--row">
                 @for (key of visibleKeys; track key) {
                     <div style="margin-top:15px;">

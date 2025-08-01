@@ -5,6 +5,8 @@ import { IMovie } from '../../services/media-service/types/movie.type';
 import { IShow } from '../../services/media-service/types/show.type';
 import { IMedia, MediaType } from "../../services/media-service/types/media.type";
 import { MediaMapper } from "../../services/media-service/media.mapper";
+import {IWatchedMovie} from "../../services/media-service/types/watched-movie.type";
+import {IWatchedShow} from "../../services/media-service/types/watched-show.type";
 
 @Component({
     selector: 'home-page',
@@ -14,8 +16,8 @@ import { MediaMapper } from "../../services/media-service/media.mapper";
 })
 export class HomePageComponent implements OnInit, OnDestroy {
 
-    public movies: Array<IMovie> = [];
-    public shows: Array<IShow> = [];
+    public movies: Array<IWatchedMovie> = [];
+    public shows: Array<IWatchedShow> = [];
 
     public moviesLoading: boolean = false;
     public showsLoading: boolean = false;
@@ -46,11 +48,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
             });
     }
 
-    public movieToMedia(movie: IMovie): IMedia {
+    public movieToMedia(movie: IWatchedMovie): IMedia {
         return MediaMapper.fromMovie(movie);
     }
 
-    public showToMedia(show: IShow): IMedia {
+    public showToMedia(show: IWatchedShow): IMedia {
         return MediaMapper.fromShow(show);
     }
 
