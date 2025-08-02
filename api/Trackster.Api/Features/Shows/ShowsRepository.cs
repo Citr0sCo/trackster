@@ -120,11 +120,15 @@ public class ShowsRepository : IMediaRepository
                                 context.Add(existingEpisode);
                             }
 
+                            var lastWatchedAt = episode.WatchedAt;
+
                             var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
                                 x.User.Username.ToUpper() == username.ToUpper() &&
                                 x.Episode.Number == episode.Number &&
                                 x.Episode.Season.Identifier == existingSeason.Identifier &&
-                                x.Episode.Season.Show.Identifier == existingShow.Identifier
+                                x.Episode.Season.Show.Identifier == existingShow.Identifier &&
+                                x.WatchedAt >= lastWatchedAt.AddHours(-1) &&
+                                x.WatchedAt <= lastWatchedAt.AddHours(1)
                             );
                     
                             if ((existingEpisodeUserRecord?.WatchedAt - episode.WatchedAt)?.TotalHours > 1)
@@ -137,7 +141,7 @@ public class ShowsRepository : IMediaRepository
                                     Identifier = Guid.NewGuid(),
                                     User = existingUser,
                                     Episode = existingEpisode,
-                                    WatchedAt = episode.WatchedAt
+                                    WatchedAt = lastWatchedAt
                                 };
                                 
                                 Console.WriteLine($"[INFO] - Episode-User Link '{username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
@@ -390,12 +394,16 @@ public class ShowsRepository : IMediaRepository
                     existingEpisode = episode;
                     context.Add(existingEpisode);
                 }
+                
+                var now = DateTime.Now;
 
                 var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
                     x.User.Username.ToUpper() == username.ToUpper() &&
                     x.Episode.Number == episode.Number &&
                     x.Episode.Season.Identifier == existingSeason.Identifier &&
-                    x.Episode.Season.Show.Identifier == existingShow.Identifier
+                    x.Episode.Season.Show.Identifier == existingShow.Identifier &&
+                    x.WatchedAt >= now.AddHours(-1) &&
+                    x.WatchedAt <= now.AddHours(1)
                 );
 
                 if (existingEpisodeUserRecord == null)
@@ -405,7 +413,7 @@ public class ShowsRepository : IMediaRepository
                         Identifier = Guid.NewGuid(),
                         User = existingUser,
                         Episode = episode,
-                        WatchedAt = DateTime.Now
+                        WatchedAt = now
                     };
 
                     context.Add(movieUserRecord);
