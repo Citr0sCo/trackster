@@ -1,3 +1,4 @@
+using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
@@ -71,6 +72,7 @@ public class MoviesService : IMoviesService
         {
             Identifier = Guid.NewGuid(),
             Title = title,
+            Slug = SlugHelper.GenerateSlugFor(title),
             TMDB = tmdbReference,
             Year = year,
             Overview = movie.Overview,
