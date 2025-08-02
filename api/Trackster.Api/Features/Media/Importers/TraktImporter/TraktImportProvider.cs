@@ -42,4 +42,40 @@ public class TraktImportProvider
             }
         }
     }
+    
+    public async Task<List<TraktMovieHistoryResponse>> GetWatchedMovieHistory(string username, string itemId)
+    {
+        var baseAddress = new Uri("https://api.trakt.tv/");
+
+        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        {
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
+  
+            using(var response = await httpClient.GetAsync($"users/{username}/history/movies/{itemId}"))
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+                var parsedData = JsonConvert.DeserializeObject<List<TraktMovieHistoryResponse>>(responseData);
+                return parsedData ?? new List<TraktMovieHistoryResponse>();
+            }
+        }
+    }
+
+    public async Task<List<TraktEpisodeHistoryResponse>> GetWatchedEpisodeHistory(string username, string itemId)
+    {
+        var baseAddress = new Uri("https://api.trakt.tv/");
+
+        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        {
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
+  
+            using(var response = await httpClient.GetAsync($"users/{username}/history/episodes/{itemId}"))
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+                var parsedData = JsonConvert.DeserializeObject<List<TraktEpisodeHistoryResponse>>(responseData);
+                return parsedData ?? new List<TraktEpisodeHistoryResponse>();
+            }
+        }
+    }
 }
