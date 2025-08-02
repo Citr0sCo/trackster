@@ -172,6 +172,9 @@ public class ShowsRepository : IMediaRepository
             {
                 var watchedShows = context.EpisodeUserLinks
                     .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+                    .OrderByDescending(x => x.WatchedAt)
+                    .Skip((page - 1) * results)
+                    .Take(results)
                     .Select(x => new WatchedShow
                     {
                         Show = new Show
@@ -198,8 +201,6 @@ public class ShowsRepository : IMediaRepository
                         },
                         WatchedAt = x.WatchedAt
                     })
-                    .Skip((page - 1) * results)
-                    .Take(results)
                     .ToList();
                 
                 foreach (var watchedShow in watchedShows)
@@ -218,7 +219,6 @@ public class ShowsRepository : IMediaRepository
                 transaction.Commit();
 
                 return watchedShows
-                    .OrderByDescending(x => x.WatchedAt)
                     .ToList();
             }
             catch (Exception exception)

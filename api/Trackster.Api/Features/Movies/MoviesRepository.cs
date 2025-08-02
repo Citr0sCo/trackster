@@ -117,6 +117,8 @@ public class MoviesRepository : IMoviesRepository
                 var watchedMovies = context.MovieUserLinks
                     .Where(x => x.User.Username.ToUpper() == username.ToUpper())
                     .OrderByDescending(x => x.WatchedAt)
+                    .Skip((page - 1) * results)
+                    .Take(results)
                     .Select(x => new WatchedMovie
                     {
                         Movie = new Movie
@@ -131,8 +133,6 @@ public class MoviesRepository : IMoviesRepository
                         },
                         WatchedAt = x.WatchedAt
                     })
-                    .Skip((page - 1) * results)
-                    .Take(results)
                     .ToList();
 
                 foreach (var watchedMovie in watchedMovies)
