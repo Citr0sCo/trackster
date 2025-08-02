@@ -17,9 +17,9 @@ public class MediaController : ControllerBase
     }
     
     [HttpGet("history")]
-    public GetHistoryForUserResponse GetHistoryForUser([FromQuery]string username)
+    public GetHistoryForUserResponse GetHistoryForUser([FromQuery]string username, [FromQuery]int results = 50, [FromQuery]int page = 1)
     {
-        return _service.GetHistoryForUser(username);
+        return _service.GetHistoryForUser(username, results, page);
     }
     
     [HttpPost("import")]

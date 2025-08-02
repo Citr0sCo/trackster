@@ -45,10 +45,10 @@ public class MediaService
         return new ImportMediaResponse();
     }
 
-    public GetHistoryForUserResponse GetHistoryForUser(string username)
+    public GetHistoryForUserResponse GetHistoryForUser(string username, int results, int page)
     {
-        var movies = _moviesService.GetAllWatchedMovies(username);
-        var shows = _showsService.GetAllWatchedShows(username);
+        var movies = _moviesService.GetAllWatchedMovies(username, results, page);
+        var shows = _showsService.GetAllWatchedShows(username, results, page);
 
         var media = new List<Types.Media>();
         

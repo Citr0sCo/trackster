@@ -15,9 +15,9 @@ public class ShowsController : ControllerBase
     }
     
     [HttpGet("")]
-    public GetAllShowsResponse GetAllShows([FromQuery]string username)
+    public GetAllShowsResponse GetAllShows([FromQuery]string username, [FromQuery]int results = 50, [FromQuery]int page = 1)
     {
-        return _service.GetAllWatchedShows(username);
+        return _service.GetAllWatchedShows(username, results, page);
     }
     
     [HttpGet("{slug}")]

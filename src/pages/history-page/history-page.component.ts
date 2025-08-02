@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { IMedia } from "../../services/media-service/types/media.type";
