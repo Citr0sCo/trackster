@@ -18,12 +18,13 @@ a {
     .movie-poster {
         width: 100%;
         background-position: center;
-        background-size: 105%;
+        background-size: cover;
         background-repeat: no-repeat;
         border-radius: $border-radius $border-radius 0 0;
         overflow: hidden;
         position: relative;
         aspect-ratio: 2 / 3;
+        background-color: rgba(0, 0, 0, 0.5);
 
         &__watched_at {
             position: absolute;
