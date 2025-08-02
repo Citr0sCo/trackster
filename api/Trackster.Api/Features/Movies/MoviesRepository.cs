@@ -69,10 +69,14 @@ public class MoviesRepository : IMoviesRepository
                         Console.WriteLine($"[INFO] - Movie '{movie.Movie.Title}' doesn't exist. Creating...");
                         context.Add(existingMovie);
                     }
+                    
+                    var lastWatchedAt = movie.LastWatchedAt;
 
                     var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
                         x.User.Username.ToUpper() == username.ToUpper() &&
-                        x.Movie.TMDB == movie.Movie.Ids.TMDB
+                        x.Movie.TMDB == movie.Movie.Ids.TMDB &&
+                        x.WatchedAt >= lastWatchedAt.AddHours(-1) &&
+                        x.WatchedAt <= lastWatchedAt.AddHours(1)
                     );
                     
                     if ((existingMovieUserRecord?.WatchedAt - movie.LastWatchedAt)?.TotalHours > 1)
@@ -85,7 +89,7 @@ public class MoviesRepository : IMoviesRepository
                             Identifier = Guid.NewGuid(),
                             User = existingUser,
                             Movie = existingMovie,
-                            WatchedAt = movie.LastWatchedAt
+                            WatchedAt = lastWatchedAt
                         };
 
                         Console.WriteLine($"[INFO] - Movie-User Link '{username}'-'{movie.Movie.Title}' doesn't exist. Creating...");
@@ -250,9 +254,13 @@ public class MoviesRepository : IMoviesRepository
                     context.Add(existingMovie);
                 }
 
+                var now = DateTime.Now;
+
                 var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
                     x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Movie.TMDB == movie.TMDB
+                    x.Movie.TMDB == movie.TMDB &&
+                    x.WatchedAt >= now.AddHours(-1) &&
+                    x.WatchedAt <= now.AddHours(1)
                 );
 
                 if (existingMovieUserRecord == null)
@@ -262,7 +270,7 @@ public class MoviesRepository : IMoviesRepository
                         Identifier = Guid.NewGuid(),
                         User = existingUser,
                         Movie = existingMovie,
-                        WatchedAt = DateTime.Now
+                        WatchedAt = now
                     };
 
                     context.Add(movieUserRecord);
