@@ -7,7 +7,7 @@ namespace Trackster.Api.Features.Movies;
 
 public interface IMoviesService
 {
-    GetAllMoviesResponse GetAllWatchedMovies(string username);
+    GetAllMoviesResponse GetAllWatchedMovies(string username, int results, int page);
     GetMovieResponse GetMovieBySlug(string slug);
     Task<MovieRecord> SearchForMovieBy(string title, int year);
     Task ImportMovies(string username, List<TraktMovieResponse> movies);
@@ -27,9 +27,9 @@ public class MoviesService : IMoviesService
         _detailsProvider = new TmdbImportProvider();
     }
     
-    public GetAllMoviesResponse GetAllWatchedMovies(string username)
+    public GetAllMoviesResponse GetAllWatchedMovies(string username, int results, int page)
     {
-        var movies = _repository.GetAllWatchedMovies(username);
+        var movies = _repository.GetAllWatchedMovies(username, results, page);
 
         return new GetAllMoviesResponse
         {

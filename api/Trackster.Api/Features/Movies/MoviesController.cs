@@ -15,9 +15,9 @@ public class MoviesController : ControllerBase
     }
     
     [HttpGet("")]
-    public GetAllMoviesResponse GetAllWatchedMovies([FromQuery]string username)
+    public GetAllMoviesResponse GetAllWatchedMovies([FromQuery]string username, [FromQuery]int results = 50, [FromQuery]int page = 1)
     {
-        return _service.GetAllWatchedMovies(username);
+        return _service.GetAllWatchedMovies(username, results, page);
     }
     
     [HttpGet("{slug}")]

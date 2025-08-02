@@ -11,7 +11,7 @@ public interface IMoviesRepository
 {
     Task ImportMovies(string username, List<TraktMovieResponse> movies);
     void ImportMovie(string username, MovieRecord movie);
-    List<WatchedMovie> GetAllWatchedMovies(string username);
+    List<WatchedMovie> GetAllWatchedMovies(string username, int results, int page);
     Movie? GetMovieBySlug(string slug);
     List<WatchedMovie> GetWatchedHistoryBySlug(string username, string slug);
 }
@@ -107,7 +107,7 @@ public class MoviesRepository : IMoviesRepository
         }
     }
     
-    public List<WatchedMovie> GetAllWatchedMovies(string username)
+    public List<WatchedMovie> GetAllWatchedMovies(string username, int results, int page)
     {
         using (var context = new DatabaseContext())
         using (var transaction = context.Database.BeginTransaction())
@@ -131,6 +131,8 @@ public class MoviesRepository : IMoviesRepository
                         },
                         WatchedAt = x.WatchedAt
                     })
+                    .Skip((page - 1) * results)
+                    .Take(results)
                     .ToList();
 
                 foreach (var watchedMovie in watchedMovies)

@@ -10,7 +10,7 @@ namespace Trackster.Api.Features.Shows;
 public interface IMediaRepository
 {
     Task ImportShows(string username, List<TraktShowResponse> shows);
-    List<WatchedShow> GetAllWatchedShows(string username);
+    List<WatchedShow> GetAllWatchedShows(string username, int results, int page);
     void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Show? GetShowBySlug(string slug);
     Season? GetSeasonByNumber(string slug, int seasonNumber);
@@ -162,7 +162,7 @@ public class ShowsRepository : IMediaRepository
         }
     }
 
-    public List<WatchedShow> GetAllWatchedShows(string username)
+    public List<WatchedShow> GetAllWatchedShows(string username, int results, int page)
     {
         
         using (var context = new DatabaseContext())
@@ -198,6 +198,8 @@ public class ShowsRepository : IMediaRepository
                         },
                         WatchedAt = x.WatchedAt
                     })
+                    .Skip((page - 1) * results)
+                    .Take(results)
                     .ToList();
                 
                 foreach (var watchedShow in watchedShows)

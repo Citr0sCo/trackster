@@ -8,7 +8,7 @@ namespace Trackster.Api.Features.Shows;
 
 public interface IShowsService
 {
-    GetAllShowsResponse GetAllWatchedShows(string username);
+    GetAllShowsResponse GetAllWatchedShows(string username, int results, int page);
     Task<EpisodeRecord> SearchForEpisode(string showTitle, string episodeTitle, int year, int seasonNumber);
     GetShowResponse GetShowBySlug(string slug);
     Task ImportShows(string username, List<TraktShowResponse> movies);
@@ -26,9 +26,9 @@ public class ShowsService : IShowsService
         _detailsProvider = new TmdbImportProvider();
     }
     
-    public GetAllShowsResponse GetAllWatchedShows(string username)
+    public GetAllShowsResponse GetAllWatchedShows(string username, int results, int page)
     {
-        var shows = _repository.GetAllWatchedShows(username);
+        var shows = _repository.GetAllWatchedShows(username, results, page);
 
         return new GetAllShowsResponse
         {
