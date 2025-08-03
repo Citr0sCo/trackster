@@ -1,8 +1,9 @@
-using Castle.Components.DictionaryAdapter.Xml;
+using System.Diagnostics;
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
+using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Shows;
@@ -36,6 +37,10 @@ public class MediaService
     {
         if (request.Type == ImportType.Trakt && request.Username != null)
         {
+            var stopwatch = Stopwatch.StartNew();
+            
+            Console.WriteLine($"[INFO] - Starting Trakt import...");
+            
             var movies = await _traktProvider.GetMovies(request.Username);
             var shows = await _traktProvider.GetShows(request.Username);
 
@@ -46,120 +51,16 @@ public class MediaService
                 shows = shows.Take(10).ToList();
             }
 
-            var userRecord = await _usersService.GetUserByUsername(request.Username);
+            var user = await ProcessUser(request);
 
-            if (userRecord == null)
-            {
-                userRecord = new UserRecord
-                {
-                    Identifier = Guid.NewGuid(),
-                    Username = request.Username,
-                };
+            await ProcessMovies(request, movies, user);
 
-                await _usersService.CreateUser(userRecord);
-            }
-
-            foreach (var movie in movies)
-            {
-                var existingMovie = _moviesService.GetMovieByTmdbId(movie.Movie.Ids.TMDB);
-
-                if (existingMovie == null)
-                {
-                    var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB);
-
-                    var movieRecord = new MovieRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        Title = movie.Movie.Title,
-                        Slug = SlugHelper.GenerateSlugFor(movie.Movie.Title),
-                        Year = movie.Movie.Year,
-                        TMDB = movie.Movie.Ids.TMDB,
-                        Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
-                        Overview = details?.Overview,
-                    };
-
-                    await _moviesService.ImportMovie(userRecord, movieRecord);
-                }
-
-                var watchingHistory = await _traktProvider.GetWatchedMovieHistory(request.Username, movie.Movie.Ids.Trakt);
-
-                foreach (var watchHistory in watchingHistory)
-                {
-                    await _moviesService.MarkMovieAsWatched(request.Username, movie.Movie.Ids.TMDB, watchHistory.WatchedAt);
-                }
-            }
-
-            foreach (var show in shows)
-            {
-                var showRecord = await _showsService.GetShowByTmdbId(show.Show.Ids.TMDB);
-                var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
-
-                if (showRecord == null)
-                {
-                    showRecord = new ShowRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        Title = show.Show.Title,
-                        Slug = SlugHelper.GenerateSlugFor(show.Show.Title),
-                        Year = show.Show.Year,
-                        TMDB = show.Show.Ids.TMDB,
-                        Poster = $"https://image.tmdb.org/t/p/w300{details?.PosterUrl}",
-                        Overview = details?.Overview,
-                    };
-                    
-                    await _showsService.ImportShow(userRecord, showRecord);
-                }
-                
-                foreach (var season in show.Seasons)
-                {
-                    var seasonRecord = await _showsService.GetSeasonBy(season.Number, showRecord.Identifier);
-
-                    if (seasonRecord == null)
-                    {
-                        var title = $"Season {season.Number}";
-
-                        if (season.Number > 0 && details?.Seasons.Count > (season.Number - 1))
-                            title = details.Seasons[season.Number - 1].Title;
-
-                        seasonRecord = new SeasonRecord
-                        {
-                            Identifier = Guid.NewGuid(),
-                            Number = season.Number,
-                            Title = title,
-                            Show = showRecord
-                        };
-                        
-                        await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
-                        
-                        foreach (var episode in season.Episodes)
-                        {
-                            var episodeRecord = await _showsService.GetEpisodeBy(episode.Number, seasonRecord.Identifier);
-                            
-                            if (episodeRecord == null)
-                            {
-                                var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number);
-                                
-                                episodeRecord = new EpisodeRecord
-                                {
-                                    Identifier = Guid.NewGuid(),
-                                    Number = episode.Number,
-                                    Title = episodeDetails.Title ?? show.Show.Title,
-                                    Season = seasonRecord
-                                };
-
-                                await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
-                            }          
-                        }
-                    }
-                }
-                    
-                var watchingHistory = await _traktProvider.GetWatchedShowHistory(request.Username, show.Show.Ids.Trakt);
-
-                foreach (var watchHistory in watchingHistory)
-                {
-                    await _showsService.MarkEpisodeAsWatched(request.Username, show.Show.Ids.TMDB, watchHistory.Episode.Season, watchHistory.Episode.Number, watchHistory.WatchedAt);
-                }
-            }
+            await ProcessShows(request, shows, user);
+            
+            stopwatch.Stop();
+            
+            var time = TimeSpan.FromMilliseconds(stopwatch.ElapsedMilliseconds);
+            Console.WriteLine($"[INFO] - Finished Trakt import in {time.Minutes}m {time.Seconds}s!");
         }
 
         return new ImportMediaResponse();
@@ -288,5 +189,143 @@ public class MediaService
         var user = await _usersService.GetUserByUsername("citr0s");
         var episode = await _showsService.SearchForEpisode(showTitle, episodeTitle, year, seasonNumber);
         await _showsService.MarkEpisodeAsWatched(user.Username, episode.Season.Show.TMDB, episode.Season.Number, episode.Number, DateTime.Now);
+    }
+
+    private async Task<UserRecord> ProcessUser(ImportMediaRequest request)
+    {
+        var userRecord = await _usersService.GetUserByUsername(request.Username);
+
+        if (userRecord == null)
+        {
+            userRecord = new UserRecord
+            {
+                Identifier = Guid.NewGuid(),
+                Username = request.Username,
+            };
+
+            await _usersService.CreateUser(userRecord);
+        }
+
+        return userRecord;
+    }
+    
+    private async Task ProcessMovies(ImportMediaRequest request, List<TraktMovieResponse> movies, UserRecord userRecord)
+    {
+        Console.WriteLine($"[INFO] - Will process {movies.Count} movies.");
+
+        var processedMovies = 0;
+        foreach (var movie in movies)
+        {
+            var existingMovie = _moviesService.GetMovieByTmdbId(movie.Movie.Ids.TMDB);
+
+            if (existingMovie == null)
+            {
+                var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB);
+
+                var movieRecord = new MovieRecord
+                {
+                    Identifier = Guid.NewGuid(),
+                    Title = movie.Movie.Title,
+                    Slug = SlugHelper.GenerateSlugFor(movie.Movie.Title),
+                    Year = movie.Movie.Year,
+                    TMDB = movie.Movie.Ids.TMDB,
+                    Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
+                    Overview = details?.Overview,
+                };
+
+                await _moviesService.ImportMovie(userRecord, movieRecord);
+            }
+
+            var watchingHistory = await _traktProvider.GetWatchedMovieHistory(request.Username, movie.Movie.Ids.Trakt);
+
+            foreach (var watchHistory in watchingHistory)
+            {
+                await _moviesService.MarkMovieAsWatched(request.Username, movie.Movie.Ids.TMDB, watchHistory.WatchedAt);
+            }
+
+            processedMovies++;
+            Console.WriteLine($"[INFO] - Processed {processedMovies}/{movies.Count} movies.");
+        }
+    }
+    
+    private async Task ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord userRecord)
+    {
+        Console.WriteLine($"[INFO] - Will process {shows.Count} shows.");
+
+        var processedShows = 0;
+        foreach (var show in shows)
+        {
+            var showRecord = await _showsService.GetShowByTmdbId(show.Show.Ids.TMDB);
+            var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
+
+            if (showRecord == null)
+            {
+                showRecord = new ShowRecord
+                {
+                    Identifier = Guid.NewGuid(),
+                    Title = show.Show.Title,
+                    Slug = SlugHelper.GenerateSlugFor(show.Show.Title),
+                    Year = show.Show.Year,
+                    TMDB = show.Show.Ids.TMDB,
+                    Poster = $"https://image.tmdb.org/t/p/w300{details?.PosterUrl}",
+                    Overview = details?.Overview,
+                };
+                    
+                await _showsService.ImportShow(userRecord, showRecord);
+            }
+                
+            foreach (var season in show.Seasons)
+            {
+                var seasonRecord = await _showsService.GetSeasonBy(season.Number, showRecord.Identifier);
+
+                if (seasonRecord == null)
+                {
+                    var title = $"Season {season.Number}";
+
+                    if (season.Number > 0 && details?.Seasons.Count > (season.Number - 1))
+                        title = details.Seasons[season.Number - 1].Title;
+
+                    seasonRecord = new SeasonRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        Number = season.Number,
+                        Title = title,
+                        Show = showRecord
+                    };
+                        
+                    await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
+                        
+                    foreach (var episode in season.Episodes)
+                    {
+                        var episodeRecord = await _showsService.GetEpisodeBy(episode.Number, seasonRecord.Identifier);
+                            
+                        if (episodeRecord == null)
+                        {
+                            var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number);
+                                
+                            episodeRecord = new EpisodeRecord
+                            {
+                                Identifier = Guid.NewGuid(),
+                                Number = episode.Number,
+                                Title = episodeDetails.Title ?? show.Show.Title,
+                                Season = seasonRecord
+                            };
+
+                            await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
+                        }          
+                    }
+                }
+            }
+                    
+            var watchingHistory = await _traktProvider.GetWatchedShowHistory(request.Username, show.Show.Ids.Trakt);
+
+            foreach (var watchHistory in watchingHistory)
+            {
+                await _showsService.MarkEpisodeAsWatched(request.Username, show.Show.Ids.TMDB, watchHistory.Episode.Season, watchHistory.Episode.Number, watchHistory.WatchedAt);
+            }
+                
+            processedShows++;
+            Console.WriteLine($"[INFO] - Processed {processedShows}/{shows.Count} shows.");
+        }
     }
 }
