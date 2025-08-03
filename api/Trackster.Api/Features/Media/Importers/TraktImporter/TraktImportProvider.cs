@@ -11,12 +11,12 @@ public class TraktImportProvider
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
-        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
-  
-            using(var response = await httpClient.GetAsync($"users/{username}/watched/movies"))
+
+            using (var response = await httpClient.GetAsync($"users/{username}/watched/movies"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
                 var parsedData = JsonConvert.DeserializeObject<List<TraktMovieResponse>>(responseData);
@@ -29,12 +29,12 @@ public class TraktImportProvider
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
-        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
-  
-            using(var response = await httpClient.GetAsync($"users/{username}/watched/shows"))
+
+            using (var response = await httpClient.GetAsync($"users/{username}/watched/shows"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
                 var parsedData = JsonConvert.DeserializeObject<List<TraktShowResponse>>(responseData);
@@ -42,17 +42,17 @@ public class TraktImportProvider
             }
         }
     }
-    
+
     public async Task<List<TraktMovieHistoryResponse>> GetWatchedMovieHistory(string username, string itemId)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
-        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
-  
-            using(var response = await httpClient.GetAsync($"users/{username}/history/movies/{itemId}"))
+
+            using (var response = await httpClient.GetAsync($"users/{username}/history/movies/{itemId}"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
                 var parsedData = JsonConvert.DeserializeObject<List<TraktMovieHistoryResponse>>(responseData);
@@ -65,16 +65,27 @@ public class TraktImportProvider
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
-        using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
+        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
-  
-            using(var response = await httpClient.GetAsync($"users/{username}/history/shows/{itemId}"))
+
+            using (var response = await httpClient.GetAsync($"users/{username}/history/shows/{itemId}"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
-                var parsedData = JsonConvert.DeserializeObject<List<TraktShowHistoryResponse>>(responseData);
-                return parsedData ?? new List<TraktShowHistoryResponse>();
+
+                try
+                {
+                    var parsedData = JsonConvert.DeserializeObject<List<TraktShowHistoryResponse>>(responseData);
+                    return parsedData ?? new List<TraktShowHistoryResponse>();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[FATAL] - Failed to get show watch history. Error: {ex.Message} Response below:");
+                    Console.WriteLine(responseData);
+                }
+
+                return new List<TraktShowHistoryResponse>();
             }
         }
     }
