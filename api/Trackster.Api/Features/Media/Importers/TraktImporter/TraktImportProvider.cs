@@ -61,7 +61,7 @@ public class TraktImportProvider
         }
     }
 
-    public async Task<List<TraktEpisodeHistoryResponse>> GetWatchedEpisodeHistory(string username, string itemId)
+    public async Task<List<TraktShowHistoryResponse>> GetWatchedShowHistory(string username, string itemId)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
@@ -70,11 +70,11 @@ public class TraktImportProvider
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
   
-            using(var response = await httpClient.GetAsync($"users/{username}/history/episodes/{itemId}"))
+            using(var response = await httpClient.GetAsync($"users/{username}/history/shows/{itemId}"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
-                var parsedData = JsonConvert.DeserializeObject<List<TraktEpisodeHistoryResponse>>(responseData);
-                return parsedData ?? new List<TraktEpisodeHistoryResponse>();
+                var parsedData = JsonConvert.DeserializeObject<List<TraktShowHistoryResponse>>(responseData);
+                return parsedData ?? new List<TraktShowHistoryResponse>();
             }
         }
     }

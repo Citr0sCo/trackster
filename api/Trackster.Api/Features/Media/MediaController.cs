@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
-using Trackster.Api.Features.Shows; 
+using Trackster.Api.Features.Shows;
+using Trackster.Api.Features.Users;
 
 namespace Trackster.Api.Features.Media;
 
@@ -13,7 +14,7 @@ public class MediaController : ControllerBase
 
     public MediaController()
     {
-        _service = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()));
+        _service = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()));
     }
     
     [HttpGet("history")]
