@@ -1,7 +1,6 @@
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
-using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Movies.Types;
 
 namespace Trackster.Api.Features.Movies;
@@ -11,10 +10,11 @@ public interface IMoviesService
     GetAllMoviesResponse GetAllWatchedMovies(string username, int results, int page);
     GetMovieResponse GetMovieBySlug(string slug);
     Task<MovieRecord> SearchForMovieBy(string title, int year);
-    Task ImportMovies(string username, List<TraktMovieResponse> movies);
-    void ImportMovie(string username, MovieRecord movie);
+    Task ImportMovie(UserRecord user, MovieRecord movie);
 
     GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug);
+    MovieRecord? GetMovieByTmdbId(string tmdbId);
+    Task MarkMovieAsWatched(string username, string tmdbId, DateTime watchedAt);
 }
 
 public class MoviesService : IMoviesService
@@ -76,18 +76,13 @@ public class MoviesService : IMoviesService
             TMDB = tmdbReference,
             Year = year,
             Overview = movie.Overview,
-            Poster = $"https://image.tmdb.org/t/p/w185{movie.PosterUrl}"
+            Poster = $"https://image.tmdb.org/t/p/w300{movie.PosterUrl}"
         };
     }
 
-    public Task ImportMovies(string username, List<TraktMovieResponse> movies)
+    public async Task ImportMovie(UserRecord user, MovieRecord movie)
     {
-        return _repository.ImportMovies(username, movies);
-    }
-
-    public void ImportMovie(string username, MovieRecord movie)
-    {
-        _repository.ImportMovie(username, movie);
+        await _repository.ImportMovie(user, movie);
     }
     
     public GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug)
@@ -109,5 +104,15 @@ public class MoviesService : IMoviesService
         }
         
         return new GetMovieWatchedHistoryResponse();
+    }
+
+    public MovieRecord? GetMovieByTmdbId(string tmdbId)
+    {
+        return _repository.GetMovieByTmdbId(tmdbId);
+    }
+
+    public async Task MarkMovieAsWatched(string username, string tmdbId, DateTime watchedAt)
+    {
+        await _repository.MarkMovieAsWatched(username, tmdbId, watchedAt);
     }
 }

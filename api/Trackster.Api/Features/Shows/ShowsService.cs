@@ -1,7 +1,6 @@
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
-using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Shows.Types;
 
 namespace Trackster.Api.Features.Shows;
@@ -11,13 +10,21 @@ public interface IShowsService
     GetAllShowsResponse GetAllWatchedShows(string username, int results, int page);
     Task<EpisodeRecord> SearchForEpisode(string showTitle, string episodeTitle, int year, int seasonNumber);
     GetShowResponse GetShowBySlug(string slug);
-    Task ImportShows(string username, List<TraktShowResponse> movies);
-    void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
+    Task<ShowRecord?> GetShowByTmdbId(string tmdbId);
+    Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier);
+    Task<EpisodeRecord?> GetEpisodeBy(int episodeNumber, Guid seasonIdentifier);
+    Task ImportShow(UserRecord user, ShowRecord show);
+    Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season);
+    Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
+    GetSeasonResponse GetSeasonByNumber(string slug, int seasonNumber);
+    GetEpisodeResponse GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber);
+    GetEpisodeWatchedHistoryResponse GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber);
+    Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt);
 }
 
 public class ShowsService : IShowsService
 {
-    private readonly IMediaRepository _repository;
+    private readonly IShowsRepository _repository;
     private readonly TmdbImportProvider _detailsProvider;
 
     public ShowsService(ShowsRepository repository)
@@ -50,7 +57,7 @@ public class ShowsService : IShowsService
             Title = parsedShow.Title,
             Slug = SlugHelper.GenerateSlugFor(parsedShow.Title),
             Overview = parsedShow.Overview,
-            Poster = $"https://image.tmdb.org/t/p/w185{parsedShow.PosterUrl}",
+            Poster = $"https://image.tmdb.org/t/p/w300{parsedShow.PosterUrl}",
             TMDB = parsedShow.Identifier.ToString(),
             Year = parsedShow.FirstAirDate.Year
         };
@@ -96,14 +103,34 @@ public class ShowsService : IShowsService
         return new GetShowResponse();
     }
 
-    public Task ImportShows(string username, List<TraktShowResponse> shows)
+    public async Task<ShowRecord?> GetShowByTmdbId(string tmdbId)
     {
-        return _repository.ImportShows(username, shows);
+        return await _repository.GetShowByTmdbId(tmdbId);    
+    }
+    
+    public async Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier)
+    {
+        return await _repository.GetSeasonBy(seasonNumber, showIdentifier);
+    }
+    
+    public async Task<EpisodeRecord?> GetEpisodeBy(int episodeNumber, Guid seasonIdentifier)
+    {
+        return await _repository.GetEpisodeBy(episodeNumber, seasonIdentifier);
     }
 
-    public void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode)
+    public async Task ImportShow(UserRecord user, ShowRecord show)
     {
-        _repository.ImportEpisode(username, show, season, episode);
+        await _repository.ImportShow(user, show);
+    }
+
+    public async Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season)
+    {
+        await _repository.ImportSeason(user, show, season);
+    }
+
+    public async Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode)
+    {
+        await _repository.ImportEpisode(user, show, season, episode);
     }
 
     public GetSeasonResponse GetSeasonByNumber(string slug, int seasonNumber)
@@ -165,5 +192,10 @@ public class ShowsService : IShowsService
         }
         
         return new GetEpisodeWatchedHistoryResponse();
+    }
+
+    public async Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt)
+    {
+        await _repository.MarkEpisodeAsWatched(username, showTmdbId, seasonNumber, episodeNumber, watchedAt);
     }
 }

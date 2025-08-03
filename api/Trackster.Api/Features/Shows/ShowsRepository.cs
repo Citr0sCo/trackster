@@ -1,180 +1,88 @@
-﻿using Trackster.Api.Core.Helpers;
-using Trackster.Api.Data;
+﻿using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
-using Trackster.Api.Features.Media.Importers.TmdbImporter;
-using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Shows.Types;
 
 namespace Trackster.Api.Features.Shows;
 
-public interface IMediaRepository
+public interface IShowsRepository
 {
-    Task ImportShows(string username, List<TraktShowResponse> shows);
+    Task<ShowRecord?> GetShowByTmdbId(string tmdbId);
+    Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier);
+    Task<EpisodeRecord?> GetEpisodeBy(int episodeNumber, Guid seasonIdentifier);
     List<WatchedShow> GetAllWatchedShows(string username, int results, int page);
-    void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Show? GetShowBySlug(string slug);
     Season? GetSeasonByNumber(string slug, int seasonNumber);
     Episode? GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber);
     List<WatchedEpisode> GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber);
+    Task ImportShow(UserRecord user, ShowRecord show);
+    Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season);
+    Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
+    Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt);
 }
 
-public class ShowsRepository : IMediaRepository
+public class ShowsRepository : IShowsRepository
 {
-    private readonly TmdbImportProvider _detailsProvider;
-
-    public ShowsRepository()
-    {
-        _detailsProvider = new TmdbImportProvider();
-    }
-
-    public async Task ImportShows(string username, List<TraktShowResponse> shows)
+    public async Task<ShowRecord?> GetShowByTmdbId(string tmdbId)
     {
         using (var context = new DatabaseContext())
-        using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
-                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
-
-                if (existingUser == null)
-                {
-                    existingUser = new UserRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        Username = username
-                    };
-
-                    Console.WriteLine($"[INFO] - User '{username}' doesn't exist. Creating...");
-                    context.Add(existingUser);
-                }
-
-                var showsProcessed = 0;
-                foreach (var show in shows)
-                {
-                    var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.Show.Ids.TMDB);
-                    
-                    var showDetails = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
-
-                    if (existingShow == null)
-                    {
-                        existingShow = new ShowRecord
-                        {
-                            Identifier = Guid.NewGuid(),
-                            Title = show.Show.Title,
-                            Slug = SlugHelper.GenerateSlugFor(show.Show.Title),
-                            Year = show.Show.Year,
-                            TMDB = show.Show.Ids.TMDB,
-                            Poster = $"https://image.tmdb.org/t/p/w185{showDetails?.PosterUrl}",
-                            Overview = showDetails?.Overview,
-                        };
-                        
-                        Console.WriteLine($"[INFO] - Show '{show.Show.Title}' doesn't exist. Creating...");
-                        context.Add(existingShow);
-                    }
-                    
-                    foreach (var season in show.Seasons)
-                    {
-                        var existingSeason = context.Seasons.FirstOrDefault(x =>
-                            x.Number == season.Number &&
-                            x.Show.Identifier == existingShow.Identifier
-                        );
-
-                        if (existingSeason == null)
-                        {
-                            var title = $"Season {season.Number}";
-
-                            if (season.Number > 0 && showDetails?.Seasons.Count > (season.Number - 1))
-                                title = showDetails.Seasons[season.Number - 1].Title;
-                            
-                            existingSeason = new SeasonRecord
-                            {
-                                Identifier = Guid.NewGuid(),
-                                Number = season.Number,
-                                Title = title,
-                                Show = existingShow
-                            };
-
-                            Console.WriteLine($"[INFO] - Season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
-                            context.Add(existingSeason);
-                        }
-
-                        foreach (var episode in season.Episodes)
-                        {
-                            var existingEpisode = context.Episodes.FirstOrDefault(x =>
-                                x.Number == episode.Number &&
-                                x.Season.Identifier == existingSeason.Identifier
-                            );
-
-                            if (existingEpisode == null)
-                            {
-                                var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number); 
-                                existingEpisode = new EpisodeRecord
-                                {
-                                    Identifier = Guid.NewGuid(),
-                                    Number = episode.Number,
-                                    Title = episodeDetails.Title ?? show.Show.Title,
-                                    Season = existingSeason
-                                };
-
-                                Console.WriteLine($"[INFO] - Episode '{episodeDetails.Title ?? episode.Number.ToString()}' for season '{season.Number}' for show '{show.Show.Title}' doesn't exist. Creating...");
-                                context.Add(existingEpisode);
-                            }
-
-                            var lastWatchedAt = episode.WatchedAt;
-
-                            var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
-                                x.User.Username.ToUpper() == username.ToUpper() &&
-                                x.Episode.Number == episode.Number &&
-                                x.Episode.Season.Identifier == existingSeason.Identifier &&
-                                x.Episode.Season.Show.Identifier == existingShow.Identifier &&
-                                x.WatchedAt >= lastWatchedAt.AddHours(-1) &&
-                                x.WatchedAt <= lastWatchedAt.AddHours(1)
-                            );
-                    
-                            if ((existingEpisodeUserRecord?.WatchedAt - episode.WatchedAt)?.TotalHours > 1)
-                                existingEpisodeUserRecord = null;
-
-                            if (existingEpisodeUserRecord == null)
-                            {
-                                var episodeUserRecord = new EpisodeUserRecord
-                                {
-                                    Identifier = Guid.NewGuid(),
-                                    User = existingUser,
-                                    Episode = existingEpisode,
-                                    WatchedAt = lastWatchedAt
-                                };
-                                
-                                Console.WriteLine($"[INFO] - Episode-User Link '{username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
-                                context.Add(episodeUserRecord);
-                            }
-                        }
-                    }
-                    
-                    showsProcessed++;
-                    Console.WriteLine($"[INFO] - Show {showsProcessed}/{shows.Count} processed.");
-                }
-
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                return context.Shows.FirstOrDefault(x => x.TMDB == tmdbId);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                Console.WriteLine($"[FATAL] - Failed to add a show. Exception below:");
-                Console.WriteLine(exception.Message, exception.StackTrace);
-                await transaction.RollbackAsync();
+                Console.WriteLine($"[FATAL] - Failed to get show.");
+                return null;
+            }
+        }
+    }
+
+    public async Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                return context.Seasons.FirstOrDefault(x =>
+                    x.Number == seasonNumber &&
+                    x.Show.Identifier == showIdentifier
+                );
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"[FATAL] - Failed to get season.");
+                return null;
+            }
+        }
+    }
+
+    public async Task<EpisodeRecord?> GetEpisodeBy(int episodeNumber, Guid seasonIdentifier)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                return  context.Episodes.FirstOrDefault(x =>
+                    x.Number == episodeNumber &&
+                    x.Season.Identifier == seasonIdentifier
+                );
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"[FATAL] - Failed to get episode.");
+                return null;
             }
         }
     }
 
     public List<WatchedShow> GetAllWatchedShows(string username, int results, int page)
     {
-        
         using (var context = new DatabaseContext())
-        using (var transaction = context.Database.BeginTransaction())
         {
             try
             {
-                var watchedShows = context.EpisodeUserLinks
+                return context.EpisodeUserLinks
                     .Where(x => x.User.Username.ToUpper() == username.ToUpper())
                     .OrderByDescending(x => x.WatchedAt)
                     .Skip((page - 1) * results)
@@ -206,29 +114,10 @@ public class ShowsRepository : IMediaRepository
                         WatchedAt = x.WatchedAt
                     })
                     .ToList();
-                
-                foreach (var watchedShow in watchedShows)
-                {
-                    if (!string.IsNullOrEmpty(watchedShow.Show.Slug))
-                        continue;
-                    
-                    watchedShow.Show.Slug = SlugHelper.GenerateSlugFor(watchedShow.Show.Title);
-                    
-                    var show = context.Shows.FirstOrDefault(x => x.Identifier == watchedShow.Show.Identifier);
-                    show.Slug = watchedShow.Show.Slug;
-                    context.Update(show);
-                }
-            
-                context.SaveChanges();
-                transaction.Commit();
-
-                return watchedShows
-                    .ToList();
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                transaction.Rollback();
             }
         }
 
@@ -258,7 +147,7 @@ public class ShowsRepository : IMediaRepository
                     Overview = show.Overview
                 };
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 return null;
             }
@@ -285,7 +174,7 @@ public class ShowsRepository : IMediaRepository
                     Number = season.Number
                 };
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 return null;
             }
@@ -313,7 +202,7 @@ public class ShowsRepository : IMediaRepository
                     Number = episode.Number
                 };
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 return null;
             }
@@ -344,17 +233,120 @@ public class ShowsRepository : IMediaRepository
                     };
                 });
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 return new  List<WatchedEpisode>();
             }
         }
     }
 
-    public void ImportEpisode(string username, ShowRecord show, SeasonRecord season, EpisodeRecord episode)
+    public async Task ImportShow(UserRecord user, ShowRecord show)
     {
         using (var context = new DatabaseContext())
-        using (var transaction = context.Database.BeginTransaction())
+        using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper());
+                if (existingUser == null)
+                    context.Add(user);
+
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
+                if (existingShow == null)
+                    context.Add(show);
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+            }
+        }
+    }
+
+    public async Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper());
+                if (existingUser == null)
+                    context.Add(user);
+
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
+                if (existingShow == null)
+                    context.Add(show);
+
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB && x.Number == season.Number);
+                if (existingSeason == null)
+                {
+                    season.Show = existingShow ?? show;
+                    context.Add(season);
+                }
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+            }
+        }
+    }
+
+    public async Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper());
+                if (existingUser == null)
+                    context.Add(user);
+
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
+                if (existingShow == null)
+                    context.Add(show);
+
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB 
+                                                                         && x.Number == season.Number);
+                if (existingSeason == null)
+                {
+                    season.Show = existingShow ?? show;
+                    context.Add(season);
+                }
+
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB 
+                                                                           && x.Season.Number == season.Number
+                                                                           && x.Number == episode.Number);
+                if (existingEpisode == null)
+                {
+                    episode.Season = existingSeason ?? season;
+                    episode.Season.Show = existingShow ?? show;
+                    context.Add(episode);
+                }
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+            }
+        }
+    }
+
+    public async Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
@@ -362,48 +354,44 @@ public class ShowsRepository : IMediaRepository
 
                 if (existingUser == null)
                 {
-                    existingUser = new UserRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        Username = username
-                    };
-
-                    context.Add(existingUser);
+                    Console.WriteLine($"[ERROR] - User '{username}' doesn't exist.");
+                    return;
                 }
 
-                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == showTmdbId);
 
                 if (existingShow == null)
                 {
-                    existingShow = show;
-                    context.Add(existingShow);
+                    Console.WriteLine($"[INFO] - Show '{showTmdbId}' doesn't exist.");
+                    return;
                 }
 
-                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB && x.Number == season.Number);
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == showTmdbId 
+                                                                         && x.Number == seasonNumber);
 
                 if (existingSeason == null)
                 {
-                    existingSeason = season;
-                    context.Add(existingSeason);
+                    Console.WriteLine($"[INFO] - Season '{seasonNumber}' doesn't exist.");
+                    return;
                 }
 
-                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB && x.Number == episode.Number);
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == showTmdbId 
+                                                                         && x.Season.Number == seasonNumber 
+                                                                         && x.Number == episodeNumber);
 
                 if (existingEpisode == null)
                 {
-                    existingEpisode = episode;
-                    context.Add(existingEpisode);
+                    Console.WriteLine($"[INFO] - Episode '{episodeNumber}' doesn't exist.");
+                    return;
                 }
                 
-                var now = DateTime.Now;
-
                 var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
                     x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Episode.Number == episode.Number &&
-                    x.Episode.Season.Identifier == existingSeason.Identifier &&
-                    x.Episode.Season.Show.Identifier == existingShow.Identifier &&
-                    x.WatchedAt >= now.AddHours(-1) &&
-                    x.WatchedAt <= now.AddHours(1)
+                    x.Episode.Season.Show.TMDB == showTmdbId && 
+                    x.Episode.Season.Number == seasonNumber && 
+                    x.Episode.Number == episodeNumber &&
+                    x.WatchedAt >= watchedAt.AddHours(-1) &&
+                    x.WatchedAt <= watchedAt.AddHours(1)
                 );
 
                 if (existingEpisodeUserRecord == null)
@@ -412,20 +400,21 @@ public class ShowsRepository : IMediaRepository
                     {
                         Identifier = Guid.NewGuid(),
                         User = existingUser,
-                        Episode = episode,
-                        WatchedAt = now
+                        Episode = existingEpisode,
+                        WatchedAt = watchedAt,
                     };
 
+                    Console.WriteLine($"[INFO] - Episode-User Link '{username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
                     context.Add(movieUserRecord);
                 }
 
-                context.SaveChanges();
-                transaction.Commit();
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                transaction.Rollback();
+                await transaction.RollbackAsync();
             }
         }
     }

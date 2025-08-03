@@ -2,7 +2,7 @@
 
 namespace Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 
-public class TraktEpisodeHistoryResponse
+public class TraktShowHistoryResponse
 {
     [JsonProperty("id")]
     public long Id { get; set; }
@@ -43,7 +43,7 @@ public class TraktEpisodeHistoryResponse
         public int Trakt { get; set; }
 
         [JsonProperty("tvdb")]
-        public int Tvdb { get; set; }
+        public string Tvdb { get; set; }
 
         [JsonProperty("imdb")]
         public string Imdb { get; set; }
