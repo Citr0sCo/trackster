@@ -38,6 +38,7 @@ public class MediaService
         if (request.Type == ImportType.Trakt && request.Username != null)
         {
             var stopwatch = Stopwatch.StartNew();
+            
             Console.WriteLine($"[INFO] - Starting Trakt import...");
             
             var movies = await _traktProvider.GetMovies(request.Username);
