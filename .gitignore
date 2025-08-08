@@ -7,3 +7,4 @@ coverage/
 examples/*
 !examples/docker-compose.yml
 !examples/.env
+api/Trackster.sln.DotSettings.user

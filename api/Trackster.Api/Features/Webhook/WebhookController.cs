@@ -25,7 +25,7 @@ public class WebhookController : ControllerBase
 
         try
         {
-            Console.WriteLine($"[INFO] - Raw Plex Response - {payloadJson}");
+            //Console.WriteLine($"[INFO] - Raw Plex Response - {payloadJson}");
             
             var webhookRequest = JsonConvert.DeserializeObject<PlexWebhookRequest>(payloadJson);
             

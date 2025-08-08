@@ -21,9 +21,9 @@ public class PlexWebhookService
         Console.WriteLine("--- Plex Webhook Parse Start ---");
         Console.WriteLine("Event - " + parsedJson.Event);
         Console.WriteLine("Account - " + JsonConvert.SerializeObject(parsedJson.Account, Formatting.Indented));
-        Console.WriteLine("Server - " + JsonConvert.SerializeObject(parsedJson.Server, Formatting.Indented));
-        Console.WriteLine("Metadata - " + JsonConvert.SerializeObject(parsedJson.Metadata, Formatting.Indented));
-        Console.WriteLine("Player - " + JsonConvert.SerializeObject(parsedJson.Player, Formatting.Indented));
+        //Console.WriteLine("Server - " + JsonConvert.SerializeObject(parsedJson.Server, Formatting.Indented));
+        //Console.WriteLine("Metadata - " + JsonConvert.SerializeObject(parsedJson.Metadata, Formatting.Indented));
+        //Console.WriteLine("Player - " + JsonConvert.SerializeObject(parsedJson.Player, Formatting.Indented));
         Console.WriteLine("--- Plex Webhook Parse End ---");
 
         if (parsedJson.Account.Title.ToLower() != "citr0s".ToLower())
