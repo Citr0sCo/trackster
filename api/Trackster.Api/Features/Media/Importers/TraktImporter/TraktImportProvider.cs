@@ -55,8 +55,19 @@ public class TraktImportProvider
             using (var response = await httpClient.GetAsync($"users/{username}/history/movies/{itemId}"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
-                var parsedData = JsonConvert.DeserializeObject<List<TraktMovieHistoryResponse>>(responseData);
-                return parsedData ?? new List<TraktMovieHistoryResponse>();
+
+                try
+                {
+                    var parsedData = JsonConvert.DeserializeObject<List<TraktMovieHistoryResponse>>(responseData);
+                    return parsedData ?? new List<TraktMovieHistoryResponse>();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[FATAL] - Failed to get movie watch history. Error: {ex.Message} Response below:");
+                    Console.WriteLine(responseData);
+                }
+                
+                return new List<TraktMovieHistoryResponse>();
             }
         }
     }
