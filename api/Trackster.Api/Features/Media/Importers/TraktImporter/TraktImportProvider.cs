@@ -56,6 +56,12 @@ public class TraktImportProvider
             {
                 string responseData = await response.Content.ReadAsStringAsync();
 
+                if (responseData.StartsWith("UNAUTHED_API_GET_LIMIT"))
+                {
+                    Console.WriteLine($"[WARN] - Hitting Trakt throttle limit. Waiting 60 seconds before continuing...");
+                    Thread.Sleep(1000 * 60);
+                }
+                
                 try
                 {
                     var parsedData = JsonConvert.DeserializeObject<List<TraktMovieHistoryResponse>>(responseData);
@@ -85,6 +91,12 @@ public class TraktImportProvider
             {
                 string responseData = await response.Content.ReadAsStringAsync();
 
+                if (responseData.StartsWith("UNAUTHED_API_GET_LIMIT"))
+                {
+                    Console.WriteLine($"[WARN] - Hitting Trakt throttle limit. Waiting 60 seconds before continuing...");
+                    Thread.Sleep(1000 * 60);
+                }
+                
                 try
                 {
                     var parsedData = JsonConvert.DeserializeObject<List<TraktShowHistoryResponse>>(responseData);
