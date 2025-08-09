@@ -93,7 +93,7 @@ public class TmdbSeasonSearchResults
         public string ProductionCode { get; set; }
 
         [JsonProperty("runtime")]
-        public int Runtime { get; set; }
+        public int? Runtime { get; set; }
 
         [JsonProperty("season_number")]
         public int SeasonNumber { get; set; }
