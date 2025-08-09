@@ -33,15 +33,15 @@ public class PlexWebhookService
         var eventType = parsedJson.Event.ToLower();
         
         if (eventType == "media.scrobble")
-            await _mediaService.MarkMediaAsWatched(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+            await _mediaService.MarkMediaAsWatched(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
 
         if (eventType == "media.play" || eventType == "media.resume")
-            _mediaService.MarkMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
+            _mediaService.MarkMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
         
         if (eventType == "media.stop" || eventType == "media.pause")
-            _mediaService.RemoveMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+            _mediaService.RemoveMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
         
         if (eventType == "media.pause")
-            _mediaService.PauseMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
+            _mediaService.PauseMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
     }
 }
