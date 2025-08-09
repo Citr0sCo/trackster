@@ -1,7 +1,6 @@
 ﻿using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
-using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Movies.Types;
 
 namespace Trackster.Api.Features.Movies;
@@ -14,6 +13,7 @@ public interface IMoviesRepository
     List<WatchedMovie> GetWatchedHistoryBySlug(string username, string slug);
     MovieRecord? GetMovieByTmdbId(string tmdbId);
     Task MarkMovieAsWatched(string username, string tmdbId, DateTime watchedAt);
+    MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
 }
 
 public class MoviesRepository : IMoviesRepository
@@ -201,6 +201,46 @@ public class MoviesRepository : IMoviesRepository
                 await transaction.RollbackAsync();
             }
         }
+    }
+
+    public MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+
+                if (existingUser == null)
+                {
+                    Console.WriteLine($"[ERROR] - User '{username}' doesn't exist.");
+                    return null;
+                }
+
+                var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == tmdbId);
+
+                if (existingMovie == null)
+                {
+                    Console.WriteLine($"[INFO] - Movie '{tmdbId}' doesn't exist.");
+                    return null;
+                }
+                
+                var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
+                    x.User.Username.ToUpper() == username.ToUpper() &&
+                    x.Movie.TMDB.ToUpper() == tmdbId.ToUpper() &&
+                    x.WatchedAt >= watchedAt.AddHours(-1) &&
+                    x.WatchedAt <= watchedAt.AddHours(1)
+                );
+
+                return existingMovieUserRecord;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+        }
+
+        return null;
     }
 
     public async Task ImportMovie(UserRecord user, MovieRecord movie)

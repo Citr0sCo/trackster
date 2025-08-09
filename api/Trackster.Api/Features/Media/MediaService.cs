@@ -230,15 +230,20 @@ public class MediaService
         {
            ProcessMovie(movie, userRecord).Wait();
 
-            var watchingHistory = await _traktProvider.GetWatchedMovieHistory(userRecord.Username, movie.Movie.Ids.Trakt);
+           var lastWatchedAt = _moviesService.GetWatchedMovieByLastWatchedAt(userRecord.Username, movie.Movie.Ids.TMDB, movie.LastWatchedAt);
 
-            foreach (var watchHistory in watchingHistory)
-            {
-                await _moviesService.MarkMovieAsWatched(userRecord.Username, movie.Movie.Ids.TMDB, watchHistory.WatchedAt);
-            }
+           if (lastWatchedAt != null)
+               continue;
+           
+           var watchingHistory = await _traktProvider.GetWatchedMovieHistory(userRecord.Username, movie.Movie.Ids.Trakt);
 
-            processedMovies++;
-            Console.WriteLine($"[INFO] - Processed {processedMovies}/{movies.Count} movies.");
+           foreach (var watchHistory in watchingHistory)
+           {
+               await _moviesService.MarkMovieAsWatched(userRecord.Username, movie.Movie.Ids.TMDB, watchHistory.WatchedAt);
+           }
+
+           processedMovies++;
+           Console.WriteLine($"[INFO] - Processed {processedMovies}/{movies.Count} movies.");
         }
     }
 
@@ -273,6 +278,11 @@ public class MediaService
         foreach (var show in shows)
         {
             ProcessShow(show, userRecord).Wait();
+
+            var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(userRecord.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
+
+            if (lastWatchedAt != null)
+                continue;
                     
             var watchingHistory = await _traktProvider.GetWatchedShowHistory(userRecord.Username, show.Show.Ids.Trakt);
 

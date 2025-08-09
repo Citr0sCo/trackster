@@ -18,6 +18,7 @@ public interface IShowsRepository
     Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season);
     Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt);
+    EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
 }
 
 public class ShowsRepository : IShowsRepository
@@ -417,5 +418,45 @@ public class ShowsRepository : IShowsRepository
                 await transaction.RollbackAsync();
             }
         }
+    }
+
+    public EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string tmdbId, DateTime watchedAt)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+
+                if (existingUser == null)
+                {
+                    Console.WriteLine($"[ERROR] - User '{username}' doesn't exist.");
+                    return null;
+                }
+
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == tmdbId);
+
+                if (existingShow == null)
+                {
+                    Console.WriteLine($"[INFO] - Show '{tmdbId}' doesn't exist.");
+                    return null;
+                }
+                
+                var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
+                    x.User.Username.ToUpper() == username.ToUpper() &&
+                    x.Episode.Season.Show.TMDB.ToUpper() == tmdbId.ToUpper() &&
+                    x.WatchedAt >= watchedAt.AddHours(-1) &&
+                    x.WatchedAt <= watchedAt.AddHours(1)
+                );
+
+                return existingEpisodeUserRecord;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+        }
+
+        return null;
     }
 }

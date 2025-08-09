@@ -15,6 +15,7 @@ public interface IMoviesService
     GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug);
     MovieRecord? GetMovieByTmdbId(string tmdbId);
     Task MarkMovieAsWatched(string username, string tmdbId, DateTime watchedAt);
+    MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
 }
 
 public class MoviesService : IMoviesService
@@ -114,5 +115,10 @@ public class MoviesService : IMoviesService
     public async Task MarkMovieAsWatched(string username, string tmdbId, DateTime watchedAt)
     {
         await _repository.MarkMovieAsWatched(username, tmdbId, watchedAt);
+    }
+
+    public MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt)
+    {
+       return _repository.GetWatchedMovieByLastWatchedAt(username, tmdbId, watchedAt);
     }
 }
