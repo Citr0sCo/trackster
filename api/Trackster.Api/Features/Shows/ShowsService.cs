@@ -21,6 +21,7 @@ public interface IShowsService
     GetEpisodeResponse GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber);
     GetEpisodeWatchedHistoryResponse GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber);
     Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt);
+    EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string idsTmdb, DateTime watchedAt);
 }
 
 public class ShowsService : IShowsService
@@ -240,5 +241,10 @@ public class ShowsService : IShowsService
     public async Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt)
     {
         await _repository.MarkEpisodeAsWatched(username, showTmdbId, seasonNumber, episodeNumber, watchedAt);
+    }
+
+    public EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string idsTmdb, DateTime watchedAt)
+    {
+        return _repository.GetWatchedShowByLastWatchedAt(username, idsTmdb, watchedAt);
     }
 }
