@@ -1,9 +1,14 @@
 using Newtonsoft.Json;
 
-namespace Trackster.Api.Features.Media.Importers.TmdbImporter;
+namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 
 public class TmdbShowSearchResults
 {
+    public TmdbShowSearchResults()
+    {
+        Results = new List<Result>();
+    }
+    
     [JsonProperty("page")]
     public int Page { get; set; }
 
