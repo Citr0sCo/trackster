@@ -9,7 +9,7 @@ namespace Trackster.Api.Features.Shows;
 public interface IShowsService
 {
     GetAllShowsResponse GetAllWatchedShows(string username, int results, int page);
-    Task<EpisodeRecord> SearchForEpisode(string showTitle, string episodeTitle, int year, int seasonNumber);
+    Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber);
     GetShowResponse GetShowBySlug(string slug);
     Task<ShowRecord?> GetShowByTmdbId(string tmdbId);
     Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier);
@@ -44,7 +44,7 @@ public class ShowsService : IShowsService
         };
     }
     
-    public async Task<EpisodeRecord> SearchForEpisode(string showTitle, string episodeTitle, int year, int seasonNumber)
+    public async Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber)
     {
         var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
 
@@ -72,6 +72,9 @@ public class ShowsService : IShowsService
             Console.WriteLine(JsonConvert.SerializeObject(searchResults));
             return new EpisodeRecord();
         }
+        
+        if(seasonNumber > 2000 && int.TryParse(seasonTitle.Replace("Season ", ""), out var seasonNumberParsed))
+            seasonNumber = seasonNumberParsed;
         
         var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
         
