@@ -188,6 +188,7 @@ public class MediaService
         catch (Exception ex)
         {
             Console.WriteLine($"[FATAL] - Failed to mark movie as watched. Exception: {ex.Message}.");
+            Console.WriteLine(ex);
         }
     }
 
@@ -202,6 +203,7 @@ public class MediaService
         catch (Exception ex)
         {
             Console.WriteLine($"[FATAL] - Failed to mark episode as watched. Exception: {ex.Message}.");
+            Console.WriteLine(ex);
         }
     }
 
