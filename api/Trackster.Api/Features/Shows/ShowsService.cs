@@ -52,12 +52,44 @@ public class ShowsService : IShowsService
         {
             Console.WriteLine($"[ERROR] - Failed to find show by title ({showTitle}) and year ({year}).");
             Console.WriteLine(JsonConvert.SerializeObject(searchResults));
+            return new EpisodeRecord();
         }
         
-        var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
-        var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
+        var tmdbReference = searchResults.Results.First().Id.ToString();
+        
+        if (tmdbReference.Length == 0)
+        {
+            Console.WriteLine($"[ERROR] - Failed to find show identifier by title ({showTitle}) and year ({year}).");
+            Console.WriteLine(JsonConvert.SerializeObject(searchResults));
+            return new EpisodeRecord();
+        }
+        
+        var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference!);
+        
+        if (parsedShow.Identifier == 0)
+        {
+            Console.WriteLine($"[ERROR] - Failed to find show details by tmdb reference ({tmdbReference}), title ({showTitle}) and year ({year}).");
+            Console.WriteLine(JsonConvert.SerializeObject(searchResults));
+            return new EpisodeRecord();
+        }
+        
         var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
+        
+        if (parsedSeason.Episodes.Count == 0)
+        {
+            Console.WriteLine($"[ERROR] - Failed to find season by tmdb reference ({parsedShow.Identifier}), season number ({seasonNumber}), title ({showTitle}) and year ({year}).");
+            Console.WriteLine(JsonConvert.SerializeObject(searchResults));
+            return new EpisodeRecord();
+        }
+        
         var parsedEpisode = parsedSeason.Episodes.FirstOrDefault(x => x.Title.ToLower() == episodeTitle.ToLower());
+        
+        if (parsedEpisode.Id == 0)
+        {
+            Console.WriteLine($"[ERROR] - Failed to find episode by title ({episodeTitle}), tmdb reference ({parsedShow.Identifier}), season number ({seasonNumber}), title ({showTitle}) and year ({year}).");
+            Console.WriteLine(JsonConvert.SerializeObject(searchResults));
+            return new EpisodeRecord();
+        }
         
         var show = new ShowRecord
         {
