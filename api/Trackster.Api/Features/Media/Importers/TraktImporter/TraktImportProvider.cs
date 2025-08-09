@@ -60,6 +60,7 @@ public class TraktImportProvider
                 {
                     Console.WriteLine($"[WARN] - Hitting Trakt throttle limit. Waiting 60 seconds before continuing...");
                     Thread.Sleep(1000 * 60);
+                    return new List<TraktMovieHistoryResponse>();
                 }
                 
                 try
@@ -95,6 +96,7 @@ public class TraktImportProvider
                 {
                     Console.WriteLine($"[WARN] - Hitting Trakt throttle limit. Waiting 60 seconds before continuing...");
                     Thread.Sleep(1000 * 60);
+                    return new List<TraktShowHistoryResponse>();
                 }
                 
                 try
