@@ -4,6 +4,11 @@ namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 
 public class TmdbMovieSearchResults
 {
+    public TmdbMovieSearchResults()
+    {
+        Results = new List<Result>();
+    }
+    
     [JsonProperty("page")]
     public int Page { get; set; }
 

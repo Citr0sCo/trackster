@@ -1,9 +1,14 @@
 using Newtonsoft.Json;
 
-namespace Trackster.Api.Features.Media.Importers.TmdbImporter;
+namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 
 public class TmdbSeasonSearchResults
 {
+    public TmdbSeasonSearchResults()
+    {
+        Episodes = new List<Episode>();
+    }
+    
     [JsonProperty("air_date")]
     public string AirDate { get; set; }
 

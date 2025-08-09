@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
@@ -46,6 +47,13 @@ public class ShowsService : IShowsService
     public async Task<EpisodeRecord> SearchForEpisode(string showTitle, string episodeTitle, int year, int seasonNumber)
     {
         var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
+
+        if (searchResults.Results.Count == 0)
+        {
+            Console.WriteLine($"[ERROR] - Failed to find show by title ({showTitle}) and year ({year}).");
+            Console.WriteLine(JsonConvert.SerializeObject(searchResults));
+        }
+        
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
         var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference ?? "");
         var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
