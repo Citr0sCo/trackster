@@ -124,7 +124,7 @@ public class MediaService
             await MarkEpisodeAsWatched(grandParentTitle!, parentTitle!, title, year, seasonNumber);
     }
 
-    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, string parentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration)
+    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
@@ -141,7 +141,7 @@ public class MediaService
         Console.WriteLine($"Marking a media as watching now. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
     }
 
-    public async void RemoveMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, string parentTitle, int seasonNumber)
+    public async void RemoveMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
@@ -156,7 +156,7 @@ public class MediaService
         Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {parentTitle}, {seasonNumber}, {year}.");
     }
 
-    public async void PauseMediaAsWatchingNow(string mediaType, int year, string title, string grandParentTitle, string parentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration)
+    public async void PauseMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
