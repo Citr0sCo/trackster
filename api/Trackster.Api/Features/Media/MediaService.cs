@@ -179,16 +179,30 @@ public class MediaService
 
     private async Task MarkMovieAsWatched(string title, int year)
     {
-        var user = await _usersService.GetUserByUsername("citr0s");
-        var movie = await _moviesService.SearchForMovieBy(title, year);
-        await _moviesService.MarkMovieAsWatched(user.Username, movie.TMDB, DateTime.UtcNow);
+        try
+        {
+            var user = await _usersService.GetUserByUsername("citr0s");
+            var movie = await _moviesService.SearchForMovieBy(title, year);
+            await _moviesService.MarkMovieAsWatched(user.Username, movie.TMDB, DateTime.UtcNow);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[FATAL] - Failed to mark movie as watched. Exception: {ex.Message}.");
+        }
     }
 
     private async Task MarkEpisodeAsWatched(string showTitle, string episodeTitle, int year, int seasonNumber)
     {
-        var user = await _usersService.GetUserByUsername("citr0s");
-        var episode = await _showsService.SearchForEpisode(showTitle, episodeTitle, year, seasonNumber);
-        await _showsService.MarkEpisodeAsWatched(user.Username, episode.Season.Show.TMDB, episode.Season.Number, episode.Number, DateTime.Now);
+        try
+        {
+            var user = await _usersService.GetUserByUsername("citr0s");
+            var episode = await _showsService.SearchForEpisode(showTitle, episodeTitle, year, seasonNumber);
+            await _showsService.MarkEpisodeAsWatched(user.Username, episode.Season.Show.TMDB, episode.Season.Number, episode.Number, DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[FATAL] - Failed to mark episode as watched. Exception: {ex.Message}.");
+        }
     }
 
     private async Task<UserRecord> ProcessUser(ImportMediaRequest request)
