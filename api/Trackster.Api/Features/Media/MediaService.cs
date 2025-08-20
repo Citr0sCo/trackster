@@ -287,9 +287,9 @@ public class MediaService
 
                 foreach (var watchHistory in watchingHistory)
                 {
-                    var showRecord = await _showsService.GetShowByTmdbId(show.Show.Ids.TMDB);
-                    var seasonRecord = await _showsService.GetSeasonBy(watchHistory.Episode.Season, showRecord.Identifier);
-                    var episodeRecord = await _showsService.GetEpisodeBy(watchHistory.Episode.Number, seasonRecord.Identifier);
+                    var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
+                    var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, watchHistory.Episode.Season);
+                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord.Identifier, seasonRecord.Identifier,  watchHistory.Episode.Number);
                     
                     await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt);
                 }
@@ -300,7 +300,25 @@ public class MediaService
         }
     }
 
-    private async Task<ShowRecord> GetShowRecordByTmdbId(string username, string tmdbId)
+    private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord)
+    {
+        var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
+        await _showsService.ImportShow(userRecord, showRecord);
+            
+        foreach (var season in show.Seasons)
+        {
+            var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, season.Number);
+            await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
+                    
+            foreach (var episode in season.Episodes)
+            {
+                var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord.Identifier, seasonRecord.Identifier,  episode.Number);
+                await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
+            }
+        }
+    }
+
+    private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId)
     {
         var showRecord = await _showsService.GetShowByTmdbId(tmdbId);
 
@@ -320,28 +338,12 @@ public class MediaService
             Overview = details?.Overview,
         };
 
-        var userRecord = await _usersService.GetUserByUsername(username);
-
-        if (userRecord == null)
-        {
-            userRecord = new UserRecord
-            {
-                Identifier = Guid.NewGuid(),
-                Username = username
-            };
-            
-            userRecord = await _usersService.CreateUser(userRecord);
-        }
-        
-        await _showsService.ImportShow(userRecord, showRecord);
-
         return showRecord;
     }
 
-    private async Task<SeasonRecord> GetSeasonRecordByShowTmdbId(string username, Guid showIdentifier, int seasonNumber)
+    private async Task<SeasonRecord> GetSeasonRecordByShowTmdbId(Guid showIdentifier, int seasonNumber)
     {
         var showRecord = _showsService.GetShowByReference(showIdentifier);
-        var userRecord = await _usersService.GetUserByUsername(username);
         
         var seasonRecord = await _showsService.GetSeasonBy(seasonNumber, showRecord.Identifier);
 
@@ -355,17 +357,14 @@ public class MediaService
             Title = $"Season {seasonNumber}",
             Show = showRecord
         };
-                
-        await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
         
         return seasonRecord;
     }
 
-    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(string username, Guid showIdentifier, Guid seasonIdentifier, int episodeNumber)
+    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(Guid showIdentifier, Guid seasonIdentifier, int episodeNumber)
     {
         var showRecord = _showsService.GetShowByReference(showIdentifier);
         var seasonRecord = _showsService.GetSeasonByReference(seasonIdentifier);
-        var userRecord = await _usersService.GetUserByUsername(username);
         var episodeRecord = await _showsService.GetEpisodeBy(episodeNumber, seasonRecord.Identifier);
 
         if (episodeRecord != null)
@@ -380,24 +379,7 @@ public class MediaService
             Title = episodeDetails.Title ?? showRecord.Title,
             Season = seasonRecord
         };
-
-        await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
         
         return episodeRecord;
-    }
-
-    private async Task ProcessShow(TraktShowResponse show, UserRecord user)
-    {
-        var showRecord = await GetShowRecordByTmdbId(user.Username, show.Show.Ids.TMDB);
-            
-        foreach (var season in show.Seasons)
-        {
-            var seasonRecord = await GetSeasonRecordByShowTmdbId(user.Username, showRecord.Identifier, season.Number);
-                    
-            foreach (var episode in season.Episodes)
-            {
-                var episodeRecord = await GetEpisodeRecordByShowTmdbId(user.Username, showRecord.Identifier, seasonRecord.Identifier,  episode.Number);
-            }
-        }
     }
 }
