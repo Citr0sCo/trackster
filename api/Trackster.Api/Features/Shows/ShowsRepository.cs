@@ -363,8 +363,10 @@ public class ShowsRepository : IShowsRepository
 
                 if (existingShow == null)
                 {
-                    Console.WriteLine($"[INFO] - Show '{showTmdbId}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[INFO] - Show '{showTmdbId}' doesn't exist. Creating...");
+
+                    existingShow = show;
+                    context.Shows.Add(existingShow);
                 }
 
                 var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == showTmdbId 
@@ -372,8 +374,10 @@ public class ShowsRepository : IShowsRepository
 
                 if (existingSeason == null)
                 {
-                    Console.WriteLine($"[INFO] - Season '{seasonNumber}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[INFO] - Season '{seasonNumber}' doesn't exist. Creating...");
+                    
+                    existingSeason = season;
+                    context.Seasons.Add(existingSeason);
                 }
 
                 var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == showTmdbId 
@@ -382,8 +386,10 @@ public class ShowsRepository : IShowsRepository
 
                 if (existingEpisode == null)
                 {
-                    Console.WriteLine($"[INFO] - Episode '{episodeNumber}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[INFO] - Episode '{episodeNumber}' doesn't exist. Creating...");
+                    
+                    existingEpisode = episode;
+                    context.Episodes.Add(existingEpisode);
                 }
                 
                 var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>

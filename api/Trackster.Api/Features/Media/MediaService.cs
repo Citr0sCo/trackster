@@ -194,7 +194,7 @@ public class MediaService
         {
             var user = await _usersService.GetUserByUsername("citr0s");
             var episode = await _showsService.SearchForEpisode(showTitle, seasonTitle, episodeTitle, year, seasonNumber);
-            await _showsService.MarkEpisodeAsWatched(user.Username, episode.Season.Show.TMDB, episode.Season.Number, episode.Number, DateTime.Now);
+            await _showsService.MarkEpisodeAsWatched(user, episode.Season.Show, episode.Season, episode, DateTime.Now);
         }
         catch (Exception ex)
         {
@@ -232,14 +232,14 @@ public class MediaService
 
            var lastWatchedAt = _moviesService.GetWatchedMovieByLastWatchedAt(userRecord.Username, movie.Movie.Ids.TMDB, movie.LastWatchedAt);
 
-           if (lastWatchedAt != null)
-               continue;
-           
-           var watchingHistory = await _traktProvider.GetWatchedMovieHistory(userRecord.Username, movie.Movie.Ids.Trakt);
-
-           foreach (var watchHistory in watchingHistory)
+           if (lastWatchedAt == null)
            {
-               await _moviesService.MarkMovieAsWatched(userRecord.Username, movie.Movie.Ids.TMDB, watchHistory.WatchedAt);
+               var watchingHistory = await _traktProvider.GetWatchedMovieHistory(userRecord.Username, movie.Movie.Ids.Trakt);
+
+               foreach (var watchHistory in watchingHistory)
+               {
+                   await _moviesService.MarkMovieAsWatched(userRecord.Username, movie.Movie.Ids.TMDB, watchHistory.WatchedAt);
+               }   
            }
 
            processedMovies++;
@@ -281,14 +281,14 @@ public class MediaService
 
             var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(userRecord.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
 
-            if (lastWatchedAt != null)
-                continue;
-                    
-            var watchingHistory = await _traktProvider.GetWatchedShowHistory(userRecord.Username, show.Show.Ids.Trakt);
-
-            foreach (var watchHistory in watchingHistory)
+            if (lastWatchedAt == null)
             {
-                await _showsService.MarkEpisodeAsWatched(userRecord.Username, show.Show.Ids.TMDB, watchHistory.Episode.Season, watchHistory.Episode.Number, watchHistory.WatchedAt);
+                var watchingHistory = await _traktProvider.GetWatchedShowHistory(userRecord.Username, show.Show.Ids.Trakt);
+
+                foreach (var watchHistory in watchingHistory)
+                {
+                    await _showsService.MarkEpisodeAsWatched(Username, show.Show, watchHistory.Episode.Season, watchHistory.Episode.Number, watchHistory.WatchedAt);
+                }
             }
                 
             processedShows++;
