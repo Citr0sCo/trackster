@@ -6,6 +6,7 @@ using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
+using Trackster.Api.Features.Movies.Types;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
 
@@ -179,7 +180,7 @@ public class MediaService
         {
             var user = await _usersService.GetUserByUsername("citr0s");
             var movie = await _moviesService.SearchForMovieBy(title, year);
-            await _moviesService.MarkMovieAsWatched(user.Username, movie.TMDB, DateTime.UtcNow);
+            await _moviesService.MarkMovieAsWatched(user, movie, DateTime.UtcNow);
         }
         catch (Exception ex)
         {
@@ -238,7 +239,8 @@ public class MediaService
 
                foreach (var watchHistory in watchingHistory)
                {
-                   await _moviesService.MarkMovieAsWatched(userRecord.Username, movie.Movie.Ids.TMDB, watchHistory.WatchedAt);
+                   var movieRecord = await GetMovieRecordByTmdbId(movie.Movie.Ids.TMDB);
+                   await _moviesService.MarkMovieAsWatched(userRecord, movieRecord, watchHistory.WatchedAt);
                }   
            }
 
@@ -316,6 +318,29 @@ public class MediaService
                 await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
             }
         }
+    }
+
+    private async Task<MovieRecord> GetMovieRecordByTmdbId(string tmdbId)
+    {
+        var movieRecord = _moviesService.GetMovieByTmdbId(tmdbId);
+
+        if (movieRecord != null)
+            return movieRecord;
+        
+        var details = await _detailsProvider.GetDetailsForMovie(tmdbId);
+
+        movieRecord = new MovieRecord
+        {
+            Identifier = Guid.NewGuid(),
+            Title = details.Title,
+            Slug = SlugHelper.GenerateSlugFor(details.Title),
+            Year = details.ReleaseDate.Year,
+            TMDB = tmdbId,
+            Poster = $"https://image.tmdb.org/t/p/w300{details?.PosterUrl}",
+            Overview = details?.Overview,
+        };
+
+        return movieRecord;
     }
 
     private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId)
