@@ -300,7 +300,7 @@ public class MediaService
         }
     }
 
-    private async Task<ShowRecord> GetShowRecordByTmdbId(string username, string tmdbId)
+    private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord)
     {
         var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
         await _showsService.ImportShow(userRecord, showRecord);
