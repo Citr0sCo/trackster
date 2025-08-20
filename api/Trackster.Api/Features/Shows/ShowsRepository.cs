@@ -17,8 +17,10 @@ public interface IShowsRepository
     Task ImportShow(UserRecord user, ShowRecord show);
     Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season);
     Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
-    Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt);
+    Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt);
     EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
+    ShowRecord? GetShowByReference(Guid identifier);
+    SeasonRecord? GetSeasonByReference(Guid identifier);
 }
 
 public class ShowsRepository : IShowsRepository
@@ -344,53 +346,61 @@ public class ShowsRepository : IShowsRepository
         }
     }
 
-    public async Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt)
+    public async Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt)
     {
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
-                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper());
 
                 if (existingUser == null)
                 {
-                    Console.WriteLine($"[ERROR] - User '{username}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[ERROR] - User '{user.Username}' doesn't exist. Creating...");
+                    
+                    existingUser = user;
+                    context.Users.Add(existingUser);
                 }
 
-                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == showTmdbId);
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
 
                 if (existingShow == null)
                 {
-                    Console.WriteLine($"[INFO] - Show '{showTmdbId}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[INFO] - Show '{show.TMDB}' doesn't exist. Creating...");
+
+                    existingShow = show;
+                    context.Shows.Add(existingShow);
                 }
 
-                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == showTmdbId 
-                                                                         && x.Number == seasonNumber);
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB 
+                                                                         && x.Number == season.Number);
 
                 if (existingSeason == null)
                 {
-                    Console.WriteLine($"[INFO] - Season '{seasonNumber}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[INFO] - Season '{season.Number}' doesn't exist. Creating...");
+                    
+                    existingSeason = season;
+                    context.Seasons.Add(existingSeason);
                 }
 
-                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == showTmdbId 
-                                                                         && x.Season.Number == seasonNumber 
-                                                                         && x.Number == episodeNumber);
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB 
+                                                                         && x.Season.Number == season.Number
+                                                                         && x.Number == episode.Number);
 
                 if (existingEpisode == null)
                 {
-                    Console.WriteLine($"[INFO] - Episode '{episodeNumber}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[INFO] - Episode '{episode.Number}' doesn't exist. Creating...");
+                    
+                    existingEpisode = episode;
+                    context.Episodes.Add(existingEpisode);
                 }
                 
                 var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
-                    x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Episode.Season.Show.TMDB == showTmdbId && 
-                    x.Episode.Season.Number == seasonNumber && 
-                    x.Episode.Number == episodeNumber &&
+                    x.User.Username.ToUpper() == user.Username.ToUpper() &&
+                    x.Episode.Season.Show.TMDB == show.TMDB && 
+                    x.Episode.Season.Number == season.Number && 
+                    x.Episode.Number == episode.Number &&
                     x.WatchedAt >= watchedAt.AddHours(-1) &&
                     x.WatchedAt <= watchedAt.AddHours(1)
                 );
@@ -405,7 +415,7 @@ public class ShowsRepository : IShowsRepository
                         WatchedAt = watchedAt,
                     };
 
-                    Console.WriteLine($"[INFO] - Episode-User Link '{username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
+                    Console.WriteLine($"[INFO] - Episode-User Link '{user.Username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
                     context.Add(movieUserRecord);
                 }
 
@@ -458,5 +468,37 @@ public class ShowsRepository : IShowsRepository
         }
 
         return null;
+    }
+
+    public ShowRecord? GetShowByReference(Guid identifier)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                return context.Shows.FirstOrDefault(x => x.Identifier == identifier);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"[FATAL] - Failed to get show.");
+                return null;
+            }
+        }
+    }
+
+    public SeasonRecord? GetSeasonByReference(Guid identifier)
+    {
+        using (var context = new DatabaseContext())
+        {
+            try
+            {
+                return context.Seasons.FirstOrDefault(x => x.Identifier == identifier);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"[FATAL] - Failed to get show.");
+                return null;
+            }
+        }
     }
 }

@@ -20,8 +20,10 @@ public interface IShowsService
     GetSeasonResponse GetSeasonByNumber(string slug, int seasonNumber);
     GetEpisodeResponse GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber);
     GetEpisodeWatchedHistoryResponse GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber);
-    Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt);
+    Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt);
     EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string idsTmdb, DateTime watchedAt);
+    ShowRecord? GetShowByReference(Guid identifier);
+    SeasonRecord? GetSeasonByReference(Guid identifier);
 }
 
 public class ShowsService : IShowsService
@@ -238,13 +240,23 @@ public class ShowsService : IShowsService
         return new GetEpisodeWatchedHistoryResponse();
     }
 
-    public async Task MarkEpisodeAsWatched(string username, string showTmdbId, int seasonNumber, int episodeNumber, DateTime watchedAt)
+    public async Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt)
     {
-        await _repository.MarkEpisodeAsWatched(username, showTmdbId, seasonNumber, episodeNumber, watchedAt);
+        await _repository.MarkEpisodeAsWatched(user, show, season, episode, watchedAt);
     }
 
     public EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string idsTmdb, DateTime watchedAt)
     {
         return _repository.GetWatchedShowByLastWatchedAt(username, idsTmdb, watchedAt);
+    }
+
+    public ShowRecord? GetShowByReference(Guid identifier)
+    {
+        return _repository.GetShowByReference(identifier);
+    }
+
+    public SeasonRecord? GetSeasonByReference(Guid identifier)
+    {
+        return _repository.GetSeasonByReference(identifier);
     }
 }
