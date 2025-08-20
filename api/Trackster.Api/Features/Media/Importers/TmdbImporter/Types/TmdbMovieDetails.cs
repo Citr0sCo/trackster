@@ -53,7 +53,7 @@ public class TmdbMovieDetails
     public List<ProductionCountry> ProductionCountries { get; set; }
 
     [JsonProperty("release_date")]
-    public string ReleaseDate { get; set; }
+    public DateTime ReleaseDate { get; set; }
 
     //[JsonProperty("revenue")]
     //public int64 Revenue { get; set; }

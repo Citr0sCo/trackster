@@ -12,7 +12,7 @@ public interface IMoviesRepository
     Movie? GetMovieBySlug(string slug);
     List<WatchedMovie> GetWatchedHistoryBySlug(string username, string slug);
     MovieRecord? GetMovieByTmdbId(string tmdbId);
-    Task MarkMovieAsWatched(string username, string tmdbId, DateTime watchedAt);
+    Task MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt);
     MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
 }
 
@@ -148,32 +148,36 @@ public class MoviesRepository : IMoviesRepository
         }
     }
 
-    public async Task MarkMovieAsWatched(string username, string tmdbId, DateTime watchedAt)
+    public async Task MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt)
     {
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
-                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper());
 
                 if (existingUser == null)
                 {
-                    Console.WriteLine($"[ERROR] - User '{username}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[ERROR] - User '{user.Username}' doesn't exist. Creating...");
+                    
+                    existingUser = user;
+                    context.Users.Add(existingUser);
                 }
 
-                var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == tmdbId);
+                var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.TMDB);
 
                 if (existingMovie == null)
                 {
-                    Console.WriteLine($"[INFO] - Movie '{tmdbId}' doesn't exist.");
-                    return;
+                    Console.WriteLine($"[INFO] - Movie '{movie.Title}' doesn't exist. Creating...");
+                    
+                    existingMovie = movie;
+                    context.Movies.Add(existingMovie);
                 }
                 
                 var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
-                    x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Movie.TMDB.ToUpper() == tmdbId.ToUpper() &&
+                    x.User.Username.ToUpper() == user.Username.ToUpper() &&
+                    x.Movie.TMDB.ToUpper() == movie.TMDB.ToUpper() &&
                     x.WatchedAt >= watchedAt.AddHours(-1) &&
                     x.WatchedAt <= watchedAt.AddHours(1)
                 );
@@ -188,7 +192,8 @@ public class MoviesRepository : IMoviesRepository
                         WatchedAt = watchedAt,
                     };
 
-                    Console.WriteLine($"[INFO] - Movie-User Link '{username}'-'{existingMovie.Title}' doesn't exist. Creating...");
+                    Console.WriteLine($"[INFO] - Movie-User Link '{user.Username}'-'{existingMovie.Title}' doesn't exist. Creating...");
+                    
                     context.Add(movieUserRecord);
                 }
 
