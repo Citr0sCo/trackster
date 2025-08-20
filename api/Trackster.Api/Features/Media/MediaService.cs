@@ -270,24 +270,28 @@ public class MediaService
         }
     }
 
-    private async Task ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord userRecord)
+    private async Task ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord user)
     {
         Console.WriteLine($"[INFO] - Will process {shows.Count} shows.");
 
         var processedShows = 0;
         foreach (var show in shows)
         {
-            ProcessShow(show, userRecord).Wait();
+            ProcessShow(show, user).Wait();
 
-            var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(userRecord.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
+            var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(user.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
 
             if (lastWatchedAt == null)
             {
-                var watchingHistory = await _traktProvider.GetWatchedShowHistory(userRecord.Username, show.Show.Ids.Trakt);
+                var watchingHistory = await _traktProvider.GetWatchedShowHistory(user.Username, show.Show.Ids.Trakt);
 
                 foreach (var watchHistory in watchingHistory)
                 {
-                    await _showsService.MarkEpisodeAsWatched(Username, show.Show, watchHistory.Episode.Season, watchHistory.Episode.Number, watchHistory.WatchedAt);
+                    var showRecord = await _showsService.GetShowByTmdbId(show.Show.Ids.TMDB);
+                    var seasonRecord = await _showsService.GetSeasonBy(watchHistory.Episode.Season, showRecord.Identifier);
+                    var episodeRecord = await _showsService.GetEpisodeBy(watchHistory.Episode.Number, seasonRecord.Identifier);
+                    
+                    await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt);
                 }
             }
                 
@@ -296,67 +300,103 @@ public class MediaService
         }
     }
 
-    private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord)
+    private async Task<ShowRecord> GetShowRecordByTmdbId(string username, string tmdbId)
     {
-        var showRecord = await _showsService.GetShowByTmdbId(show.Show.Ids.TMDB);
-        var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB);
+        var showRecord = await _showsService.GetShowByTmdbId(tmdbId);
 
-        if (showRecord == null)
+        if (showRecord != null)
+            return showRecord;
+        
+        var details = await _detailsProvider.GetDetailsForShow(tmdbId);
+
+        showRecord = new ShowRecord
         {
-            showRecord = new ShowRecord
+            Identifier = Guid.NewGuid(),
+            Title = details.Title,
+            Slug = SlugHelper.GenerateSlugFor(details.Title),
+            Year = details.FirstAirDate.Year,
+            TMDB = tmdbId,
+            Poster = $"https://image.tmdb.org/t/p/w300{details?.PosterUrl}",
+            Overview = details?.Overview,
+        };
+
+        var userRecord = await _usersService.GetUserByUsername(username);
+
+        if (userRecord == null)
+        {
+            userRecord = new UserRecord
             {
                 Identifier = Guid.NewGuid(),
-                Title = show.Show.Title,
-                Slug = SlugHelper.GenerateSlugFor(show.Show.Title),
-                Year = show.Show.Year,
-                TMDB = show.Show.Ids.TMDB,
-                Poster = $"https://image.tmdb.org/t/p/w300{details?.PosterUrl}",
-                Overview = details?.Overview,
+                Username = username
             };
-                
-            await _showsService.ImportShow(userRecord, showRecord);
+            
+            userRecord = await _usersService.CreateUser(userRecord);
         }
+        
+        await _showsService.ImportShow(userRecord, showRecord);
+
+        return showRecord;
+    }
+
+    private async Task<SeasonRecord> GetSeasonRecordByShowTmdbId(string username, Guid showIdentifier, int seasonNumber)
+    {
+        var showRecord = _showsService.GetShowByReference(showIdentifier);
+        var userRecord = await _usersService.GetUserByUsername(username);
+        
+        var seasonRecord = await _showsService.GetSeasonBy(seasonNumber, showRecord.Identifier);
+
+        if (seasonRecord != null)
+            return seasonRecord;
+
+        seasonRecord = new SeasonRecord
+        {
+            Identifier = Guid.NewGuid(),
+            Number = seasonNumber,
+            Title = $"Season {seasonNumber}",
+            Show = showRecord
+        };
+                
+        await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
+        
+        return seasonRecord;
+    }
+
+    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(string username, Guid showIdentifier, Guid seasonIdentifier, int episodeNumber)
+    {
+        var showRecord = _showsService.GetShowByReference(showIdentifier);
+        var seasonRecord = _showsService.GetSeasonByReference(seasonIdentifier);
+        var userRecord = await _usersService.GetUserByUsername(username);
+        var episodeRecord = await _showsService.GetEpisodeBy(episodeNumber, seasonRecord.Identifier);
+
+        if (episodeRecord != null)
+            return episodeRecord;
+        
+        var episodeDetails = await _detailsProvider.GetEpisodeDetails(showRecord.TMDB, seasonRecord.Number, episodeNumber);
+                        
+        episodeRecord = new EpisodeRecord
+        {
+            Identifier = Guid.NewGuid(),
+            Number = episodeNumber,
+            Title = episodeDetails.Title ?? showRecord.Title,
+            Season = seasonRecord
+        };
+
+        await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
+        
+        return episodeRecord;
+    }
+
+    private async Task ProcessShow(TraktShowResponse show, UserRecord user)
+    {
+        var showRecord = await GetShowRecordByTmdbId(user.Username, show.Show.Ids.TMDB);
             
         foreach (var season in show.Seasons)
         {
-            var seasonRecord = await _showsService.GetSeasonBy(season.Number, showRecord.Identifier);
-
-            if (seasonRecord == null)
+            var seasonRecord = await GetSeasonRecordByShowTmdbId(user.Username, showRecord.Identifier, season.Number);
+                    
+            foreach (var episode in season.Episodes)
             {
-                var title = $"Season {season.Number}";
-
-                if (season.Number > 0 && details?.Seasons.Count > (season.Number - 1))
-                    title = details.Seasons[season.Number - 1].Title;
-
-                seasonRecord = new SeasonRecord
-                {
-                    Identifier = Guid.NewGuid(),
-                    Number = season.Number,
-                    Title = title,
-                    Show = showRecord
-                };
-                    
-                await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
-                    
-                foreach (var episode in season.Episodes)
-                {
-                    var episodeRecord = await _showsService.GetEpisodeBy(episode.Number, seasonRecord.Identifier);
-                        
-                    if (episodeRecord == null)
-                    {
-                        var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.Show.Ids.TMDB, season.Number, episode.Number);
-                            
-                        episodeRecord = new EpisodeRecord
-                        {
-                            Identifier = Guid.NewGuid(),
-                            Number = episode.Number,
-                            Title = episodeDetails.Title ?? show.Show.Title,
-                            Season = seasonRecord
-                        };
-
-                        await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
-                    }          
-                }
+                var episodeRecord = await GetEpisodeRecordByShowTmdbId(user.Username, showRecord.Identifier, seasonRecord.Identifier,  episode.Number);
             }
         }
     }
