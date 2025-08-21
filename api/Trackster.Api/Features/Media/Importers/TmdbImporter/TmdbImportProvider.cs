@@ -26,6 +26,9 @@ public class TmdbImportProvider
                 using (var response = await httpClient.GetAsync($"3/movie/{reference}"))
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
+                    
+                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for movie {responseData}.");
+                    
                     var parsedData = JsonConvert.DeserializeObject<TmdbMovieDetails>(responseData);
                     return parsedData ?? new TmdbMovieDetails();
                 }
@@ -54,6 +57,9 @@ public class TmdbImportProvider
                 using(var response = await httpClient.GetAsync($"3/tv/{reference}"))
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
+                    
+                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for show {responseData}.");
+                    
                     var parsedData = JsonConvert.DeserializeObject<TmdbShowDetails>(responseData);
                     return parsedData ?? new TmdbShowDetails();
                 }
@@ -82,6 +88,9 @@ public class TmdbImportProvider
                 using(var response = await httpClient.GetAsync($"3/tv/{seriesId}/season/{seasonNumber}/episode/{episodeNumber}"))
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
+                    
+                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for episode {responseData}.");
+                    
                     var parsedData = JsonConvert.DeserializeObject<TmdbEpisodeDetails>(responseData);
                     return parsedData ?? new TmdbEpisodeDetails();
                 }
@@ -120,6 +129,9 @@ public class TmdbImportProvider
                 using(var response = await httpClient.GetAsync($"3/search/movie?{flatQueryParams}"))
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
+                    
+                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB search for movie {responseData}.");
+                    
                     var parsedData = JsonConvert.DeserializeObject<TmdbMovieSearchResults>(responseData);
                     return parsedData ?? new TmdbMovieSearchResults();
                 }
@@ -196,6 +208,9 @@ public class TmdbImportProvider
                 using(var response = await httpClient.GetAsync($"3/tv/{showIdentifier}/season/{seasonNumber}?{flatQueryParams}"))
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
+                    
+                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for season {responseData}.");
+                    
                     var parsedData = JsonConvert.DeserializeObject<TmdbSeasonSearchResults>(responseData);
                     return parsedData ?? new TmdbSeasonSearchResults();
                 }
