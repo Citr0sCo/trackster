@@ -6,7 +6,7 @@ using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
-using Trackster.Api.Features.Movies.Types;
+using Trackster.Api.Features.Notifications;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
 
@@ -20,6 +20,7 @@ public class MediaService
     private readonly TraktImportProvider _traktProvider;
     private readonly WatchingNowService _watchingNowService;
     private readonly TmdbImportProvider _detailsProvider;
+    private readonly NotificationsService _notificationsService;
 
     private const string MOVIE_MEDIA_TYPE = "movie";
     private string EPISODE_MEDIA_TYPE = "episode";
@@ -32,6 +33,7 @@ public class MediaService
         _traktProvider = new TraktImportProvider();
         _watchingNowService = WatchingNowService.Instance();
         _detailsProvider = new TmdbImportProvider();
+        _notificationsService = new NotificationsService();
     }
 
     public async Task<ImportMediaResponse> ImportMedia(ImportMediaRequest request)
@@ -145,14 +147,10 @@ public class MediaService
     public async void RemoveMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
-        {
             _watchingNowService.MarkAsStoppedWatchingMovie("citr0s");
-        }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
-        {
             _watchingNowService.MarkAsStoppedWatchingEpisode("citr0s");
-        }
 
         Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {parentTitle}, {seasonNumber}, {year}.");
     }
@@ -181,6 +179,7 @@ public class MediaService
             var user = await _usersService.GetUserByUsername("citr0s");
             var movie = await _moviesService.SearchForMovieBy(title, year);
             await _moviesService.MarkMovieAsWatched(user, movie, DateTime.UtcNow);
+            _notificationsService.Send($"Movie {title} ({year}) marked as watched.");
         }
         catch (Exception ex)
         {
@@ -196,6 +195,7 @@ public class MediaService
             var user = await _usersService.GetUserByUsername("citr0s");
             var episode = await _showsService.SearchForEpisode(showTitle, seasonTitle, episodeTitle, year, seasonNumber);
             await _showsService.MarkEpisodeAsWatched(user, episode.Season.Show, episode.Season, episode, DateTime.Now);
+            _notificationsService.Send($"Episode '{episodeTitle}' of show {showTitle} marked as watched.");
         }
         catch (Exception ex)
         {

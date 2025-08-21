@@ -58,6 +58,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_PUSHOVER_TOKEN=<YOUR_PUSHOVER_TOKEN>
+      - ASPNETCORE_PUSHOVER_USER=<YOUR_PUSHOVER_USER>
+      - ASPNETCORE_TRAKT_API_KEY=<YOUR_TRAKT_API_KEY>
+      - ASPNETCORE_TMDB_API_KEY=<YOUR_TMDB_API_KEY>
     volumes:
       - ./assets:/web-api/app/assets
 

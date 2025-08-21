@@ -9,7 +9,7 @@ public class TmdbImportProvider
 
     public TmdbImportProvider()
     {
-        _authToken = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhODRjNDI4MjZmNWJkNjIxZThlNjkyMWMwZTYxZTAxZSIsIm5iZiI6MTUxNTY2NDUwMS43MTgwMDAyLCJzdWIiOiI1YTU3MzQ3NTBlMGEyNjA3ZDcwMzY0MWEiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.iT-8sXm-DxqL5uXUrznWUZmn41UOeI6vGyby9ZSvMX4";
+        _authToken = Environment.GetEnvironmentVariable("ASPNETCORE_TMDB_API_KEY")!;
     }
     
     public async Task<TmdbMovieDetails> GetDetailsForMovie(string reference)
