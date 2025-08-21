@@ -179,7 +179,7 @@ public class MediaService
             var user = await _usersService.GetUserByUsername("citr0s");
             var movie = await _moviesService.SearchForMovieBy(title, year);
             await _moviesService.MarkMovieAsWatched(user, movie, DateTime.UtcNow);
-            _notificationsService.Send($"Movie {title} ({year}) marked as watched.");
+            _notificationsService.Send($"Movie '{title} ({year})' marked as watched.");
         }
         catch (Exception ex)
         {
@@ -195,7 +195,7 @@ public class MediaService
             var user = await _usersService.GetUserByUsername("citr0s");
             var episode = await _showsService.SearchForEpisode(showTitle, seasonTitle, episodeTitle, year, seasonNumber);
             await _showsService.MarkEpisodeAsWatched(user, episode.Season.Show, episode.Season, episode, DateTime.Now);
-            _notificationsService.Send($"Episode '{episodeTitle}' of show {showTitle} marked as watched.");
+            _notificationsService.Send($"Episode '{episodeTitle}' of show '{showTitle}' marked as watched.");
         }
         catch (Exception ex)
         {
