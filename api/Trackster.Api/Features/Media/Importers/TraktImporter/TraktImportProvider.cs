@@ -5,7 +5,12 @@ namespace Trackster.Api.Features.Media.Importers.TraktImporter;
 
 public class TraktImportProvider
 {
-    private readonly string _apiKey = "ce40409023d4a567b678e19aa3c4b4dc243d05f85ac624f4d203840227043011";
+    private readonly string _apiKey;
+
+    public TraktImportProvider()    
+    {
+        _apiKey = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_API_KEY")!;
+    }
 
     public async Task<List<TraktMovieResponse>> GetMovies(string username)
     {
