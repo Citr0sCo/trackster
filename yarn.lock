@@ -167,26 +167,26 @@
     ora "8.2.0"
     rxjs "7.8.2"
 
-"@angular-eslint/bundled-angular-compiler@20.1.1":
-  version "20.1.1"
-  resolved "https://registry.yarnpkg.com/@angular-eslint/bundled-angular-compiler/-/bundled-angular-compiler-20.1.1.tgz#aca45911806a21daf4b1c60aecadfd908f458fcb"
-  integrity sha512-hEWh/upyTj2bhyRmbNnGtlOXhBSEHwLg8/9YYhwmiNApQwKcvcg7lkstZMEVrKievNHZT6Wh4dWZvjRjMqLNSg==
+"@angular-eslint/bundled-angular-compiler@20.2.0":
+  version "20.2.0"
+  resolved "https://registry.yarnpkg.com/@angular-eslint/bundled-angular-compiler/-/bundled-angular-compiler-20.2.0.tgz#e649d0791b94495743bd8d6f157b77d65b2dd03b"
+  integrity sha512-9NhytRavpxWqa0fK+mlQZrif91MhtG3VEV3JCQEwOH9JPueY95XVHYwPgcbODhoSg/z5YaTVby5G254cEXUMew==
 
-"@angular-eslint/eslint-plugin@^20.1.1":
-  version "20.1.1"
-  resolved "https://registry.yarnpkg.com/@angular-eslint/eslint-plugin/-/eslint-plugin-20.1.1.tgz#332e0d3efc0420abecf507fafc33effccc37217a"
-  integrity sha512-h+D6T35UGIuG0keYPH7dc6OTdfTVJ8GoIhCIpoAmVGhdIdfXIISvDvvX/QPiZtTcefik3vEZEGRiI/Nzc5xImw==
+"@angular-eslint/eslint-plugin@^20.2.0":
+  version "20.2.0"
+  resolved "https://registry.yarnpkg.com/@angular-eslint/eslint-plugin/-/eslint-plugin-20.2.0.tgz#5cac6586e0b38458c65ffb47eedc091da21ccef3"
+  integrity sha512-HdujUz7Q1ZW371cCJRkUcp0bjU/iP8Z/ZNTStCzMd4euu+HwVt69dLsTCs6f1i6SMqlIUjaP8TbqNo5nV8Altw==
   dependencies:
-    "@angular-eslint/bundled-angular-compiler" "20.1.1"
-    "@angular-eslint/utils" "20.1.1"
+    "@angular-eslint/bundled-angular-compiler" "20.2.0"
+    "@angular-eslint/utils" "20.2.0"
     ts-api-utils "^2.1.0"
 
-"@angular-eslint/utils@20.1.1":
-  version "20.1.1"
-  resolved "https://registry.yarnpkg.com/@angular-eslint/utils/-/utils-20.1.1.tgz#7f64edcc2aa0d1294c8e72d268960a30f253552d"
-  integrity sha512-hqbzGqa/0Ua90r4TMn4oZVnLuwIF6dqEfH7SlstB224h/7+nKoi67aHkmUq7VItWXpDDe+f1opeR01GKS9fNog==
+"@angular-eslint/utils@20.2.0":
+  version "20.2.0"
+  resolved "https://registry.yarnpkg.com/@angular-eslint/utils/-/utils-20.2.0.tgz#5938a5c8fad87dfc15193ccf58fec200bb983524"
+  integrity sha512-GnEa8BU9xBLUq4JQ8UgXecUXPCmju9P5KIobql17LV1t3vnJ33Zr7acO1jWOzluypllKSVrtARdRTI+TQGCqrA==
   dependencies:
-    "@angular-eslint/bundled-angular-compiler" "20.1.1"
+    "@angular-eslint/bundled-angular-compiler" "20.2.0"
 
 "@angular/animations@^20.2.1":
   version "20.2.1"
