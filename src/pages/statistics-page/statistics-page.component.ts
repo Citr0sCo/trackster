@@ -17,6 +17,7 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
     public totalMovies: number = 0;
     public totalEpisodes: number = 0;
     public calendarItems: { key: string; value: number }[] = [];
+    public calendarItemsMonths: Date[] = [];
     public startDate: Date = new Date();
     public endDate: Date = new Date();
     public calendarMaxValue: number = 0;
@@ -75,6 +76,11 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
         const endDate = this.endDate;
         const startDate = new Date(endDate);
         startDate.setDate(endDate.getDate() - 365);
+
+        while (startDate.getDay() !== 1) {
+            startDate.setDate(startDate.getDate() - 1);
+        }
+
         this.startDate = startDate;
 
         let years = [endDate.getFullYear()];
@@ -82,15 +88,13 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
             years = [startDate.getFullYear(), endDate.getFullYear()];
         }
 
-        console.log(years);
-
         for (let year of years) {
             for (let month = 0; month < 12; month++) {
 
                 const actualMonth = 1 + month;
                 const days = this.daysInMonth(year, actualMonth);
 
-                for (let day = 1; day <= days; day++) {
+                for (let day = startDate.getDate(); day <= days; day++) {
 
                     let parsedDay = day.toString();
                     if (day < 10) {
@@ -105,12 +109,18 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
                     const key = `${year}-${parsedMonth}-${parsedDay}`;
                     const parsedDate = new Date(key);
 
-                    if (parsedDate < startDate) {
+                    if (parsedDate.getTime() < startDate.getTime()) {
                         continue;
                     }
 
-                    if (parsedDate > endDate) {
+                    if (parsedDate.getTime() > endDate.getTime()) {
                         continue;
+                    }
+
+                    if (this.calendarItems.length === 0) {
+                        if (parsedDate.getDay() !== 1) {
+                            continue;
+                        }
                     }
 
                     this.calendarItems.push({ key: key, value: 0 });
@@ -123,6 +133,15 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
 
                 if (item.key == entry[0]) {
                     item.value = entry[1];
+                }
+
+                const date = new Date(item.key);
+                const parsedDate = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-01`);
+
+                const alreadyAdded = this.calendarItemsMonths.find((x) => x.toDateString() === parsedDate.toDateString());
+
+                if (!alreadyAdded) {
+                    this.calendarItemsMonths.push(parsedDate);
                 }
 
                 return item;

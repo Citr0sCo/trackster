@@ -42,30 +42,66 @@
                 <div style="text-align:center;" class="u-mt-3">
                     {{ startDate | date:'MMM' }} {{ startDate.getFullYear() }} - {{ endDate | date:'MMM' }} {{ endDate.getFullYear() }}
                 </div>
-                <div class="calendar-stats u-mt-3">
-                    @for (media of calendarItems; track media) {
-                        <div class="calendar-stats__cell" style="background:rgba(98, 29, 226, {{ media.value > 0 ? generateCalenderItemColour(media.value) : '' }})"
-                             title="{{ media.key }} - {{ media.value }}"></div>
+                <div class="calendar-stats__months u-mt-3">
+                    @for (month of calendarItemsMonths; track month) {
+                        <div class="calendar-stats__month">
+                            {{ month | date:'MMM' }}
+                        </div>
                     }
+                </div>
+                <div class="o-grid">
+                    <div class="o-grid__col">
+                        <div class="calendar-stats__days">
+                            <div class="calendar-stats__day">
+                                Mon
+                            </div>
+                            <div class="calendar-stats__day">
+                                Tue
+                            </div>
+                            <div class="calendar-stats__day">
+                                Wed
+                            </div>
+                            <div class="calendar-stats__day">
+                                Thurs
+                            </div>
+                            <div class="calendar-stats__day">
+                                Fri
+                            </div>
+                            <div class="calendar-stats__day">
+                                Sat
+                            </div>
+                            <div class="calendar-stats__day">
+                                Sun
+                            </div>
+                        </div>
+                    </div>
+                    <div class="o-grid__col">
+                        <div class="calendar-stats">
+                            @for (media of calendarItems; track media) {
+                                <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, {{ media.value > 0 ? generateCalenderItemColour(media.value) : '' }})"
+                                     title="{{ media.key }} - {{ media.value }}"></div>
+                            }
+                        </div>
+                    </div>
                 </div>
                 <div style="text-align:center;" class="u-mt-1">
                     <div class="calendar-stats__legend">
                         <div class="">
                             0
-                            <div class="calendar-stats__cell" style="background:rgba(98, 29, 226, 0)"></div>
+                            <div class="calendar-stats__cell" style="background:rgba(255, 255, 255, 0.05)"></div>
                         </div>
                         <div class="">
-                            <div class="calendar-stats__cell" style="background:rgba(98, 29, 226, 0.25)"></div>
+                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.25)"></div>
                         </div>
                         <div class="">
-                            <div class="calendar-stats__cell" style="background:rgba(98, 29, 226, 0.5)"></div>
+                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.5)"></div>
                         </div>
                         <div class="">
-                            <div class="calendar-stats__cell" style="background:rgba(98, 29, 226, 0.75)"></div>
+                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.75)"></div>
                         </div>
                         <div class="">
                             {{ calendarMaxValue }}
-                            <div class="calendar-stats__cell" style="background:rgba(98, 29, 226, 1)"></div>
+                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 1)"></div>
                         </div>
                     </div>
                 </div>
