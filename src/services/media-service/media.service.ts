@@ -128,5 +128,7 @@ export class MediaService {
         this._cachedAllMovies = [];
         this._cachedAllShows = [];
         this._cachedHistory = [];
+        this._cachedStats = null;
+        this._cachedStatsForCalendar = [];
     }
 }
