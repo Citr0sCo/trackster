@@ -4,11 +4,11 @@ import { Observable, of, tap, } from 'rxjs';
 import { MediaRepository } from './media.repository';
 import { IShow } from './types/show.type';
 import { IMedia } from "./types/media.type";
-import {IWatchedMovie} from "./types/watched-movie.type";
-import {IWatchedShow} from "./types/watched-show.type";
-import {ISeason} from "./types/season.type";
-import {IEpisode} from "./types/episode.type";
-import {IWatchedEpisode} from "./types/watched-episode.type";
+import { IWatchedMovie } from "./types/watched-movie.type";
+import { IWatchedShow } from "./types/watched-show.type";
+import { ISeason } from "./types/season.type";
+import { IEpisode } from "./types/episode.type";
+import { IWatchedEpisode } from "./types/watched-episode.type";
 
 @Injectable()
 export class MediaService {
@@ -51,13 +51,13 @@ export class MediaService {
             );
     }
 
-    public getHistoryForUser(username: string): Observable<Array<IMedia>> {
+    public getHistoryForUser(username: string, results: number = 50, page: number = 1): Observable<Array<IMedia>> {
 
         if (this._cachedHistory.length > 0) {
-            return of(this._cachedHistory);
+            return of(this._cachedHistory.slice(0, results));
         }
 
-        return this._mediaRepository.getHistoryForUser(username)
+        return this._mediaRepository.getHistoryForUser(username, results, page)
             .pipe(
                 tap((media) => {
                     this._cachedHistory = media;
@@ -65,8 +65,8 @@ export class MediaService {
             );
     }
 
-    public importFromTrakt(username: string): Observable<any> {
-        return this._mediaRepository.importFromTrakt(username);
+    public importFromTrakt(username: string, debug: boolean): Observable<any> {
+        return this._mediaRepository.importFromTrakt(username, debug);
     }
 
     public getMovieBySlug(slug: string): Observable<IMovie> {

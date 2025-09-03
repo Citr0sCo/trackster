@@ -4,109 +4,117 @@
             <div class="o-grid__col">
                 <h3>Statistics</h3>
             </div>
-        </div>
-
-        <div class="o-grid">
-            <div class="o-grid__col">
-                <div class="stats-highlights">
-                    <div class="stats-highlight-container">
-                        <div class="stats-highlight-container__value">
-                            {{ media.length }}
-                        </div>
-                        <div class="stats-highlight-container__label">
-                            Total
-                        </div>
-                    </div>
-                    <div class="stats-highlight-container">
-                        <div class="stats-highlight-container__value">
-                            {{ totalMovies }}
-                        </div>
-                        <div class="stats-highlight-container__label">
-                            Movies
-                        </div>
-                    </div>
-                    <div class="stats-highlight-container">
-                        <div class="stats-highlight-container__value">
-                            {{ totalEpisodes }}
-                        </div>
-                        <div class="stats-highlight-container__label">
-                            Episodes
-                        </div>
+            <div class="o-grid__col o-grid__col--fixed">
+                <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
+                    <div class="custom-sidebar__button__icon">
+                        <i class="fa fa-sync" [ngClass]="{'fa-spin': mediaLoading}"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="o-grid">
-            <div class="o-grid__col">
-                <div style="text-align:center;" class="u-mt-3">
-                    {{ startDate | date:'MMM' }} {{ startDate.getFullYear() }} - {{ endDate | date:'MMM' }} {{ endDate.getFullYear() }}
-                </div>
-                <div class="o-grid u-mt-2">
-                    <div class="o-grid__col">
-                        <div class="calendar-stats__days">
-                            <div class="calendar-stats__day">
-                                Mon
+        @if (!mediaLoading) {
+            <div class="o-grid">
+                <div class="o-grid__col">
+                    <div class="stats-highlights">
+                        <div class="stats-highlight-container">
+                            <div class="stats-highlight-container__value">
+                                {{ media.length }}
                             </div>
-                            <div class="calendar-stats__day">
-                                Tue
+                            <div class="stats-highlight-container__label">
+                                Total
                             </div>
-                            <div class="calendar-stats__day">
-                                Wed
+                        </div>
+                        <div class="stats-highlight-container">
+                            <div class="stats-highlight-container__value">
+                                {{ totalMovies }}
                             </div>
-                            <div class="calendar-stats__day">
-                                Thurs
+                            <div class="stats-highlight-container__label">
+                                Movies
                             </div>
-                            <div class="calendar-stats__day">
-                                Fri
+                        </div>
+                        <div class="stats-highlight-container">
+                            <div class="stats-highlight-container__value">
+                                {{ totalEpisodes }}
                             </div>
-                            <div class="calendar-stats__day">
-                                Sat
-                            </div>
-                            <div class="calendar-stats__day">
-                                Sun
+                            <div class="stats-highlight-container__label">
+                                Episodes
                             </div>
                         </div>
                     </div>
-                    <div class="o-grid__col">
-                        <div class="calendar-stats__months">
-                            @for (month of calendarItemsMonths; track month) {
-                                <div class="calendar-stats__month">
-                                    {{ month | date:'MMM' }}
+                </div>
+            </div>
+
+            <div class="o-grid" style="overflow-x: auto;">
+                <div class="o-grid__col">
+                    <div style="text-align:center;" class="u-mt-3">
+                        {{ startDate | date:'MMM' }} {{ startDate.getFullYear() }} - {{ endDate | date:'MMM' }} {{ endDate.getFullYear() }}
+                    </div>
+                    <div class="o-grid u-mt-2">
+                        <div class="o-grid__col">
+                            <div class="calendar-stats__days">
+                                <div class="calendar-stats__day">
+                                    Mon
                                 </div>
-                            }
+                                <div class="calendar-stats__day">
+                                    Tue
+                                </div>
+                                <div class="calendar-stats__day">
+                                    Wed
+                                </div>
+                                <div class="calendar-stats__day">
+                                    Thu
+                                </div>
+                                <div class="calendar-stats__day">
+                                    Fri
+                                </div>
+                                <div class="calendar-stats__day">
+                                    Sat
+                                </div>
+                                <div class="calendar-stats__day">
+                                    Sun
+                                </div>
+                            </div>
                         </div>
-                        <div class="calendar-stats">
-                            @for (media of calendarItems; track media) {
-                                <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, {{ media.value > 0 ? generateCalenderItemColour(media.value) : '' }})"
-                                     title="{{ media.key }} - {{ media.value }}"></div>
-                            }
+                        <div class="o-grid__col">
+                            <div class="calendar-stats__months">
+                                @for (month of calendarItemsMonths; track month) {
+                                    <div class="calendar-stats__month">
+                                        {{ month | date:'MMM' }}
+                                    </div>
+                                }
+                            </div>
+                            <div class="calendar-stats">
+                                @for (media of calendarItems; track media) {
+                                    <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, {{ media.value > 0 ? generateCalenderItemColour(media.value) : '' }})"
+                                         title="{{ media.key }} - {{ media.value }}"></div>
+                                }
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div style="text-align:center;" class="u-mt-1">
-                    <div class="calendar-stats__legend">
-                        <div class="">
-                            0
-                            <div class="calendar-stats__cell" style="background:rgba(255, 255, 255, 0.05)"></div>
-                        </div>
-                        <div class="">
-                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.25)"></div>
-                        </div>
-                        <div class="">
-                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.5)"></div>
-                        </div>
-                        <div class="">
-                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.75)"></div>
-                        </div>
-                        <div class="">
-                            {{ calendarMaxValue }}
-                            <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 1)"></div>
+                    <div style="text-align:center;" class="u-mt-1">
+                        <div class="calendar-stats__legend">
+                            <div class="">
+                                0
+                                <div class="calendar-stats__cell" style="background:rgba(255, 255, 255, 0.05)"></div>
+                            </div>
+                            <div class="">
+                                <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.25)"></div>
+                            </div>
+                            <div class="">
+                                <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.5)"></div>
+                            </div>
+                            <div class="">
+                                <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 0.75)"></div>
+                            </div>
+                            <div class="">
+                                {{ calendarMaxValue }}
+                                <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, 1)"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
+        }
     </div>
 </div>

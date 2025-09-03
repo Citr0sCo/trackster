@@ -50,8 +50,8 @@ public class MediaService
             var value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (value == "Development")
             {
-                movies = movies.Take(10).ToList();
-                shows = shows.Take(10).ToList();
+                movies = movies.OrderByDescending(x => x.LastWatchedAt).Take(25).ToList();
+                shows = shows.OrderByDescending(x => x.LastWatchedAt).Take(25).ToList();
             }
 
             var user = await ProcessUser(request);

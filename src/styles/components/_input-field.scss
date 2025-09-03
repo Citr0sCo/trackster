@@ -1,7 +1,12 @@
 @import "../../styles/utility/variables";
 
 .c-field {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    align-content: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
     width: 100%;
     margin: 0;
     border: 1px solid var(--border-color);
@@ -31,7 +36,6 @@
 
     &:focus {
         border-color: $brand-primary;
-        //box-shadow: var(--box-shadow);
     }
 
     &__select {

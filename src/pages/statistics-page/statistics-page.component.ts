@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { IMedia, MediaType } from '../../services/media-service/types/media.type';
@@ -11,7 +11,7 @@ import { IMedia, MediaType } from '../../services/media-service/types/media.type
 })
 export class StatisticsPageComponent implements OnInit, OnDestroy {
 
-    public isImporting: boolean = false;
+    public mediaLoading: boolean = false;
     public username: string = 'citr0s';
     public media: Array<IMedia> = [];
     public totalMovies: number = 0;
@@ -31,12 +31,14 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
-        this.isImporting = true;
+        this.mediaLoading = true;
 
-        this._mediaService.getHistoryForUser('citr0s')
+        this._mediaService.getHistoryForUser('citr0s', 1000)
             .pipe(takeUntil(this._destroy))
             .subscribe((media) => {
-                this.isImporting = false;
+                this.mediaLoading = false;
+                this.calendarItems = [];
+                this.history = new Map<string, number>();
 
                 this.media = media;
                 this.totalMovies = this.media.filter((x) => x.mediaType === MediaType.Movie).length;
@@ -50,7 +52,7 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
         for (let item of media) {
 
             let day = item.watchedAt.getDate();
-            let month = item.watchedAt.getMonth();
+            let month = item.watchedAt.getMonth() + 1;
 
             let parsedDay = day.toString();
             if (day < 10) {
@@ -94,11 +96,13 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
                 const actualMonth = 1 + month;
                 const days = this.daysInMonth(year, actualMonth);
 
-                for (let day = startDate.getDate(); day <= days; day++) {
+                for (let day = 0; day < days; day++) {
 
-                    let parsedDay = day.toString();
-                    if (day < 10) {
-                        parsedDay = `0${day}`;
+                    const actualDay = 1 + day;
+
+                    let parsedDay = actualDay.toString();
+                    if (actualDay < 10) {
+                        parsedDay = `0${actualDay}`;
                     }
 
                     let parsedMonth = actualMonth.toString();
@@ -135,6 +139,10 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
                     item.value = entry[1];
                 }
 
+                if (item.value > this.calendarMaxValue) {
+                    this.calendarMaxValue = item.value;
+                }
+
                 const date = new Date(item.key);
                 const parsedDate = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-01`);
 
@@ -154,18 +162,12 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
     }
 
     public generateCalenderItemColour(value: number): string {
+        return (Math.floor((value / this.calendarMaxValue) * 100) / 100).toString();
+    }
 
-        let highestNumber = this.calendarMaxValue;
-
-        for (let entry of this.calendarItems) {
-            if (entry.value > highestNumber) {
-                highestNumber = entry.value;
-            }
-        }
-
-        this.calendarMaxValue = highestNumber;
-
-        return (Math.floor((value / highestNumber) * 100) / 100).toString();
+    public bustCache(): void {
+        this._mediaService.bustCache();
+        this.ngOnInit();
     }
 
     public ngOnDestroy(): void {
