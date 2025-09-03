@@ -13,6 +13,7 @@ import { IWatchedShow } from "./types/watched-show.type";
 import { IEpisode } from "./types/episode.type";
 import { ISeason } from "./types/season.type";
 import { IWatchedEpisode } from "./types/watched-episode.type";
+import { IStats } from './types/stats.type';
 
 @Injectable()
 export class MediaRepository {
@@ -101,6 +102,30 @@ export class MediaRepository {
                             episodeNumber: media.EpisodeNumber,
                         };
                     });
+                })
+            );
+    }
+
+    public getStats(username: string): Observable<IStats> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/stats?username=${username}`).pipe()
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    return {
+                        totalWatched: response.Total,
+                        totalMoviesWatched: response.MoviesWatched,
+                        totalEpisodesWatched: response.EpisodesWatched,
+                    };
+                })
+            );
+    }
+
+    public getStatsForCalendar(username: string, daysInThePast: number): Observable<Array<any>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/stats/calendar?username=${username}&daysInThePast=${daysInThePast}`).pipe()
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    return response.Stats;
                 })
             );
     }

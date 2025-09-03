@@ -23,6 +23,18 @@ public class MediaController : ControllerBase
         return _service.GetHistoryForUser(username, results, page);
     }
     
+    [HttpGet("stats")]
+    public GetStatsResponse GetStats([FromQuery]string username)
+    {
+        return _service.GetStats(username);
+    }
+    
+    [HttpGet("stats/calendar")]
+    public GetStatsForCalendarResonse GetStatsForCalendar([FromQuery]string username, [FromQuery]int daysInThePast = 365)
+    {
+        return _service.GetStatsForCalendar(username, daysInThePast);
+    }
+    
     [HttpPost("import")]
     public async Task<ImportMediaResponse> ImportMedia([FromBody]ImportMediaRequest request)
     {

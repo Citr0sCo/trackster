@@ -9,6 +9,7 @@ import { IWatchedShow } from "./types/watched-show.type";
 import { ISeason } from "./types/season.type";
 import { IEpisode } from "./types/episode.type";
 import { IWatchedEpisode } from "./types/watched-episode.type";
+import { IStats } from './types/stats.type';
 
 @Injectable()
 export class MediaService {
@@ -18,6 +19,8 @@ export class MediaService {
     private _cachedAllMovies: Array<IWatchedMovie> = [];
     private _cachedAllShows: Array<IWatchedShow> = [];
     private _cachedHistory: Array<IMedia> = [];
+    private _cachedStats: IStats | null = null;
+    private _cachedStatsForCalendar: Array<any> = [];
 
     constructor(mediaRepository: MediaRepository) {
         this._mediaRepository = mediaRepository;
@@ -54,13 +57,41 @@ export class MediaService {
     public getHistoryForUser(username: string, results: number = 50, page: number = 1): Observable<Array<IMedia>> {
 
         if (this._cachedHistory.length > 0) {
-            return of(this._cachedHistory.slice(0, results));
+            return of(this._cachedHistory);
         }
 
         return this._mediaRepository.getHistoryForUser(username, results, page)
             .pipe(
                 tap((media) => {
                     this._cachedHistory = media;
+                })
+            );
+    }
+
+    public getStats(username: string): Observable<IStats> {
+
+        if (this._cachedStats) {
+            return of(this._cachedStats);
+        }
+
+        return this._mediaRepository.getStats(username)
+            .pipe(
+                tap((stats) => {
+                    this._cachedStats = stats;
+                })
+            );
+    }
+
+    public getStatsForCalendar(username: string, daysInThePast: number = 50): Observable<Array<any>> {
+
+        if (this._cachedStatsForCalendar.length > 0) {
+            return of(this._cachedStatsForCalendar);
+        }
+
+        return this._mediaRepository.getStatsForCalendar(username, daysInThePast)
+            .pipe(
+                tap((media) => {
+                    this._cachedStatsForCalendar = media;
                 })
             );
     }

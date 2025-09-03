@@ -7,19 +7,19 @@
             <div class="o-grid__col o-grid__col--fixed">
                 <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
                     <div class="custom-sidebar__button__icon">
-                        <i class="fa fa-sync" [ngClass]="{'fa-spin': mediaLoading}"></i>
+                        <i class="fa fa-sync" [ngClass]="{'fa-spin': statsLoading || calendarStatsLoading}"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        @if (!mediaLoading) {
+        @if (!statsLoading) {
             <div class="o-grid">
                 <div class="o-grid__col">
                     <div class="stats-highlights">
                         <div class="stats-highlight-container">
                             <div class="stats-highlight-container__value">
-                                {{ media.length }}
+                                {{ totalWatched }}
                             </div>
                             <div class="stats-highlight-container__label">
                                 Total
@@ -44,7 +44,8 @@
                     </div>
                 </div>
             </div>
-
+        }
+        @if (!calendarStatsLoading) {
             <div class="o-grid" style="overflow-x: auto;">
                 <div class="o-grid__col">
                     <div style="text-align:center;" class="u-mt-3">

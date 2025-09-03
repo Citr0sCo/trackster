@@ -6,6 +6,7 @@ using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
+using Trackster.Api.Features.Movies.Types;
 using Trackster.Api.Features.Notifications;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
@@ -115,6 +116,69 @@ public class MediaService
         return new GetHistoryForUserResponse
         {
             Media = media.OrderByDescending(x => x.WatchedAt).ToList()
+        };
+    }
+
+    public GetStatsForCalendarResonse GetStatsForCalendar(string username, int daysInThePast)
+    {
+        var movies = _moviesService.GetAllWatchedMovies(username, 10000, 1);
+        var shows = _showsService.GetAllWatchedShows(username, 10000, 1);
+
+        var stats = new Dictionary<string, int>();
+
+        var lowestDate = DateTime.Now.AddDays(-daysInThePast);
+
+        foreach (var movie in movies.WatchedMovies)
+        {
+            if(movie.WatchedAt < lowestDate)
+                continue;
+            
+            var key = GenerateKeyFromDate(movie.WatchedAt);
+            
+            if(!stats.TryAdd(key, 1))
+                stats[key]++;
+        }
+
+        foreach (var show in shows.WatchedShows)
+        {
+            if(show.WatchedAt < lowestDate)
+                continue;
+            
+            var key = GenerateKeyFromDate(show.WatchedAt);
+            
+            if(!stats.TryAdd(key, 1))
+                stats[key]++;
+        }
+
+        return new GetStatsForCalendarResonse
+        {
+            Stats = stats
+        };
+    }
+
+    private static string GenerateKeyFromDate(DateTime date)
+    {
+        var month = date.Month.ToString();
+        if (date.Month < 10)
+            month = $"0{date.Month}";
+
+        var day = date.Day.ToString();
+        if (date.Day < 10)
+            day = $"0{date.Day}";
+        
+        return $"{date.Year}-{month}-{day}";
+    }
+
+    public GetStatsResponse GetStats(string username)
+    {
+        var movies = _moviesService.GetAllWatchedMovies(username, 10000, 1);
+        var shows = _showsService.GetAllWatchedShows(username, 10000, 1);
+
+        return new GetStatsResponse
+        {
+            Total = movies.WatchedMovies.Count + shows.WatchedShows.Count,
+            MoviesWatched = movies.WatchedMovies.Count,
+            EpisodesWatched = shows.WatchedShows.Count
         };
     }
 

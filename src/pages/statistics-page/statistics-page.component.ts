@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { IMedia, MediaType } from '../../services/media-service/types/media.type';
@@ -11,9 +11,11 @@ import { IMedia, MediaType } from '../../services/media-service/types/media.type
 })
 export class StatisticsPageComponent implements OnInit, OnDestroy {
 
-    public mediaLoading: boolean = false;
+    public statsLoading: boolean = false;
+    public calendarStatsLoading: boolean = false;
     public username: string = 'citr0s';
     public media: Array<IMedia> = [];
+    public totalWatched: number = 0;
     public totalMovies: number = 0;
     public totalEpisodes: number = 0;
     public calendarItems: { key: string; value: number }[] = [];
@@ -31,50 +33,36 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
-        this.mediaLoading = true;
+        this.statsLoading = true;
+        this.calendarStatsLoading = true;
 
-        this._mediaService.getHistoryForUser('citr0s', 1000)
+        this._mediaService.getStats('citr0s')
             .pipe(takeUntil(this._destroy))
-            .subscribe((media) => {
-                this.mediaLoading = false;
+            .subscribe((stats) => {
+                this.statsLoading = false;
+
+                this.totalWatched = stats.totalWatched;
+                this.totalMovies = stats.totalMoviesWatched;
+                this.totalEpisodes = stats.totalEpisodesWatched;
+            });
+
+        this._mediaService.getStatsForCalendar('citr0s', 400)
+            .pipe(takeUntil(this._destroy))
+            .subscribe((stats) => {
+                this.calendarStatsLoading = false;
                 this.calendarItems = [];
                 this.history = new Map<string, number>();
 
-                this.media = media;
-                this.totalMovies = this.media.filter((x) => x.mediaType === MediaType.Movie).length;
-                this.totalEpisodes = this.media.filter((x) => x.mediaType === MediaType.Episode).length;
+                for (let entry of Object.entries(stats)) {
+                    this.history.set(entry[0], entry[1]);
+                }
 
-                this.parseMediaForHistory(media);
+                this.generateCalendarMatrix();
+                this.parseMediaForHistory();
             });
     }
 
-    private parseMediaForHistory(media: Array<IMedia>) {
-        for (let item of media) {
-
-            let day = item.watchedAt.getDate();
-            let month = item.watchedAt.getMonth() + 1;
-
-            let parsedDay = day.toString();
-            if (day < 10) {
-                parsedDay = `0${day}`;
-            }
-
-            let parsedMonth = month.toString();
-            if (month < 10) {
-                parsedMonth = `0${month}`;
-            }
-
-            const key = `${item.watchedAt.getFullYear()}-${parsedMonth}-${parsedDay}`;
-
-            if (this.history.has(key)) {
-                const currentValue = this.history.get(key)!;
-                const newValue = currentValue + 1;
-                this.history.set(key, newValue);
-            } else {
-                this.history.set(key, 1);
-            }
-        }
-
+    private generateCalendarMatrix(): void {
         const endDate = this.endDate;
         const startDate = new Date(endDate);
         startDate.setDate(endDate.getDate() - 365);
@@ -131,7 +119,9 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
                 }
             }
         }
+    }
 
+    private parseMediaForHistory() {
         for (let entry of this.history.entries()) {
             this.calendarItems = this.calendarItems.map((item) => {
 
