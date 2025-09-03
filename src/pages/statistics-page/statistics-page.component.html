@@ -42,14 +42,7 @@
                 <div style="text-align:center;" class="u-mt-3">
                     {{ startDate | date:'MMM' }} {{ startDate.getFullYear() }} - {{ endDate | date:'MMM' }} {{ endDate.getFullYear() }}
                 </div>
-                <div class="calendar-stats__months u-mt-3">
-                    @for (month of calendarItemsMonths; track month) {
-                        <div class="calendar-stats__month">
-                            {{ month | date:'MMM' }}
-                        </div>
-                    }
-                </div>
-                <div class="o-grid">
+                <div class="o-grid u-mt-2">
                     <div class="o-grid__col">
                         <div class="calendar-stats__days">
                             <div class="calendar-stats__day">
@@ -76,6 +69,13 @@
                         </div>
                     </div>
                     <div class="o-grid__col">
+                        <div class="calendar-stats__months">
+                            @for (month of calendarItemsMonths; track month) {
+                                <div class="calendar-stats__month">
+                                    {{ month | date:'MMM' }}
+                                </div>
+                            }
+                        </div>
                         <div class="calendar-stats">
                             @for (media of calendarItems; track media) {
                                 <div class="calendar-stats__cell" style="background:rgba(148, 90, 245, {{ media.value > 0 ? generateCalenderItemColour(media.value) : '' }})"

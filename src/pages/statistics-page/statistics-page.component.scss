@@ -53,13 +53,13 @@
 
         &__months {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             flex-direction: row;
             flex-wrap: nowrap;
             align-content: center;
             align-items: center;
             margin-bottom: 5px;
-            margin-left: 100px;
+            line-height: calc((15px + 4px));
 
             @media(max-width: $mobile-width) {
                 display: none;
@@ -79,6 +79,7 @@
             align-content: center;
             align-items: end;
             margin-right: 5px;
+            margin-top: calc((15px + 4px + 5px));
 
             @media(max-width: $mobile-width) {
                 display: none;
