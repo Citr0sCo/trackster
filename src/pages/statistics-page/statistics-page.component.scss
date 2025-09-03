@@ -49,7 +49,6 @@
         align-items: flex-start;
         align-content: flex-start;
         height: calc((15px + 4px) * 7);
-        overflow-x: auto;
 
         &__months {
             display: flex;
@@ -98,9 +97,12 @@
             background: rgba(255, 255, 255, 0.025);
             margin: 2px;
             border-radius: 2.5px;
+            border: 1px solid transparent;
+            cursor: pointer;
 
             &:hover {
                 background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.25);
             }
         }
 

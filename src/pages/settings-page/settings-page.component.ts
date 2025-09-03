@@ -12,6 +12,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     public isImporting: boolean = false;
     public username: string = 'citr0s';
+    public isDebug: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
@@ -27,7 +28,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public importFromTrakt(): void {
         this.isImporting = true;
 
-        this._mediaService.importFromTrakt('citr0s')
+        this._mediaService.importFromTrakt('citr0s', this.isDebug)
             .pipe(takeUntil(this._destroy))
             .subscribe(() => {
                 this.isImporting = false;

@@ -1,6 +1,18 @@
 <div class="settings-page-component">
     <div class="container">
-        <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'" [isLoading]="isImporting"></wide-button>
+        <div class="o-grid">
+            <div class="o-grid__col">
+                <div class="c-input-group" style="margin-right:5px;" (click)="isDebug = !isDebug">
+                    <div class="c-field" style="margin-top:15px;">
+                        <input type="checkbox" [checked]="isDebug">
+                        <div class="c-label">Debug</div>
+                    </div>
+                </div>
+            </div>
+            <div class="o-grid__col">
+                <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'" [isLoading]="isImporting"></wide-button>
+            </div>
+        </div>
 
         <hr>
 

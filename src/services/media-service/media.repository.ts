@@ -79,8 +79,8 @@ export class MediaRepository {
             );
     }
 
-    public getHistoryForUser(username: string): Observable<Array<IMedia>> {
-        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/history?username=${username}`)
+    public getHistoryForUser(username: string, results: number, page: number): Observable<Array<IMedia>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/history?username=${username}&results=${results}&page=${page}`).pipe()
             .pipe(
                 mapNetworkError(),
                 map((response: any) => {
@@ -105,8 +105,8 @@ export class MediaRepository {
             );
     }
 
-    public importFromTrakt(username: string): Observable<any> {
-        return this._httpClient.post(`${environment.apiBaseUrl}/api/media/import`, { Type: ImportType.Trakt, Username: username })
+    public importFromTrakt(username: string, debug: boolean): Observable<any> {
+        return this._httpClient.post(`${environment.apiBaseUrl}/api/media/import`, { Type: ImportType.Trakt, Username: username, Debug: debug })
             .pipe(
                 mapNetworkError()
             );
