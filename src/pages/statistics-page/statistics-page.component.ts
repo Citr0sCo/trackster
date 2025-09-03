@@ -136,7 +136,7 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
 
     public generateCalenderItemColour(value: number): string {
 
-        let highestNumber = 0;
+        let highestNumber = this.calendarMaxValue;
 
         for (let entry of this.calendarItems) {
             if (entry.value > highestNumber) {
