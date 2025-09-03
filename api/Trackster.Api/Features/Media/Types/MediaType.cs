@@ -4,5 +4,5 @@ public enum MediaType
 {
     Unknown,
     Movie,
-    Show
+    Episode
 }

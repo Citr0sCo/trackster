@@ -1,0 +1,43 @@
+@import "../../styles/utility/variables";
+
+.statistics-page-component {
+    padding: 10px 0;
+
+    .stats-highlights {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-items: center;
+
+        @media(max-width: $mobile-width) {
+            flex-direction: column;
+        }
+    }
+
+    .stats-highlight-container {
+        text-align: center;
+        border-radius: $border-radius;
+        width: 100%;
+        padding: 15px;
+        margin: 0 15px;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(45deg, $brand-primary, $brand-primary-alt);
+
+        @media(max-width: $mobile-width) {
+            margin: 15px 0;
+        }
+
+        &__value {
+            font-size: 2rem;
+        }
+
+        &__label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+        }
+    }
+}
