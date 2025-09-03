@@ -6,6 +6,7 @@ import { HistoryPageComponent } from '../pages/history-page/history-page.compone
 import {SettingsPageComponent} from "../pages/settings-page/settings-page.component";
 import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
 import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
+import { StatisticsPageComponent } from '../pages/statistics-page/statistics-page.component';
 
 const routes: Routes = [
     {
@@ -15,6 +16,10 @@ const routes: Routes = [
     {
         path: 'history',
         component: HistoryPageComponent
+    },
+    {
+        path: 'statistics',
+        component: StatisticsPageComponent
     },
     {
         path: 'settings',

@@ -105,7 +105,7 @@ public class MediaService
                 Overview = show.Show.Overview,
                 Poster = show.Show.Poster,
                 TMDB = show.Show.TMDB,
-                Type = MediaType.Show.ToString(),
+                Type = MediaType.Episode.ToString(),
                 SeasonNumber = show.Season.Number,
                 EpisodeNumber = show.Episode.Number,
                 WatchedAt = show.WatchedAt,

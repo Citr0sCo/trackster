@@ -6,13 +6,13 @@ import { mapNetworkError } from '../../core/map-network-error';
 import { Provider } from "../../core/providers.enum";
 import { ImportType } from "../../core/import-type.enum";
 import { IMovie } from "./types/movie.type";
-import {IShow} from "./types/show.type";
-import {IMedia} from "./types/media.type";
-import {IWatchedMovie} from "./types/watched-movie.type";
-import {IWatchedShow} from "./types/watched-show.type";
-import {IEpisode} from "./types/episode.type";
-import {ISeason} from "./types/season.type";
-import {IWatchedEpisode} from "./types/watched-episode.type";
+import { IShow } from "./types/show.type";
+import { IMedia } from "./types/media.type";
+import { IWatchedMovie } from "./types/watched-movie.type";
+import { IWatchedShow } from "./types/watched-show.type";
+import { IEpisode } from "./types/episode.type";
+import { ISeason } from "./types/season.type";
+import { IWatchedEpisode } from "./types/watched-episode.type";
 
 @Injectable()
 export class MediaRepository {
@@ -96,7 +96,7 @@ export class MediaRepository {
                             tmdb: media.TMDB,
                             posterUrl: media.Poster,
                             overview: media.Overview,
-                            watchedAt: media.WatchedAt,
+                            watchedAt: new Date(media.WatchedAt),
                             seasonNumber: media.SeasonNumber,
                             episodeNumber: media.EpisodeNumber,
                         };
@@ -185,7 +185,7 @@ export class MediaRepository {
             );
     }
 
-    public getEpisodeWatchHistory(username:string, identifier: string, seasonNumber: number, episodeNumber: number): Observable<Array<IWatchedEpisode>> {
+    public getEpisodeWatchHistory(username: string, identifier: string, seasonNumber: number, episodeNumber: number): Observable<Array<IWatchedEpisode>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}/history?username=${username}`)
             .pipe(
                 mapNetworkError(),
@@ -200,7 +200,7 @@ export class MediaRepository {
             );
     }
 
-    public getMovieWatchHistoryById(username:string, identifier: string): Observable<Array<IWatchedMovie>> {
+    public getMovieWatchHistoryById(username: string, identifier: string): Observable<Array<IWatchedMovie>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${identifier}/history?username=${username}`)
             .pipe(
                 mapNetworkError(),

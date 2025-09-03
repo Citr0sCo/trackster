@@ -18,6 +18,15 @@
         </div>
     </div>
 
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/statistics'" [routerLinkActive]="'custom-sidebar__button--active'">
+        <div class="custom-sidebar__button__icon">
+            <i class="fa fa-chart-line"></i>
+        </div>
+        <div class="custom-sidebar__button__label">
+            Statistics
+        </div>
+    </div>
+
     <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/settings'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-cog"></i>

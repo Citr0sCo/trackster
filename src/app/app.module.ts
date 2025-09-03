@@ -22,6 +22,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { WatchingNowComponent } from '../components/watching-now/watching-now.component';
 import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
 import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
+import { StatisticsPageComponent } from '../pages/statistics-page/statistics-page.component';
 
 @NgModule({
     declarations: [
@@ -35,7 +36,8 @@ import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-detai
         MediaPosterComponent,
         WatchingNowComponent,
         ShowDetailsPageComponent,
-        MovieDetailsPageComponent
+        MovieDetailsPageComponent,
+        StatisticsPageComponent
     ],
     bootstrap: [AppComponent],
     imports: [

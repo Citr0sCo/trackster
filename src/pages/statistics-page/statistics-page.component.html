@@ -1,0 +1,55 @@
+<div class="statistics-page-component">
+    <div class="container">
+        <div class="o-grid u-mb-2 o-grid--static">
+            <div class="o-grid__col">
+                <h3>Statistics</h3>
+            </div>
+        </div>
+
+        <div class="o-grid">
+            <div class="o-grid__col">
+                <div class="stats-highlights">
+                    <div class="stats-highlight-container">
+                        <div class="stats-highlight-container__value">
+                            {{ media.length }}
+                        </div>
+                        <div class="stats-highlight-container__label">
+                            Total
+                        </div>
+                    </div>
+                    <div class="stats-highlight-container">
+                        <div class="stats-highlight-container__value">
+                            {{ totalMovies }}
+                        </div>
+                        <div class="stats-highlight-container__label">
+                            Movies
+                        </div>
+                    </div>
+                    <div class="stats-highlight-container">
+                        <div class="stats-highlight-container__value">
+                            {{ totalEpisodes }}
+                        </div>
+                        <div class="stats-highlight-container__label">
+                            Episodes
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="o-grid">
+            <div class="o-grid__col">
+                <div style="text-align:center;" class="u-mt-3">
+                    {{ startDate | date:'MMM' }} {{ startDate.getFullYear() }} - {{ endDate | date:'MMM' }} {{ endDate.getFullYear() }}
+                </div>
+                <div class="calendar-stats u-mt-3">
+                    @for (media of calendarItems; track media) {
+                        <div class="calendar-stats__cell" style="background:rgba(98, 29, 226, {{ media.value > 0 ? generateCalenderItemColour(media.value) : '' }})"
+                             title="{{ media.key }} - {{ media.value }}"></div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
