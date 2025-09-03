@@ -46,12 +46,12 @@
             </div>
         }
         @if (!calendarStatsLoading) {
-            <div class="o-grid" style="overflow-x: auto;">
+            <div class="o-grid">
                 <div class="o-grid__col">
                     <div style="text-align:center;" class="u-mt-3">
                         {{ startDate | date:'MMM' }} {{ startDate.getFullYear() }} - {{ endDate | date:'MMM' }} {{ endDate.getFullYear() }}
                     </div>
-                    <div class="o-grid u-mt-2">
+                    <div class="o-grid u-mt-2" style="overflow-x: auto;">
                         <div class="o-grid__col">
                             <div class="calendar-stats__days">
                                 <div class="calendar-stats__day">
