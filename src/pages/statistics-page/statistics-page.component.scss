@@ -62,5 +62,33 @@
             margin: 2px;
             border-radius: 2.5px;
         }
+
+        &__legend {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+
+            & > :first-of-type {
+                display: flex;
+                align-items: center;
+
+                .calendar-stats__cell {
+                    margin-left: 5px;
+                }
+            }
+
+            & > :last-of-type {
+                display: flex;
+                align-items: center;
+                flex-direction: row-reverse;
+
+                .calendar-stats__cell {
+                    margin-right: 5px;
+                }
+            }
+        }
     }
 }
