@@ -19,6 +19,7 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
     public calendarItems: { key: string; value: number }[] = [];
     public startDate: Date = new Date();
     public endDate: Date = new Date();
+    public calendarMaxValue: number = 0;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
@@ -142,6 +143,8 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
                 highestNumber = entry.value;
             }
         }
+
+        this.calendarMaxValue = highestNumber;
 
         return (Math.floor((value / highestNumber) * 100) / 100).toString();
     }
