@@ -31,7 +31,7 @@ export class HistoryPageComponent implements OnInit, OnDestroy {
     public ngOnInit(): void {
         this.mediaLoading = true;
 
-        this._mediaService.getHistoryForUser('citr0s')
+        this._mediaService.getHistoryForUser('citr0s', 500, 1)
             .pipe(takeUntil(this._destroy))
             .subscribe((media) => {
                 this.mediaLoading = false;
