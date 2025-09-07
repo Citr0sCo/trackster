@@ -59,6 +59,9 @@ public class TmdbImportProvider
                     string responseData = await response.Content.ReadAsStringAsync();
                     
                     Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for show {responseData}.");
+
+                    if (responseData == "The resource you requested could not be found.")
+                        return new TmdbShowDetails();
                     
                     var parsedData = JsonConvert.DeserializeObject<TmdbShowDetails>(responseData);
                     return parsedData ?? new TmdbShowDetails();
