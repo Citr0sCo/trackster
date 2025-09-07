@@ -356,8 +356,19 @@ public class MediaService
                 foreach (var watchHistory in watchingHistory)
                 {
                     var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
+                    
+                    if (showRecord.Identifier.ToString() == Guid.Empty.ToString())
+                        continue;
+                    
                     var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord, watchHistory.Episode.Season);
+                    
+                    if (seasonRecord.Identifier.ToString() == Guid.Empty.ToString())
+                        continue;
+                    
                     var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  watchHistory.Episode.Number);
+                    
+                    if (episodeRecord.Identifier.ToString() == Guid.Empty.ToString())
+                        continue;
                     
                     await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt);
                 }
@@ -430,10 +441,16 @@ public class MediaService
         
         var details = await _detailsProvider.GetDetailsForShow(tmdbId);
 
+        if (details.Identifier == 0)
+        {
+            Console.WriteLine($"[ERROR] - Failed to find show details ({tmdbId}).");
+            return new ShowRecord();
+        }
+        
         showRecord = new ShowRecord
         {
             Identifier = Guid.NewGuid(),
-            Title = string.IsNullOrEmpty(details.Title) ? details.Title : "Missing Title",
+            Title = details.Title,
             Slug = SlugHelper.GenerateSlugFor(details.Title),
             Year = details.FirstAirDate.Year,
             TMDB = tmdbId,
