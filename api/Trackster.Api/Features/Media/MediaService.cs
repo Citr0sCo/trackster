@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Newtonsoft.Json;
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
@@ -343,7 +344,7 @@ public class MediaService
         var processedShows = 0;
         foreach (var show in shows)
         {
-            ProcessShow(show, user).Wait();
+            await ProcessShow(show, user);
 
             var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(user.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
 
@@ -369,17 +370,17 @@ public class MediaService
     private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord)
     {
         var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
-        _showsService.ImportShow(userRecord, showRecord).Wait();
+        await _showsService.ImportShow(userRecord, showRecord);
             
         foreach (var season in show.Seasons)
         {
             var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, season.Number);
-            _showsService.ImportSeason(userRecord, showRecord, seasonRecord).Wait();
+            await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
                     
             foreach (var episode in season.Episodes)
             {
                 var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord.Identifier, seasonRecord.Identifier,  episode.Number);
-                _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord).Wait();
+                await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
             }
         }
     }
@@ -452,23 +453,37 @@ public class MediaService
 
     private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(Guid showIdentifier, Guid seasonIdentifier, int episodeNumber)
     {
-        var showRecord = _showsService.GetShowByReference(showIdentifier);
-        var seasonRecord = _showsService.GetSeasonByReference(seasonIdentifier);
-        var episodeRecord = await _showsService.GetEpisodeBy(episodeNumber, seasonRecord.Identifier);
-
-        if (episodeRecord != null)
-            return episodeRecord;
-        
-        var episodeDetails = await _detailsProvider.GetEpisodeDetails(showRecord.TMDB, seasonRecord.Number, episodeNumber);
-                        
-        episodeRecord = new EpisodeRecord
+        try
         {
-            Identifier = Guid.NewGuid(),
-            Number = episodeNumber,
-            Title = episodeDetails.Title ?? showRecord.Title,
-            Season = seasonRecord
-        };
-        
-        return episodeRecord;
+            var showRecord = _showsService.GetShowByReference(showIdentifier);
+            Console.WriteLine($"[DEBUG] - Got Show Record. ShowIdentifier: {showIdentifier}. {JsonConvert.SerializeObject(showRecord)}");
+
+            var seasonRecord = _showsService.GetSeasonByReference(seasonIdentifier);
+            Console.WriteLine($"[DEBUG] - Got Season Record. SeasonIdentifier: {seasonRecord}. {JsonConvert.SerializeObject(seasonRecord)}");
+            
+            var episodeRecord = await _showsService.GetEpisodeBy(episodeNumber, seasonRecord.Identifier);
+            Console.WriteLine($"[DEBUG] - Got Episode Record. EpisodeNumber: {episodeNumber}. {JsonConvert.SerializeObject(episodeNumber)}");
+
+            if (episodeRecord != null)
+                return episodeRecord;
+
+            var episodeDetails =
+                await _detailsProvider.GetEpisodeDetails(showRecord.TMDB, seasonRecord.Number, episodeNumber);
+
+            episodeRecord = new EpisodeRecord
+            {
+                Identifier = Guid.NewGuid(),
+                Number = episodeNumber,
+                Title = episodeDetails.Title ?? showRecord.Title,
+                Season = seasonRecord
+            };
+
+            return episodeRecord;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine($"[ERROR] - Failed getting episode record by show tmdb id. ShowIdentifier: {showIdentifier}, SeasonIdentifier: {seasonIdentifier}, EpisodeNumer: {episodeNumber}");
+            throw;
+        }
     }
 }
