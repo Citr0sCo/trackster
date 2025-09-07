@@ -1,7 +1,14 @@
 <div class="media-details-component">
     <div class="container">
 
-        <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
+        <div class="o-grid">
+            <div class="o-grid__col">
+                <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
+            </div>
+            <div class="o-grid__col text-right">
+                <button (click)="updateEpisode()" class="btn btn-primary btn-sm mb-3"><i class="fa fa-sync" [ngClass]="{'fa-spin': isUpdating}"></i> Refresh Metdata</button>
+            </div>
+        </div>
 
         @if (show) {
             <div class="media-overview o-grid">
@@ -12,13 +19,12 @@
                 </div>
                 <div class="o-grid__col">
                     <div class="media-details">
-                        <h1>{{ show.title }}</h1>
+                        <h1>{{ show.title }} <small style="font-size: 1.25rem;">{{ show.year }}</small></h1>
 
                         @if (season && episode) {
-                            <h2>{{ season.title }} &bull; {{ episode.title }}</h2>
+                            <h2>{{ season.title }} &bull; Episode {{ episode.number }} &bull; {{ episode.title }}</h2>
                         }
 
-                        <h3>{{ show.year }}</h3>
                         <p>{{ show.overview }}</p>
 
                         @for (episode of watchHistory; track episode) {

@@ -210,6 +210,21 @@ export class MediaRepository {
             );
     }
 
+    public updateEpisodeById(identifier: string, seasonNumber: number, episodeNumber: number): Observable<IEpisode> {
+        return this._httpClient.patch(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}`, {})
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    const episode = response.Episode;
+                    return {
+                        identifier: episode.Identifier,
+                        title: episode.Title,
+                        number: episode.Number
+                    };
+                })
+            );
+    }
+
     public getEpisodeWatchHistory(username: string, identifier: string, seasonNumber: number, episodeNumber: number): Observable<Array<IWatchedEpisode>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}/history?username=${username}`)
             .pipe(
