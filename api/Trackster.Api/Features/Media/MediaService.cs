@@ -370,16 +370,19 @@ public class MediaService
     private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord)
     {
         var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
+        Console.WriteLine($"[DEBUG] - Got Show Record. ShowTbdbId: {show.Show.Ids.TMDB}. {JsonConvert.SerializeObject(show)}");
         _showsService.ImportShow(userRecord, showRecord).Wait();
             
         foreach (var season in show.Seasons)
         {
             var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, season.Number);
+            Console.WriteLine($"[DEBUG] - Got Season Record. ShowRecordId: {showRecord.Identifier}, SeasonNumber: {season.Number}. {JsonConvert.SerializeObject(season)}");
             _showsService.ImportSeason(userRecord, showRecord, seasonRecord).Wait();
                     
             foreach (var episode in season.Episodes)
             {
                 var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord.Identifier, seasonRecord.Identifier,  episode.Number);
+                Console.WriteLine($"[DEBUG] - Got Episode Record. ShowRecordId: {showRecord.Identifier}, SeasonIdentifier: {seasonRecord.Identifier}, EpisodeNumber: {episode.Number}. {JsonConvert.SerializeObject(episode)}");
                 _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord).Wait();
             }
         }
