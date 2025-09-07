@@ -21,10 +21,14 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
     public watchHistory: Array<IWatchedEpisode> = [];
 
     public isLoading: boolean = false;
+    public isUpdating: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
     private _activatedRoute: ActivatedRoute;
     private _mediaService: MediaService;
+    private slug: string = '';
+    private seasonId: number = 0;
+    private episodeId: number = 0;
 
     constructor(activatedRoute: ActivatedRoute, mediaService: MediaService) {
         this._activatedRoute = activatedRoute;
@@ -43,6 +47,10 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
                 const episode = this._mediaService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
                 const watchHistory = this._mediaService.getEpisodeWatchHistory('citr0s', params['slug'], params['seasonId'], params['episodeId']);
 
+                this.slug = params['slug'];
+                this.seasonId = params['seasonId'];
+                this.episodeId = params['episodeId'];
+
                 zip(show, season, episode, watchHistory)
                     .pipe(takeUntil(this._destroy))
                     .subscribe(([show, season, episode, watchHistory]) => {
@@ -57,6 +65,20 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
 
     public redirectBack():void {
         window.history.back();
+    }
+
+    public updateEpisode(): void {
+        this.isUpdating = true;
+
+        const episode = this._mediaService
+            .updateEpisodeById(this.slug, this.seasonId, this.episodeId)
+            .pipe(takeUntil(this._destroy))
+            .subscribe((episode) => {
+                this.isUpdating = false;
+
+                this.episode!.title = episode.title;
+                this.episode!.title = episode.title;
+            });
     }
 
     public ngOnDestroy(): void {

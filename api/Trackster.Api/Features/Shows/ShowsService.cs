@@ -219,6 +219,34 @@ public class ShowsService : IShowsService
         return new GetEpisodeResponse();
     }
 
+    public async Task<GetEpisodeResponse> ImportDataForEpisode(string slug, int seasonNumber, int episodeNumber)
+    {
+        var episode = _repository.GetEpisodeByNumber(slug, seasonNumber, episodeNumber);
+
+        if (episode != null)
+        {
+            var details = await _detailsProvider.GetEpisodeDetails(episode.Season.Show.TMDB, seasonNumber, episodeNumber);
+
+            var updatedEpisode = await _repository.UpdateEpisode(new EpisodeRecord
+            {
+                Identifier = episode.Identifier,
+                Title = details.Title ?? episode.Season.Show.Title,
+            });
+            
+            return new GetEpisodeResponse
+            {
+                Episode = new Episode
+                {
+                    Identifier = episode.Identifier,
+                    Title = updatedEpisode.Title,
+                    Number = episode.Number
+                }
+            };
+        }
+        
+        return new GetEpisodeResponse();
+    }
+
     public GetEpisodeWatchedHistoryResponse GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber)
     {
         var episodeWatchHistory = _repository.GetWatchedHistoryByEpisodeNumber(username, slug, seasonNumber, episodeNumber);

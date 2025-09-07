@@ -12,8 +12,7 @@
                 </div>
                 <div class="o-grid__col">
                     <div class="media-details">
-                        <h1>{{ movie.title }}</h1>
-                        <h3>{{ movie.year }}</h3>
+                        <h1>{{ movie.title }} <small style="font-size: 1.25rem;">{{ movie.year }}</small></h1>
                         <p>{{ movie.overview }}</p>
 
                         @for (episode of watchHistory; track episode) {

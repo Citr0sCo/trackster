@@ -1,4 +1,5 @@
-﻿using Trackster.Api.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Shows.Types;
 
@@ -21,6 +22,7 @@ public interface IShowsRepository
     EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
     ShowRecord? GetShowByReference(Guid identifier);
     SeasonRecord? GetSeasonByReference(Guid identifier);
+    Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord);
 }
 
 public class ShowsRepository : IShowsRepository
@@ -193,6 +195,8 @@ public class ShowsRepository : IShowsRepository
                 var episode = context.Episodes
                     .Where(x => x.Season.Show.Slug.ToUpper() == slug.ToUpper())
                     .Where(x => x.Season.Number == seasonNumber)
+                    .Include(episodeRecord => episodeRecord.Season)
+                    .ThenInclude(seasonRecord => seasonRecord.Show)
                     .FirstOrDefault(x => x.Number == episodeNumber);
 
                 if (episode == null)
@@ -202,7 +206,17 @@ public class ShowsRepository : IShowsRepository
                 {
                     Identifier = episode.Identifier,
                     Title = episode.Title,
-                    Number = episode.Number
+                    Number = episode.Number,
+                    Season = new Season
+                    {
+                        Identifier = episode.Season.Identifier,
+                        Show = new Show
+                        {
+                            Identifier = episode.Season.Show.Identifier,
+                            TMDB = episode.Season.Show.TMDB,
+                            Title = episode.Season.Show.Title,
+                        }
+                    }
                 };
             }
             catch (Exception)
@@ -499,6 +513,37 @@ public class ShowsRepository : IShowsRepository
                 Console.WriteLine($"[FATAL] - Failed to get show.");
                 return null;
             }
+        }
+    }
+
+    public async Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Identifier == episodeRecord.Identifier);
+
+                if (existingEpisode == null)
+                    return episodeRecord;
+                
+                existingEpisode.Title = episodeRecord.Title;
+                
+                context.Episodes.Update(existingEpisode);
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                
+                return existingEpisode;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+            }
+
+            return episodeRecord;
         }
     }
 }

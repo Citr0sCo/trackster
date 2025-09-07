@@ -43,9 +43,20 @@ public class ShowsController : ControllerBase
     }
     
     [HttpGet("{slug}/seasons/{seasonNumber}/episodes/{episodeNumber}")]
-    public IActionResult GetSeasonByNumber([FromRoute]string slug, [FromRoute]int seasonNumber,  [FromRoute]int episodeNumber)
+    public IActionResult GetSeasonByNumber([FromRoute]string slug, [FromRoute]int seasonNumber, [FromRoute]int episodeNumber)
     {
         var response = _service.GetEpisodeByNumber(slug, seasonNumber, episodeNumber);
+        
+        if(response == null)
+            return NotFound();
+        
+        return Ok(response);
+    }
+    
+    [HttpPatch("{slug}/seasons/{seasonNumber}/episodes/{episodeNumber}")]
+    public async Task<IActionResult> ImportDataForEpisode([FromRoute]string slug, [FromRoute]int seasonNumber, [FromRoute]int episodeNumber)
+    {
+        var response = await _service.ImportDataForEpisode(slug, seasonNumber, episodeNumber);
         
         if(response == null)
             return NotFound();
