@@ -356,7 +356,7 @@ public class MediaService
                 foreach (var watchHistory in watchingHistory)
                 {
                     var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
-                    var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, watchHistory.Episode.Season);
+                    var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord, watchHistory.Episode.Season);
                     var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  watchHistory.Episode.Number);
                     
                     await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt);
@@ -379,7 +379,7 @@ public class MediaService
             
         foreach (var season in show.Seasons)
         {
-            var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, season.Number);
+            var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord, season.Number);
             
             if(requestDebug)
                 Console.WriteLine($"[DEBUG] - Got Season Record. ShowRecordId: {showRecord.Identifier}, SeasonNumber: {season.Number}. {JsonConvert.SerializeObject(season)}");
@@ -444,10 +444,8 @@ public class MediaService
         return showRecord;
     }
 
-    private async Task<SeasonRecord> GetSeasonRecordByShowTmdbId(Guid showIdentifier, int seasonNumber)
+    private async Task<SeasonRecord> GetSeasonRecordByShowTmdbId(ShowRecord showRecord, int seasonNumber)
     {
-        var showRecord = _showsService.GetShowByReference(showIdentifier);
-        
         var seasonRecord = await _showsService.GetSeasonBy(seasonNumber, showRecord.Identifier);
 
         if (seasonRecord != null)
