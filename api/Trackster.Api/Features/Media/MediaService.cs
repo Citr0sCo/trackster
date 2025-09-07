@@ -450,7 +450,7 @@ public class MediaService
         showRecord = new ShowRecord
         {
             Identifier = Guid.NewGuid(),
-            Title = details.Title,
+            Title = string.IsNullOrEmpty(details.Title) ? details.Title : "Missing Title",
             Slug = SlugHelper.GenerateSlugFor(details.Title),
             Year = details.FirstAirDate.Year,
             TMDB = tmdbId,
