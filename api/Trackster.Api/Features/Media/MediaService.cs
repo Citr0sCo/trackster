@@ -433,12 +433,12 @@ public class MediaService
         showRecord = new ShowRecord
         {
             Identifier = Guid.NewGuid(),
-            Title = details.Title,
+            Title = string.IsNullOrEmpty(details.Title) ? details.Title : "Missing Title",
             Slug = SlugHelper.GenerateSlugFor(details.Title),
             Year = details.FirstAirDate.Year,
             TMDB = tmdbId,
-            Poster = $"https://image.tmdb.org/t/p/w300{details?.PosterUrl}",
-            Overview = details?.Overview,
+            Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
+            Overview = details.Overview,
         };
 
         return showRecord;

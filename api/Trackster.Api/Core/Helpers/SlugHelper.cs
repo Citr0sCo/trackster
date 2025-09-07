@@ -4,7 +4,7 @@ namespace Trackster.Api.Core.Helpers;
 
 public class SlugHelper
 {
-    public static string GenerateSlugFor(string title)
+    public static string GenerateSlugFor(string? title)
     {
         if (string.IsNullOrEmpty(title))
             return Guid.NewGuid().ToString();
