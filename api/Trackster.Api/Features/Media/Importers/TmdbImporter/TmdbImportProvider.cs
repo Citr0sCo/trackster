@@ -160,6 +160,9 @@ public class TmdbImportProvider
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
 
+                if(title.Contains("("))
+                    title = title.Split("(")[0].Trim();
+                
                 var queryParams = new Dictionary<string, string>
                 {
                     { "query", title }, 
