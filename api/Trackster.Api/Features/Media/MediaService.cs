@@ -356,7 +356,7 @@ public class MediaService
                 {
                     var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
                     var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, watchHistory.Episode.Season);
-                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord.Identifier, seasonRecord.Identifier,  watchHistory.Episode.Number);
+                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  watchHistory.Episode.Number);
                     
                     await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt);
                 }
@@ -381,7 +381,7 @@ public class MediaService
                     
             foreach (var episode in season.Episodes)
             {
-                var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord.Identifier, seasonRecord.Identifier,  episode.Number);
+                var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  episode.Number);
                 Console.WriteLine($"[DEBUG] - Got Episode Record. ShowRecordId: {showRecord.Identifier}, SeasonIdentifier: {seasonRecord.Identifier}, EpisodeNumber: {episode.Number}. {JsonConvert.SerializeObject(episode)}");
                 _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord).Wait();
             }
@@ -454,38 +454,31 @@ public class MediaService
         return seasonRecord;
     }
 
-    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(Guid showIdentifier, Guid seasonIdentifier, int episodeNumber)
+    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(ShowRecord show, SeasonRecord season, int episodeNumber)
     {
         try
         {
-            var showRecord = _showsService.GetShowByReference(showIdentifier);
-            Console.WriteLine($"[DEBUG] - Got Show Record. ShowIdentifier: {showIdentifier}. {JsonConvert.SerializeObject(showRecord)}");
-
-            var seasonRecord = _showsService.GetSeasonByReference(seasonIdentifier);
-            Console.WriteLine($"[DEBUG] - Got Season Record. SeasonIdentifier: {seasonRecord}. {JsonConvert.SerializeObject(seasonRecord)}");
-            
-            var episodeRecord = await _showsService.GetEpisodeBy(episodeNumber, seasonRecord.Identifier);
-            Console.WriteLine($"[DEBUG] - Got Episode Record. EpisodeNumber: {episodeNumber}. {JsonConvert.SerializeObject(episodeNumber)}");
+            var episodeRecord = await _showsService.GetEpisodeBy(episodeNumber, season.Identifier);
 
             if (episodeRecord != null)
                 return episodeRecord;
 
             var episodeDetails =
-                await _detailsProvider.GetEpisodeDetails(showRecord.TMDB, seasonRecord.Number, episodeNumber);
+                await _detailsProvider.GetEpisodeDetails(show.TMDB, season.Number, episodeNumber);
 
             episodeRecord = new EpisodeRecord
             {
                 Identifier = Guid.NewGuid(),
                 Number = episodeNumber,
-                Title = episodeDetails.Title ?? showRecord.Title,
-                Season = seasonRecord
+                Title = episodeDetails.Title ?? show.Title,
+                Season = season
             };
 
             return episodeRecord;
         }
         catch (Exception)
         {
-            Console.WriteLine($"[ERROR] - Failed getting episode record by show tmdb id. ShowIdentifier: {showIdentifier}, SeasonIdentifier: {seasonIdentifier}, EpisodeNumer: {episodeNumber}");
+            Console.WriteLine($"[ERROR] - Failed getting episode record by show tmdb id. ShowIdentifier: {show}, SeasonIdentifier: {season}, EpisodeNumer: {episodeNumber}");
             throw;
         }
     }
