@@ -58,9 +58,9 @@ public class MediaService
 
             var user = await ProcessUser(request);
 
-            await ProcessMovies(request, movies, user);
+            await ProcessMovies(request, movies, user, request.Debug);
 
-            await ProcessShows(request, shows, user);
+            await ProcessShows(request, shows, user, request.Debug);
             
             stopwatch.Stop();
             
@@ -287,7 +287,8 @@ public class MediaService
         return userRecord;
     }
     
-    private async Task ProcessMovies(ImportMediaRequest request, List<TraktMovieResponse> movies, UserRecord userRecord)
+    private async Task ProcessMovies(ImportMediaRequest request, List<TraktMovieResponse> movies, UserRecord userRecord,
+        bool requestDebug)
     {
         Console.WriteLine($"[INFO] - Will process {movies.Count} movies.");
 
@@ -337,14 +338,14 @@ public class MediaService
         }
     }
 
-    private async Task ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord user)
+    private async Task ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord user, bool requestDebug)
     {
         Console.WriteLine($"[INFO] - Will process {shows.Count} shows.");
 
         var processedShows = 0;
         foreach (var show in shows)
         {
-            await ProcessShow(show, user);
+            await ProcessShow(show, user, requestDebug);
 
             var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(user.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
 
@@ -367,22 +368,31 @@ public class MediaService
         }
     }
 
-    private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord)
+    private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord, bool requestDebug)
     {
         var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
-        Console.WriteLine($"[DEBUG] - Got Show Record. ShowTbdbId: {show.Show.Ids.TMDB}. {JsonConvert.SerializeObject(show)}");
+        
+        if(requestDebug)
+            Console.WriteLine($"[DEBUG] - Got Show Record. ShowTbdbId: {show.Show.Ids.TMDB}. {JsonConvert.SerializeObject(show)}");
+        
         _showsService.ImportShow(userRecord, showRecord).Wait();
             
         foreach (var season in show.Seasons)
         {
             var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord.Identifier, season.Number);
-            Console.WriteLine($"[DEBUG] - Got Season Record. ShowRecordId: {showRecord.Identifier}, SeasonNumber: {season.Number}. {JsonConvert.SerializeObject(season)}");
+            
+            if(requestDebug)
+                Console.WriteLine($"[DEBUG] - Got Season Record. ShowRecordId: {showRecord.Identifier}, SeasonNumber: {season.Number}. {JsonConvert.SerializeObject(season)}");
+            
             _showsService.ImportSeason(userRecord, showRecord, seasonRecord).Wait();
                     
             foreach (var episode in season.Episodes)
             {
                 var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  episode.Number);
-                Console.WriteLine($"[DEBUG] - Got Episode Record. ShowRecordId: {showRecord.Identifier}, SeasonIdentifier: {seasonRecord.Identifier}, EpisodeNumber: {episode.Number}. {JsonConvert.SerializeObject(episode)}");
+                
+                if(requestDebug)
+                    Console.WriteLine($"[DEBUG] - Got Episode Record. ShowRecordId: {showRecord.Identifier}, SeasonIdentifier: {seasonRecord.Identifier}, EpisodeNumber: {episode.Number}. {JsonConvert.SerializeObject(episode)}");
+                
                 _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord).Wait();
             }
         }
