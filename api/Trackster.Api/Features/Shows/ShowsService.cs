@@ -9,7 +9,7 @@ namespace Trackster.Api.Features.Shows;
 public interface IShowsService
 {
     GetAllShowsResponse GetAllWatchedShows(string username, int results, int page);
-    Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber);
+    Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber, bool requestDebug);
     GetShowResponse GetShowBySlug(string slug);
     Task<ShowRecord?> GetShowByTmdbId(string tmdbId);
     Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier);
@@ -47,9 +47,9 @@ public class ShowsService : IShowsService
         };
     }
     
-    public async Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber)
+    public async Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber, bool requestDebug)
     {
-        var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year);
+        var searchResults = await _detailsProvider.FindShowByTitleAndYear(showTitle, year, requestDebug);
 
         if (searchResults.Results.Count == 0)
         {
@@ -67,7 +67,7 @@ public class ShowsService : IShowsService
             return new EpisodeRecord();
         }
         
-        var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference!);
+        var parsedShow = await _detailsProvider.GetDetailsForShow(tmdbReference!, requestDebug);
         
         if (parsedShow.Identifier == 0)
         {
@@ -79,7 +79,7 @@ public class ShowsService : IShowsService
         if(seasonNumber > 2000 && int.TryParse(seasonTitle.Replace("Season ", ""), out var seasonNumberParsed))
             seasonNumber = seasonNumberParsed;
         
-        var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber);
+        var parsedSeason = await _detailsProvider.GetDetailsForSeason(parsedShow.Identifier, seasonNumber, requestDebug);
         
         if (parsedSeason.Episodes.Count == 0)
         {
@@ -211,6 +211,34 @@ public class ShowsService : IShowsService
                 {
                     Identifier = episode.Identifier,
                     Title = episode.Title,
+                    Number = episode.Number
+                }
+            };
+        }
+        
+        return new GetEpisodeResponse();
+    }
+
+    public async Task<GetEpisodeResponse> ImportDataForEpisode(string slug, int seasonNumber, int episodeNumber, bool requestDebug = false)
+    {
+        var episode = _repository.GetEpisodeByNumber(slug, seasonNumber, episodeNumber);
+
+        if (episode != null)
+        {
+            var details = await _detailsProvider.GetEpisodeDetails(episode.Season.Show.TMDB, seasonNumber, episodeNumber, requestDebug);
+
+            var updatedEpisode = await _repository.UpdateEpisode(new EpisodeRecord
+            {
+                Identifier = episode.Identifier,
+                Title = details.Title ?? episode.Season.Show.Title,
+            });
+            
+            return new GetEpisodeResponse
+            {
+                Episode = new Episode
+                {
+                    Identifier = episode.Identifier,
+                    Title = updatedEpisode.Title,
                     Number = episode.Number
                 }
             };

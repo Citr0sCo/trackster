@@ -12,7 +12,7 @@ public class TmdbImportProvider
         _authToken = Environment.GetEnvironmentVariable("ASPNETCORE_TMDB_API_KEY")!;
     }
     
-    public async Task<TmdbMovieDetails> GetDetailsForMovie(string reference)
+    public async Task<TmdbMovieDetails> GetDetailsForMovie(string reference, bool requestDebug)
     {
         try
         {
@@ -27,7 +27,8 @@ public class TmdbImportProvider
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     
-                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for movie {responseData}.");
+                    if(requestDebug)
+                        Console.WriteLine($"[DEBUG] - Received response from TMDB details for movie {responseData}.");
                     
                     var parsedData = JsonConvert.DeserializeObject<TmdbMovieDetails>(responseData);
                     return parsedData ?? new TmdbMovieDetails();
@@ -43,10 +44,12 @@ public class TmdbImportProvider
         return new TmdbMovieDetails();
     }
     
-    public async Task<TmdbShowDetails> GetDetailsForShow(string reference)
+    public async Task<TmdbShowDetails> GetDetailsForShow(string reference, bool requestDebug)
     {
         try 
         {
+            Console.WriteLine($"[INFO] - Making request for details for Show Details by {reference}.");
+            
             var baseAddress = new Uri("https://api.themoviedb.org/");
 
             using (var httpClient = new HttpClient{ BaseAddress = baseAddress })
@@ -58,7 +61,8 @@ public class TmdbImportProvider
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     
-                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for show {responseData}.");
+                    if(requestDebug)
+                        Console.WriteLine($"[DEBUG] - Received response from TMDB details for show {responseData}.");
 
                     if (responseData == "The resource you requested could not be found.")
                         return new TmdbShowDetails();
@@ -77,7 +81,7 @@ public class TmdbImportProvider
         return new TmdbShowDetails();
     }
     
-    public async Task<TmdbEpisodeDetails> GetEpisodeDetails(string seriesId, int seasonNumber, int episodeNumber)
+    public async Task<TmdbEpisodeDetails> GetEpisodeDetails(string seriesId, int seasonNumber, int episodeNumber, bool requestDebug)
     {
         try 
         {
@@ -92,7 +96,8 @@ public class TmdbImportProvider
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     
-                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for episode {responseData}.");
+                    if(requestDebug)
+                        Console.WriteLine($"[DEBUG] - Received response from TMDB details for episode {responseData}.");
                     
                     var parsedData = JsonConvert.DeserializeObject<TmdbEpisodeDetails>(responseData);
                     return parsedData ?? new TmdbEpisodeDetails();
@@ -108,7 +113,7 @@ public class TmdbImportProvider
         return new TmdbEpisodeDetails();
     }
 
-    public async Task<TmdbMovieSearchResults> FindMovieByTitleAndYear(string title, int year)
+    public async Task<TmdbMovieSearchResults> FindMovieByTitleAndYear(string title, int year, bool requestDebug)
     {
         try 
         {
@@ -133,7 +138,8 @@ public class TmdbImportProvider
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     
-                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB search for movie {responseData}.");
+                    if(requestDebug)
+                        Console.WriteLine($"[DEBUG] - Received response from TMDB search for movie {responseData}.");
                     
                     var parsedData = JsonConvert.DeserializeObject<TmdbMovieSearchResults>(responseData);
                     return parsedData ?? new TmdbMovieSearchResults();
@@ -149,7 +155,7 @@ public class TmdbImportProvider
         return new  TmdbMovieSearchResults();
     }
 
-    public async Task<TmdbShowSearchResults> FindShowByTitleAndYear(string title, int year)
+    public async Task<TmdbShowSearchResults> FindShowByTitleAndYear(string title, int year, bool requestDebug)
     {
         try 
         {
@@ -160,8 +166,16 @@ public class TmdbImportProvider
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
 
-                if(title.Contains("("))
-                    title = title.Split("(")[0].Trim();
+                if (title.Contains("("))
+                {
+                    var explodedTitle = title.Split("(");
+                    title = explodedTitle[0].Trim();
+
+                    if(year == 0)
+                        year = int.Parse(explodedTitle[1].Split(")")[0].Trim());
+                    
+                    Console.WriteLine($"[INFO] - Parsed title and got title: {title}, year: {year}.");
+                }
                 
                 var queryParams = new Dictionary<string, string>
                 {
@@ -177,7 +191,8 @@ public class TmdbImportProvider
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     
-                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB search for show {responseData}.");
+                    if(requestDebug)
+                        Console.WriteLine($"[DEBUG] - Received response from TMDB search for show {responseData}.");
                     
                     var parsedData = JsonConvert.DeserializeObject<TmdbShowSearchResults>(responseData);
                     return parsedData ?? new TmdbShowSearchResults();
@@ -193,7 +208,7 @@ public class TmdbImportProvider
         return new TmdbShowSearchResults();
     }
 
-    public async Task<TmdbSeasonSearchResults> GetDetailsForSeason(int showIdentifier, int seasonNumber)
+    public async Task<TmdbSeasonSearchResults> GetDetailsForSeason(int showIdentifier, int seasonNumber, bool requestDebug)
     {
         try 
         {
@@ -215,7 +230,8 @@ public class TmdbImportProvider
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     
-                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from TMDB details for season {responseData}.");
+                    if(requestDebug)
+                        Console.WriteLine($"[DEBUG] - Received response from TMDB details for season {responseData}.");
                     
                     var parsedData = JsonConvert.DeserializeObject<TmdbSeasonSearchResults>(responseData);
                     return parsedData ?? new TmdbSeasonSearchResults();

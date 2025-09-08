@@ -120,6 +120,10 @@ export class MediaService {
         return this._mediaRepository.getEpisodeById(identifier, seasonNumber, episodeNumber);
     }
 
+    public updateEpisodeById(identifier: string, seasonNumber: number, episodeNumber: number): Observable<IEpisode> {
+        return this._mediaRepository.updateEpisodeById(identifier, seasonNumber, episodeNumber);
+    }
+
     public getEpisodeWatchHistory(username: string, identifier: string, seasonNumber: number, episodeNumber: number): Observable<Array<IWatchedEpisode>> {
         return this._mediaRepository.getEpisodeWatchHistory(username, identifier, seasonNumber, episodeNumber);
     }

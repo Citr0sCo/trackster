@@ -19,7 +19,7 @@ public class NotificationsService
                 using (var response = await httpClient.PostAsync($"messages.json?token={token}&user={user}&message={message}", content))
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[DEBUG] - 1/1 - Received response from Pushovers {responseData}.");
+                    Console.WriteLine($"[INFO] - Received response from Pushovers {responseData}.");
                 }
             }
         }

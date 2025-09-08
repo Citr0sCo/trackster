@@ -23,6 +23,7 @@ import { WatchingNowComponent } from '../components/watching-now/watching-now.co
 import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
 import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
 import { StatisticsPageComponent } from '../pages/statistics-page/statistics-page.component';
+import {StreamService} from "../core/event-service.service";
 
 @NgModule({
     declarations: [
@@ -57,6 +58,7 @@ import { StatisticsPageComponent } from '../pages/statistics-page/statistics-pag
         AuthenticationService,
         AuthenticationRepository,
         EventService,
+        StreamService,
         provideHttpClient(withInterceptorsFromDi())
     ]
 })
