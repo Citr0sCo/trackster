@@ -183,26 +183,26 @@ public class MediaService
         };
     }
 
-    public async Task MarkMediaAsWatched(string mediaType, int year, string title, string? parentTitle = null, string? grandParentTitle = null, int seasonNumber = 0)
+    public async Task MarkMediaAsWatched(string mediaType, int year, string title, string? parentTitle = null, string? grandParentTitle = null, int seasonNumber = 0, bool requestDebug = false)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
-            await MarkMovieAsWatched(title, year);
+            await MarkMovieAsWatched(title, year, requestDebug);
 
         if (mediaType == EPISODE_MEDIA_TYPE)
             await MarkEpisodeAsWatched(grandParentTitle!, parentTitle!, title, year, seasonNumber);
     }
 
-    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration)
+    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
-            var movie = await _moviesService.SearchForMovieBy(title, year);
+            var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
             _watchingNowService.MarkAsWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
-            var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber);
+            var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber, requestDebug);
             _watchingNowService.MarkAsWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
         }
 
@@ -220,29 +220,29 @@ public class MediaService
         Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {parentTitle}, {seasonNumber}, {year}.");
     }
 
-    public async void PauseMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration)
+    public async void PauseMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
-            var movie = await _moviesService.SearchForMovieBy(title, year);
+            var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
             _watchingNowService.MarkAsPausedWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
-            var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber);
+            var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber, requestDebug);
             _watchingNowService.MarkAsPausedWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
         }
 
         Console.WriteLine($"Marking a media as paused watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
     }
 
-    private async Task MarkMovieAsWatched(string title, int year)
+    private async Task MarkMovieAsWatched(string title, int year, bool requestDebug)
     {
         try
         {
             var user = await _usersService.GetUserByUsername("citr0s");
-            var movie = await _moviesService.SearchForMovieBy(title, year);
+            var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
             await _moviesService.MarkMovieAsWatched(user, movie, DateTime.UtcNow);
             _notificationsService.Send($"Movie '{title} ({year})' marked as watched.");
         }
@@ -253,12 +253,12 @@ public class MediaService
         }
     }
 
-    private async Task MarkEpisodeAsWatched(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber)
+    private async Task MarkEpisodeAsWatched(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber, bool requestDebug = false)
     {
         try
         {
             var user = await _usersService.GetUserByUsername("citr0s");
-            var episode = await _showsService.SearchForEpisode(showTitle, seasonTitle, episodeTitle, year, seasonNumber);
+            var episode = await _showsService.SearchForEpisode(showTitle, seasonTitle, episodeTitle, year, seasonNumber, requestDebug);
             await _showsService.MarkEpisodeAsWatched(user, episode.Season.Show, episode.Season, episode, DateTime.Now);
             _notificationsService.Send($"Episode '{episodeTitle}' of show '{showTitle}' marked as watched.");
         }
@@ -287,15 +287,14 @@ public class MediaService
         return userRecord;
     }
     
-    private async Task ProcessMovies(ImportMediaRequest request, List<TraktMovieResponse> movies, UserRecord userRecord,
-        bool requestDebug)
+    private async Task ProcessMovies(ImportMediaRequest request, List<TraktMovieResponse> movies, UserRecord userRecord, bool requestDebug)
     {
         Console.WriteLine($"[INFO] - Will process {movies.Count} movies.");
 
         var processedMovies = 0;
         foreach (var movie in movies)
         {
-           ProcessMovie(movie, userRecord).Wait();
+           ProcessMovie(movie, userRecord, requestDebug).Wait();
 
            var lastWatchedAt = _moviesService.GetWatchedMovieByLastWatchedAt(userRecord.Username, movie.Movie.Ids.TMDB, movie.LastWatchedAt);
 
@@ -305,7 +304,7 @@ public class MediaService
 
                foreach (var watchHistory in watchingHistory)
                {
-                   var movieRecord = await GetMovieRecordByTmdbId(movie.Movie.Ids.TMDB);
+                   var movieRecord = await GetMovieRecordByTmdbId(movie.Movie.Ids.TMDB, requestDebug);
                    await _moviesService.MarkMovieAsWatched(userRecord, movieRecord, watchHistory.WatchedAt);
                }   
            }
@@ -315,13 +314,13 @@ public class MediaService
         }
     }
 
-    private async Task ProcessMovie(TraktMovieResponse movie, UserRecord userRecord)
+    private async Task ProcessMovie(TraktMovieResponse movie, UserRecord userRecord, bool requestDebug)
     {
         var existingMovie = _moviesService.GetMovieByTmdbId(movie.Movie.Ids.TMDB);
 
         if (existingMovie == null)
         {
-            var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB);
+            var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB, requestDebug);
 
             var movieRecord = new MovieRecord
             {
@@ -355,20 +354,29 @@ public class MediaService
 
                 foreach (var watchHistory in watchingHistory)
                 {
-                    var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
+                    var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, requestDebug);
                     
                     if (showRecord.Identifier.ToString() == Guid.Empty.ToString())
+                    {  
+                        Console.WriteLine($"[WARN] - Failed to save watch history. Did not find Show by Show.TMDB: {show.Show.Ids.TMDB}.");
                         continue;
+                    }
                     
                     var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord, watchHistory.Episode.Season);
-                    
+
                     if (seasonRecord.Identifier.ToString() == Guid.Empty.ToString())
+                    {
+                        Console.WriteLine($"[WARN] - Failed to save watch history. Did not find Season by Show.TMDB: {show.Show.Ids.TMDB}, Season.Number: {watchHistory.Episode.Season}.");
                         continue;
+                    }
                     
-                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  watchHistory.Episode.Number);
-                    
+                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  watchHistory.Episode.Number, requestDebug);
+
                     if (episodeRecord.Identifier.ToString() == Guid.Empty.ToString())
+                    {
+                        Console.WriteLine($"[WARN] - Failed to save watch history. Did not find Episode by Show.TMDB: {show.Show.Ids.TMDB}, Season.Number: {watchHistory.Episode.Season}, Episode.Number: {watchHistory.Episode.Number}.");
                         continue;
+                    }
                     
                     await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt);
                 }
@@ -381,7 +389,7 @@ public class MediaService
 
     private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord, bool requestDebug)
     {
-        var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB);
+        var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, requestDebug);
         
         if(requestDebug)
             Console.WriteLine($"[DEBUG] - Got Show Record. ShowTbdbId: {show.Show.Ids.TMDB}. {JsonConvert.SerializeObject(show)}");
@@ -399,7 +407,7 @@ public class MediaService
                     
             foreach (var episode in season.Episodes)
             {
-                var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  episode.Number);
+                var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  episode.Number, requestDebug);
                 
                 if(requestDebug)
                     Console.WriteLine($"[DEBUG] - Got Episode Record. ShowRecordId: {showRecord.Identifier}, SeasonIdentifier: {seasonRecord.Identifier}, EpisodeNumber: {episode.Number}. {JsonConvert.SerializeObject(episode)}");
@@ -409,14 +417,14 @@ public class MediaService
         }
     }
 
-    private async Task<MovieRecord> GetMovieRecordByTmdbId(string tmdbId)
+    private async Task<MovieRecord> GetMovieRecordByTmdbId(string tmdbId, bool requestDebug)
     {
         var movieRecord = _moviesService.GetMovieByTmdbId(tmdbId);
 
         if (movieRecord != null)
             return movieRecord;
         
-        var details = await _detailsProvider.GetDetailsForMovie(tmdbId);
+        var details = await _detailsProvider.GetDetailsForMovie(tmdbId, requestDebug);
 
         movieRecord = new MovieRecord
         {
@@ -432,14 +440,14 @@ public class MediaService
         return movieRecord;
     }
 
-    private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId)
+    private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId, bool requestDebug)
     {
         var showRecord = await _showsService.GetShowByTmdbId(tmdbId);
 
         if (showRecord != null)
             return showRecord;
         
-        var details = await _detailsProvider.GetDetailsForShow(tmdbId);
+        var details = await _detailsProvider.GetDetailsForShow(tmdbId, requestDebug);
 
         if (details.Identifier == 0)
         {
@@ -450,7 +458,7 @@ public class MediaService
         showRecord = new ShowRecord
         {
             Identifier = Guid.NewGuid(),
-            Title = string.IsNullOrEmpty(details.Title) ? details.Title : "Missing Title",
+            Title = details.Title,
             Slug = SlugHelper.GenerateSlugFor(details.Title),
             Year = details.FirstAirDate.Year,
             TMDB = tmdbId,
@@ -479,7 +487,7 @@ public class MediaService
         return seasonRecord;
     }
 
-    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(ShowRecord show, SeasonRecord season, int episodeNumber)
+    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(ShowRecord show, SeasonRecord season, int episodeNumber, bool requestDebug)
     {
         try
         {
@@ -489,7 +497,7 @@ public class MediaService
                 return episodeRecord;
 
             var episodeDetails =
-                await _detailsProvider.GetEpisodeDetails(show.TMDB, season.Number, episodeNumber);
+                await _detailsProvider.GetEpisodeDetails(show.TMDB, season.Number, episodeNumber, requestDebug);
 
             episodeRecord = new EpisodeRecord
             {
