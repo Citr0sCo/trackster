@@ -160,8 +160,16 @@ public class TmdbImportProvider
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
 
-                if(title.Contains("("))
-                    title = title.Split("(")[0].Trim();
+                if (title.Contains("("))
+                {
+                    var explodedTitle = title.Split("(");
+                    title = explodedTitle[0].Trim();
+
+                    if(year == 0)
+                        year = int.Parse(explodedTitle[1].Split(")")[0].Trim());
+                    
+                    Console.WriteLine($"[DEBUG] - Parsed title and got title: {title}, year: {year}.");
+                }
                 
                 var queryParams = new Dictionary<string, string>
                 {
