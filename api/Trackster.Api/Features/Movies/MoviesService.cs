@@ -9,7 +9,7 @@ public interface IMoviesService
 {
     GetAllMoviesResponse GetAllWatchedMovies(string username, int results, int page);
     GetMovieResponse GetMovieBySlug(string slug);
-    Task<MovieRecord> SearchForMovieBy(string title, int year);
+    Task<MovieRecord> SearchForMovieBy(string title, int year, bool requestDebug);
     Task ImportMovie(UserRecord user, MovieRecord movie);
 
     GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug);
@@ -63,11 +63,11 @@ public class MoviesService : IMoviesService
         return new GetMovieResponse();
     }
 
-    public async Task<MovieRecord> SearchForMovieBy(string title, int year)
+    public async Task<MovieRecord> SearchForMovieBy(string title, int year, bool requestDebug)
     {
-        var searchResults = await _detailsProvider.FindMovieByTitleAndYear(title, year);
+        var searchResults = await _detailsProvider.FindMovieByTitleAndYear(title, year, requestDebug);
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
-        var movie = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "");
+        var movie = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "", requestDebug);
         
         return new MovieRecord
         {
