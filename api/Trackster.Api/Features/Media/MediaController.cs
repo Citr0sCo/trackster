@@ -35,11 +35,18 @@ public class MediaController : ControllerBase
         return _service.GetStatsForCalendar(username, daysInThePast);
     }
     
-    [HttpPost("import")]
-    public async Task<ImportMediaResponse> ImportMedia([FromBody]ImportMediaRequest request)
+    [HttpGet("import")]
+    public async Task ImportMedia()
     {
-        await _service.ImportMedia(request);
+        Response.ContentType = "text/event-stream";
         
-        return new ImportMediaResponse();
+        await foreach (var item in _service.ImportMedia(new ImportMediaRequest { Type = ImportType.Trakt, Username = "citr0s" }))
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(item);
+            await Response.WriteAsync($"data: {json}\n\n");
+            await Response.Body.FlushAsync();
+            
+            Thread.Sleep(1000);
+        }
     }
 }

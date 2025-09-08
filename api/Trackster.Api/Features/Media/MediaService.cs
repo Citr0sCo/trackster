@@ -38,13 +38,17 @@ public class MediaService
         _notificationsService = new NotificationsService();
     }
 
-    public async Task<ImportMediaResponse> ImportMedia(ImportMediaRequest request)
+    public async IAsyncEnumerable<ImportMediaResponse> ImportMedia(ImportMediaRequest request)
     {
         if (request.Type == ImportType.Trakt && request.Username != null)
         {
             var stopwatch = Stopwatch.StartNew();
             
-            Console.WriteLine($"[INFO] - Starting Trakt import...");
+            Console.WriteLine("[INFO] - Starting Trakt import...");
+            yield return new ImportMediaResponse
+            {
+                Data = "[INFO] - Starting Trakt import..."
+            };
             
             var movies = await _traktProvider.GetMovies(request.Username);
             var shows = await _traktProvider.GetShows(request.Username);
@@ -58,17 +62,27 @@ public class MediaService
 
             var user = await ProcessUser(request);
 
-            await ProcessMovies(request, movies, user, request.Debug);
+            await foreach (var importMediaResponse in ProcessMovies(request, movies, user, request.Debug)) 
+                yield return importMediaResponse;
 
-            await ProcessShows(request, shows, user, request.Debug);
+            await foreach (var importMediaResponse in ProcessShows(request, shows, user, request.Debug))
+                yield return importMediaResponse;            
             
             stopwatch.Stop();
             
             var time = TimeSpan.FromMilliseconds(stopwatch.ElapsedMilliseconds);
+            
             Console.WriteLine($"[INFO] - Finished Trakt import in {time.Minutes}m {time.Seconds}s!");
+            yield return new ImportMediaResponse
+            {
+                Data = $"[INFO] - Finished Trakt import in {time.Minutes}m {time.Seconds}s!"
+            };
         }
-
-        return new ImportMediaResponse();
+        
+        yield return new ImportMediaResponse
+        {
+            Data = "[INFO] - DONE!"
+        };
     }
 
     public GetHistoryForUserResponse GetHistoryForUser(string username, int results, int page)
@@ -287,9 +301,13 @@ public class MediaService
         return userRecord;
     }
     
-    private async Task ProcessMovies(ImportMediaRequest request, List<TraktMovieResponse> movies, UserRecord userRecord, bool requestDebug)
+    private async IAsyncEnumerable<ImportMediaResponse> ProcessMovies(ImportMediaRequest request, List<TraktMovieResponse> movies, UserRecord userRecord, bool requestDebug)
     {
         Console.WriteLine($"[INFO] - Will process {movies.Count} movies.");
+        yield return new ImportMediaResponse
+        {
+            Data = $"[INFO] - Will process {movies.Count} movies."
+        };
 
         var processedMovies = 0;
         foreach (var movie in movies)
@@ -311,6 +329,13 @@ public class MediaService
 
            processedMovies++;
            Console.WriteLine($"[INFO] - Processed {processedMovies}/{movies.Count} movies.");
+           yield return new ImportMediaResponse
+           {
+               Data = $"[INFO] - Processed {processedMovies}/{movies.Count} movies.",
+               Total = movies.Count,
+               Processed = processedMovies,
+               Type = MediaType.Movie.ToString()
+           };
         }
     }
 
@@ -337,9 +362,13 @@ public class MediaService
         }
     }
 
-    private async Task ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord user, bool requestDebug)
+    private async IAsyncEnumerable<ImportMediaResponse> ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord user, bool requestDebug)
     {
         Console.WriteLine($"[INFO] - Will process {shows.Count} shows.");
+        yield return new ImportMediaResponse
+        {
+            Data = $"[INFO] - Will process {shows.Count} shows."
+        };
 
         var processedShows = 0;
         foreach (var show in shows)
@@ -384,6 +413,13 @@ public class MediaService
                 
             processedShows++;
             Console.WriteLine($"[INFO] - Processed {processedShows}/{shows.Count} shows.");
+            yield return new ImportMediaResponse
+            {
+                Data = $"[INFO] - Processed {processedShows}/{shows.Count} shows.",
+                Total = shows.Count,
+                Processed = processedShows,
+                Type = MediaType.Episode.ToString()
+            };
         }
     }
 
