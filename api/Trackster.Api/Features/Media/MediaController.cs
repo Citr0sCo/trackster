@@ -45,8 +45,6 @@ public class MediaController : ControllerBase
             var json = System.Text.Json.JsonSerializer.Serialize(item);
             await Response.WriteAsync($"data: {json}\n\n");
             await Response.Body.FlushAsync();
-            
-            Thread.Sleep(1000);
         }
     }
 }
