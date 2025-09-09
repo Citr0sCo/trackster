@@ -213,7 +213,7 @@ public class MediaService
             var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
             Console.WriteLine($"[INFO] - Making movie as watching now. Title: {title}, Year: {year}, Looked Up MovieTmdbId: {movie.TMDB}.");
             
-            if (movie.TMDB.Length == 0)
+            if (movie.TMDB?.Length == 0)
                 return;
             
             _watchingNowService.MarkAsWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
@@ -224,7 +224,7 @@ public class MediaService
             var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber, requestDebug);
             Console.WriteLine($"[INFO] - Making movie as watching now. Title: {title}, Year: {year}, Looked Up Episode Title: {episode.Title}.");
 
-            if (episode.Title.Length == 0)
+            if (episode.Title?.Length == 0)
                 return;
             
             _watchingNowService.MarkAsWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
