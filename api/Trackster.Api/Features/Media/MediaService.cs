@@ -268,10 +268,11 @@ public class MediaService
             var user = await _usersService.GetUserByUsername("citr0s");
             var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
             await _moviesService.MarkMovieAsWatched(user, movie, DateTime.UtcNow);
-            _notificationsService.Send($"Movie '{title} ({year})' marked as watched.");
+            await _notificationsService.Send($"Movie '{title} ({year})' marked as watched.");
         }
         catch (Exception ex)
         {
+            await _notificationsService.Send($"⚠️ Failed to mark Movie '{title} ({year})' as watched.");
             Console.WriteLine($"[FATAL] - Failed to mark movie as watched. Exception: {ex.Message}.");
             Console.WriteLine(ex);
         }
@@ -284,10 +285,11 @@ public class MediaService
             var user = await _usersService.GetUserByUsername("citr0s");
             var episode = await _showsService.SearchForEpisode(showTitle, seasonTitle, episodeTitle, year, seasonNumber, requestDebug);
             await _showsService.MarkEpisodeAsWatched(user, episode.Season.Show, episode.Season, episode, DateTime.Now);
-            _notificationsService.Send($"Episode '{episodeTitle}' of show '{showTitle}' marked as watched.");
+            await _notificationsService.Send($"Episode '{episodeTitle}' of show '{showTitle}' marked as watched.");
         }
         catch (Exception ex)
         {
+            await _notificationsService.Send($"⚠️ Failed to mark Episode '{episodeTitle}' of show '{showTitle}' as watched.");
             Console.WriteLine($"[FATAL] - Failed to mark episode as watched. Exception: {ex.Message}.");
             Console.WriteLine(ex);
         }
