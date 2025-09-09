@@ -90,7 +90,7 @@ public class ShowsService : IShowsService
         
         var parsedEpisode = parsedSeason.Episodes.FirstOrDefault(x => x.Title.ToLower() == episodeTitle.ToLower());
         
-        if (parsedEpisode.Id == 0)
+        if (parsedEpisode?.Id == 0)
         {
             Console.WriteLine($"[ERROR] - Failed to find episode by title ({episodeTitle}), tmdb reference ({parsedShow.Identifier}), season number ({seasonNumber}), title ({showTitle}) and year ({year}).");
             Console.WriteLine(JsonConvert.SerializeObject(searchResults));
@@ -120,8 +120,8 @@ public class ShowsService : IShowsService
         {
             Identifier = Guid.NewGuid(),
             Season = season,
-            Number = parsedEpisode.EpisodeNumber,
-            Title = parsedEpisode.Title,
+            Number = parsedEpisode?.EpisodeNumber ?? 0,
+            Title = parsedEpisode?.Title ?? "",
         };
     }
 
