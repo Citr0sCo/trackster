@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Trackster.Api.Attributes;
 using Trackster.Api.Features.Shows.Types;
 
 namespace Trackster.Api.Features.Shows;
 
+[AuthRequired]
 [ApiController]
 [Route("api/[controller]")]
 public class ShowsController : ControllerBase

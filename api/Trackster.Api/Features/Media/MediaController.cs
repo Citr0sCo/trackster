@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Trackster.Api.Attributes;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Shows;
@@ -6,6 +7,7 @@ using Trackster.Api.Features.Users;
 
 namespace Trackster.Api.Features.Media;
 
+[AuthRequired]
 [ApiController]
 [Route("api/[controller]")]
 public class MediaController : ControllerBase

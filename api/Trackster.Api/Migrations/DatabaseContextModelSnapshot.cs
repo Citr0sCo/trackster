@@ -15,7 +15,7 @@ namespace Trackster.Api.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
 
             modelBuilder.Entity("Trackster.Api.Data.Records.EpisodeRecord", b =>
                 {
@@ -181,6 +181,20 @@ namespace Trackster.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -188,6 +202,25 @@ namespace Trackster.Api.Migrations
                     b.HasKey("Identifier");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Trackster.Api.Features.Auth.SessionRecord", b =>
+                {
+                    b.Property<Guid>("Identifier")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeToLive")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserIdentifier")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Identifier");
+
+                    b.HasIndex("UserIdentifier");
+
+                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("Trackster.Api.Data.Records.EpisodeRecord", b =>
@@ -248,6 +281,17 @@ namespace Trackster.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Show");
+                });
+
+            modelBuilder.Entity("Trackster.Api.Features.Auth.SessionRecord", b =>
+                {
+                    b.HasOne("Trackster.Api.Data.Records.UserRecord", "User")
+                        .WithMany()
+                        .HasForeignKey("UserIdentifier")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

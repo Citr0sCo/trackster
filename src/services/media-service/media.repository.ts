@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import {map, Observable, tap} from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mapNetworkError } from '../../core/map-network-error';
 import { Provider } from "../../core/providers.enum";
@@ -24,10 +24,26 @@ export class MediaRepository {
         this._httpClient = httpClient;
     }
 
+    public getPosters(): Observable<Array<string>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/posters`)
+            .pipe(
+                mapNetworkError(),
+                map((response: any) => {
+                    return response;
+                })
+            );
+    }
+
     public getAllMoviesFor(username: string): Observable<Array<IWatchedMovie>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies?username=${username}`)
             .pipe(
                 mapNetworkError(),
+                tap((tap) => {
+                }, (error) => {
+                    if(error.exception.status === 401) {
+                        window.location.href = "/#/login";
+                    }
+                }),
                 map((response: any) => {
                     return response.WatchedMovies.map((movie: any) => {
                         return {

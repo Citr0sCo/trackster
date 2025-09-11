@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Trackster.Api.Attributes;
 using Trackster.Api.Features.Movies.Types;
 
 namespace Trackster.Api.Features.Movies;
 
+[AuthRequired]
 [ApiController]
 [Route("api/[controller]")]
 public class MoviesController : ControllerBase

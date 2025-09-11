@@ -21,9 +21,24 @@ export class MediaService {
     private _cachedHistory: Array<IMedia> = [];
     private _cachedStats: IStats | null = null;
     private _cachedStatsForCalendar: Array<any> = [];
+    private _cachedPosters: Array<string> = [];
 
     constructor(mediaRepository: MediaRepository) {
         this._mediaRepository = mediaRepository;
+    }
+
+    public getPosters(): Observable<Array<string>> {
+
+        if (this._cachedPosters.length > 0) {
+            return of(this._cachedPosters);
+        }
+
+        return this._mediaRepository.getPosters()
+            .pipe(
+                tap((posters: Array<string>) => {
+                    this._cachedPosters = posters;
+                })
+            );
     }
 
     public getAllMoviesFor(username: string): Observable<Array<IWatchedMovie>> {
