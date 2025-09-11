@@ -1,0 +1,43 @@
+<div class="login-page-component">
+    <div class="login-form-wrapper">
+        <div class="login-form">
+            <div class="login-form__intro">
+                <img src="./assets/apps/default.png" alt="trackster logo" class="u-mb-3">
+                <h2>Login to Trackster</h2>
+            </div>
+
+            @if (response?.hasError) {
+                <div class="alert alert-danger">
+                    {{ response?.error?.userMessage }}
+                </div>
+            }
+
+            <form [formGroup]="formGroup">
+                <div class="c-input-group u-mb-1">
+                    <input type="text" class="c-field" formControlName="email" placeholder="jon@westeros.com">
+                </div>
+                <div class="c-input-group u-mb-1">
+                    <input type="password" class="c-field" formControlName="password" placeholder="password">
+                </div>
+                <div class="c-input-group">
+                    <button class="btn btn-primary w-100" (click)="login()" [disabled]="!formGroup.valid || isLoading">
+                        Login
+                        @if (isLoading) {
+                            <i class="fa fa-spinner fa-spin"></i>
+                        }
+                    </button>
+                </div>
+            </form>
+
+            <hr>
+
+            <a [routerLink]="'/register'" style="text-decoration: none; color:#fff;">Register</a>
+        </div>
+    </div>
+    <div class="login-poster-wrapper">
+        @if (activePoster) {
+            <div class="login-poster" style="background-image:url('https://image.tmdb.org/t/p/original{{ activePoster }}');"></div>
+        }
+        <div class="login-poster__backdrop"></div>
+    </div>
+</div>

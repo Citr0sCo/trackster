@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomePageComponent } from '../pages/home-page/home-page.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import { MediaService } from '../services/media-service/media.service';
 import { MediaRepository } from '../services/media-service/media.repository';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -24,6 +24,11 @@ import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-
 import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
 import { StatisticsPageComponent } from '../pages/statistics-page/statistics-page.component';
 import {StreamService} from "../core/event-service.service";
+import {AuthInterceptor} from "../core/auth-interceptor";
+import {DashboardPageComponent} from "../pages/dashboard-page/dashboard-page.component";
+import {LoginPageComponent} from "../pages/login-page/login-page.component";
+import {RegisterPageComponent} from "../pages/register-page/register-page.component";
+import {LogoutPageComponent} from "../pages/logout-page/logout-page.component";
 
 @NgModule({
     declarations: [
@@ -38,7 +43,11 @@ import {StreamService} from "../core/event-service.service";
         WatchingNowComponent,
         ShowDetailsPageComponent,
         MovieDetailsPageComponent,
-        StatisticsPageComponent
+        StatisticsPageComponent,
+        DashboardPageComponent,
+        LoginPageComponent,
+        RegisterPageComponent,
+        LogoutPageComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -59,7 +68,10 @@ import {StreamService} from "../core/event-service.service";
         AuthenticationRepository,
         EventService,
         StreamService,
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
+        {
+            provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true
+        }
     ]
 })
 export class AppModule {

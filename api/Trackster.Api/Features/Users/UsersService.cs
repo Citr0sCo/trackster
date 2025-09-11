@@ -22,6 +22,11 @@ public class UsersService : IUsersService
         return await _repository.GetUserByUsername(username);
     }
 
+    public async Task<UserRecord?> GetUserByEmail(string email)
+    {
+        return await _repository.GetUserByEmail(email);
+    }
+
     public async Task<UserRecord> CreateUser(UserRecord user)
     {
         return await _repository.CreateUser(user);

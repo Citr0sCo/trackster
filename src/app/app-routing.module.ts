@@ -7,37 +7,59 @@ import {SettingsPageComponent} from "../pages/settings-page/settings-page.compon
 import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
 import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
 import { StatisticsPageComponent } from '../pages/statistics-page/statistics-page.component';
+import {LoginPageComponent} from "../pages/login-page/login-page.component";
+import {DashboardPageComponent} from "../pages/dashboard-page/dashboard-page.component";
+import {RegisterPageComponent} from "../pages/register-page/register-page.component";
+import {LogoutPageComponent} from "../pages/logout-page/logout-page.component";
 
 const routes: Routes = [
     {
-        path: 'home',
-        component: HomePageComponent
+        path: 'login',
+        component: LoginPageComponent
     },
     {
-        path: 'history',
-        component: HistoryPageComponent
+        path: 'register',
+        component: RegisterPageComponent
     },
     {
-        path: 'statistics',
-        component: StatisticsPageComponent
+        path: 'logout',
+        component: LogoutPageComponent
     },
     {
-        path: 'settings',
-        component: SettingsPageComponent
+        path: 'app',
+        component: DashboardPageComponent,
+        children: [
+            {
+                path: 'home',
+                component: HomePageComponent
+            },
+            {
+                path: 'history',
+                component: HistoryPageComponent
+            },
+            {
+                path: 'statistics',
+                component: StatisticsPageComponent
+            },
+            {
+                path: 'settings',
+                component: SettingsPageComponent
+            },
+            {
+                path: 'authorize/trakt',
+                component: AuthorizeTraktComponent
+            },
+            {
+                path: 'movies/:slug',
+                component: MovieDetailsPageComponent
+            },
+            {
+                path: 'shows/:slug/seasons/:seasonId/episodes/:episodeId',
+                component: ShowDetailsPageComponent
+            }
+        ]
     },
-    {
-        path: 'authorize/trakt',
-        component: AuthorizeTraktComponent
-    },
-    {
-        path: 'movies/:slug',
-        component: MovieDetailsPageComponent
-    },
-    {
-        path: 'shows/:slug/seasons/:seasonId/episodes/:episodeId',
-        component: ShowDetailsPageComponent
-    },
-    { path: '**', pathMatch: 'full', redirectTo: 'home' }
+    { path: '**', pathMatch: 'full', redirectTo: 'app/home' }
 ];
 
 @NgModule({

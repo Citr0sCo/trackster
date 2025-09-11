@@ -2,12 +2,12 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Media.Importers.OverseerrImporter;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
-using Trackster.Api.Features.Movies.Types;
 using Trackster.Api.Features.Notifications;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
@@ -23,6 +23,7 @@ public class MediaService
     private readonly WatchingNowService _watchingNowService;
     private readonly TmdbImportProvider _detailsProvider;
     private readonly NotificationsService _notificationsService;
+    private readonly OverseerrService _overseerrService;
 
     private const string MOVIE_MEDIA_TYPE = "movie";
     private string EPISODE_MEDIA_TYPE = "episode";
@@ -36,6 +37,7 @@ public class MediaService
         _watchingNowService = WatchingNowService.Instance();
         _detailsProvider = new TmdbImportProvider();
         _notificationsService = new NotificationsService();
+        _overseerrService = new OverseerrService();
     }
 
     public async IAsyncEnumerable<ImportMediaResponse> ImportMedia(ImportMediaRequest request)
@@ -301,13 +303,7 @@ public class MediaService
 
         if (userRecord == null)
         {
-            userRecord = new UserRecord
-            {
-                Identifier = Guid.NewGuid(),
-                Username = request.Username,
-            };
-
-            await _usersService.CreateUser(userRecord);
+            throw new Exception($"User '{request.Username}' does not exist.");
         }
 
         return userRecord;
@@ -562,5 +558,10 @@ public class MediaService
             Console.WriteLine($"[ERROR] - Failed getting episode record by show tmdb id. ShowIdentifier: {show}, SeasonIdentifier: {season}, EpisodeNumer: {episodeNumber}");
             throw;
         }
+    }
+
+    public async Task<List<string>> GetPosters()
+    {
+        return await _overseerrService.GetPosters();
     }
 }

@@ -1,6 +1,6 @@
 <div class="custom-sidebar" [ngClass]="{'custom-sidebar--hidden': !showMenu}" [@slideInFromLeft]="showMenu ? 'visible' : 'hidden'">
 
-    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/home'" [routerLinkActive]="'custom-sidebar__button--active'">
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/app/home'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-home"></i>
         </div>
@@ -9,7 +9,7 @@
         </div>
     </div>
 
-    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/history'" [routerLinkActive]="'custom-sidebar__button--active'">
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/app/history'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-history"></i>
         </div>
@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/statistics'" [routerLinkActive]="'custom-sidebar__button--active'">
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/app/statistics'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-chart-line"></i>
         </div>
@@ -27,12 +27,23 @@
         </div>
     </div>
 
-    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/settings'" [routerLinkActive]="'custom-sidebar__button--active'">
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/app/settings'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-cog"></i>
         </div>
         <div class="custom-sidebar__button__label">
             Settings
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/logout'" [routerLinkActive]="'custom-sidebar__button--active'">
+        <div class="custom-sidebar__button__icon">
+            <i class="fa fa-door-open"></i>
+        </div>
+        <div class="custom-sidebar__button__label">
+            Log Out
         </div>
     </div>
 

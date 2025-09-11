@@ -20,6 +20,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public mediaType: string = '';
     public processed: number = 0;
     public total: number = 0;
+    public readonly round = round;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
@@ -90,6 +91,4 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public ngOnDestroy(): void {
         this._destroy.next();
     }
-
-    protected readonly round = round;
 }

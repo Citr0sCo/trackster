@@ -6,6 +6,7 @@ namespace Trackster.Api.Features.Users;
 public interface IUsersRepository
 {
     Task<UserRecord?> GetUserByUsername(string username);
+    Task<UserRecord?> GetUserByEmail(string email);
     Task<UserRecord> CreateUser(UserRecord user);
 }
 
@@ -18,6 +19,22 @@ public class UsersRepository : IUsersRepository
             try
             {
                 return context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                return null;
+            }
+        }
+    }
+
+    public async Task<UserRecord?> GetUserByEmail(string email)
+    {
+        await using (var context = new DatabaseContext())
+        {
+            try
+            {
+                return context.Users.FirstOrDefault(x => x.Email.ToUpper() == email.Trim().ToUpper());
             }
             catch (Exception exception)
             {
