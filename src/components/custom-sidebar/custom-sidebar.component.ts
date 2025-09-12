@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { Subject, takeUntil } from 'rxjs';
+import { UserService } from '../../services/user-service/user.service';
+import { IUser } from '../../services/user-service/types/user.type';
 
 @Component({
     selector: 'custom-sidebar',
@@ -23,10 +26,18 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
         ])
     ]
 })
-export class CustomSidebarComponent implements OnInit {
+export class CustomSidebarComponent implements OnInit, OnDestroy {
 
     public showMenu: boolean = false;
     public isDesktop: boolean = false;
+    public user: IUser | null = null;
+
+    private readonly _destroy: Subject<void> = new Subject();
+    private readonly _userService: UserService;
+
+    constructor(userService: UserService) {
+        this._userService = userService;
+    }
 
     public ngOnInit(): void {
         if (window.innerWidth > 768) {
@@ -45,6 +56,12 @@ export class CustomSidebarComponent implements OnInit {
                 this.isDesktop = false;
             }
         });
+
+        this._userService.getUserBySession()
+            .pipe(takeUntil(this._destroy))
+            .subscribe((user) => {
+                this.user = user;
+            });
     }
 
     public toggleMenu(): void {
@@ -57,4 +74,7 @@ export class CustomSidebarComponent implements OnInit {
         this.showMenu = !this.showMenu;
     }
 
+    public ngOnDestroy(): void {
+        this._destroy.next();
+    }
 }

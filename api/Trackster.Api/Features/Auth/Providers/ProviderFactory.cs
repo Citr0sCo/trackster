@@ -1,6 +1,7 @@
 using Trackster.Api.Features.Auth.Providers.Email;
 using Trackster.Api.Features.Auth.Providers.Trakt;
 using Trackster.Api.Features.Auth.Types;
+using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Users;
 
 namespace Trackster.Api.Features.Auth.Providers;

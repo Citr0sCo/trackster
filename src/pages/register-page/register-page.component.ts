@@ -1,11 +1,11 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
-import {MediaService} from "../../services/media-service/media.service";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {AuthenticationService} from "../../services/authentication-service/authentication.service";
-import {Provider} from "../../core/providers.enum";
-import {IRegisterRequest} from "../../services/authentication-service/types/register.request";
-import {IRegisterResponse} from "../../services/authentication-service/types/register.response";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { MediaService } from "../../services/media-service/media.service";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { AuthenticationService } from "../../services/authentication-service/authentication.service";
+import { Provider } from "../../core/providers.enum";
+import { IRegisterRequest } from "../../services/authentication-service/types/register.request";
+import { IRegisterResponse } from "../../services/authentication-service/types/register.response";
 
 @Component({
     selector: 'register-page',
@@ -40,6 +40,10 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
             .subscribe((posters: Array<string>) => {
                 this.activePoster = posters[this.randomIntFromInterval(0, posters.length - 1)]
             });
+
+        if (this._authService.isLoggedIn()) {
+            window.location.href = "/#/app/home";
+        }
     }
 
     public register(): void {
@@ -63,7 +67,7 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
 
                 this.response = response;
 
-                if(response.hasError == false) {
+                if (response.hasError == false) {
                     window.location.href = "/";
                 }
             });

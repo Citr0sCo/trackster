@@ -7,6 +7,7 @@ public interface IUsersRepository
 {
     Task<UserRecord?> GetUserByUsername(string username);
     Task<UserRecord?> GetUserByEmail(string email);
+    Task<UserRecord?> GetUserByReference(Guid reference);
     Task<UserRecord> CreateUser(UserRecord user);
 }
 
@@ -35,6 +36,22 @@ public class UsersRepository : IUsersRepository
             try
             {
                 return context.Users.FirstOrDefault(x => x.Email.ToUpper() == email.Trim().ToUpper());
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                return null;
+            }
+        }
+    }
+
+    public async Task<UserRecord?> GetUserByReference(Guid reference)
+    {
+        await using (var context = new DatabaseContext())
+        {
+            try
+            {
+                return context.Users.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == reference.ToString().ToUpper());
             }
             catch (Exception exception)
             {

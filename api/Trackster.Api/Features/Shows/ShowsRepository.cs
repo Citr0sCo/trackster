@@ -490,7 +490,7 @@ public class ShowsRepository : IShowsRepository
         {
             try
             {
-                return context.Shows.FirstOrDefault(x => x.Identifier == identifier);
+                return context.Shows.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == identifier.ToString().ToUpper());
             }
             catch (Exception)
             {
@@ -506,7 +506,7 @@ public class ShowsRepository : IShowsRepository
         {
             try
             {
-                return context.Seasons.FirstOrDefault(x => x.Identifier == identifier);
+                return context.Seasons.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == identifier.ToString().ToUpper());
             }
             catch (Exception)
             {
@@ -523,7 +523,7 @@ public class ShowsRepository : IShowsRepository
         {
             try
             {
-                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Identifier == episodeRecord.Identifier);
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == episodeRecord.Identifier.ToString().ToUpper());
 
                 if (existingEpisode == null)
                     return episodeRecord;

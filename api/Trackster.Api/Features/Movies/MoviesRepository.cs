@@ -53,7 +53,7 @@ public class MoviesRepository : IMoviesRepository
                     
                     watchedMovie.Movie.Slug = SlugHelper.GenerateSlugFor(watchedMovie.Movie.Title);
                     
-                    var movie = context.Movies.FirstOrDefault(x => x.Identifier == watchedMovie.Movie.Identifier);
+                    var movie = context.Movies.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == watchedMovie.Movie.Identifier.ToString().ToUpper());
                     movie.Slug = watchedMovie.Movie.Slug;
                     context.Update(movie);
                 }

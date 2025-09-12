@@ -4,6 +4,8 @@ import {MediaService} from '../../services/media-service/media.service';
 import {StreamService} from "../../core/event-service.service";
 import {environment} from "../../environments/environment";
 import {round} from "@popperjs/core/lib/utils/math";
+import { UserService } from '../../services/user-service/user.service';
+import { IUser } from '../../services/user-service/types/user.type';
 
 @Component({
     selector: 'settings-page',
@@ -14,25 +16,32 @@ import {round} from "@popperjs/core/lib/utils/math";
 export class SettingsPageComponent implements OnInit, OnDestroy {
 
     public isImporting: boolean = false;
-    public username: string = 'citr0s';
     public isDebug: boolean = false;
     public progress: Array<string> = [];
     public mediaType: string = '';
     public processed: number = 0;
     public total: number = 0;
     public readonly round = round;
+    public user: IUser | null = null;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
     private readonly _streamService: StreamService;
+    private readonly _userService: UserService;
 
-    constructor(mediaService: MediaService, streamService: StreamService) {
+    constructor(mediaService: MediaService, streamService: StreamService, userService: UserService) {
         this._mediaService = mediaService;
         this._streamService = streamService;
+        this._userService = userService;
     }
 
     public ngOnInit(): void {
 
+        this._userService.getUserBySession()
+            .pipe(takeUntil(this._destroy))
+            .subscribe((user) => {
+               this.user = user;
+            });
     }
 
     public importFromTrakt(): void {

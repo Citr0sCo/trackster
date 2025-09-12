@@ -1,4 +1,4 @@
-using System.Security.Cryptography.Xml;
+using Trackster.Api.Features.Sessions.Types;
 
 namespace Trackster.Api.Features.Auth.Types;
 
@@ -33,5 +33,10 @@ public class Session
     public void ExtendTimeToLive()
     {
         _ttl = _ttl.AddMinutes(30);
+    }
+
+    public bool Expired()
+    {
+        return _ttl < DateTime.Now;
     }
 }

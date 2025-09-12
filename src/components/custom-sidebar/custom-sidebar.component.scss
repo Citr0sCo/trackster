@@ -11,7 +11,7 @@
         width: 100%;
         position: absolute;
         z-index: 990;
-        background-color: #1e293c;
+        background-color: #151e2c;
     }
 
     &--hidden {
@@ -47,12 +47,26 @@
         }
     }
 
+    &__box {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        align-content: center;
+
+        &__link {
+            color: var(--text-color-alt);
+            text-decoration: none;
+            font-size: 0.75rem;
+        }
+    }
+
     &--action-button {
         border: 1px solid var(--border-color);
         width: 50px;
         height: 50px;
         border-radius: $border-radius;
-        background-color: #2d3647;
+        background: linear-gradient(45deg, $brand-primary, $brand-primary-alt);
         box-shadow: var(--box-shadow);
         text-align: center;
         line-height: 50px;
@@ -62,5 +76,10 @@
         bottom: 15px;
         left: 15px;
         z-index: 999;
+
+        &:hover {
+            cursor: pointer;
+            background-color: $brand-primary;
+        }
     }
 }

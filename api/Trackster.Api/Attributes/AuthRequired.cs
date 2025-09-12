@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Trackster.Api.Features.Auth;
+using Trackster.Api.Features.Sessions;
 
 namespace Trackster.Api.Attributes;
 
@@ -13,14 +13,16 @@ public class AuthRequired : ActionFilterAttribute
         _sessionFactory = SessionFactory.Instance();
     }
     
-    public override void OnActionExecuting(ActionExecutingContext actionContext)
+    public override async void OnActionExecuting(ActionExecutingContext context)
     {
-        actionContext.HttpContext.Request.Headers.TryGetValue("X-Authentication-Token", out var authorizationToken);
+        context.HttpContext.Request.Headers.TryGetValue("X-Authentication-Token", out var authorizationToken);
 
         if(!Guid.TryParse(authorizationToken, out Guid sessionGuid))
-            actionContext.Result = new UnauthorizedResult();
+            context.Result = new UnauthorizedResult();
         
-        if (!_sessionFactory.HasSession(sessionGuid))
-            actionContext.Result = new UnauthorizedResult();
+        if (!await _sessionFactory.HasSession(sessionGuid))
+            context.Result = new UnauthorizedResult();
+
+        context.HttpContext.Items["SessionId"] = authorizationToken;
     }
 }

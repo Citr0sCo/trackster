@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {map, Observable, tap} from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mapNetworkError } from '../../core/map-network-error';
 import { Provider } from "../../core/providers.enum";
@@ -14,14 +14,17 @@ import { IEpisode } from "./types/episode.type";
 import { ISeason } from "./types/season.type";
 import { IWatchedEpisode } from "./types/watched-episode.type";
 import { IStats } from './types/stats.type';
+import { AuthenticationService } from '../authentication-service/authentication.service';
 
 @Injectable()
 export class MediaRepository {
 
     private _httpClient: HttpClient;
+    private _authService: AuthenticationService;
 
-    constructor(httpClient: HttpClient) {
+    constructor(httpClient: HttpClient, authService: AuthenticationService) {
         this._httpClient = httpClient;
+        this._authService = authService;
     }
 
     public getPosters(): Observable<Array<string>> {
@@ -40,8 +43,11 @@ export class MediaRepository {
                 mapNetworkError(),
                 tap((tap) => {
                 }, (error) => {
-                    if(error.exception.status === 401) {
-                        window.location.href = "/#/login";
+                    if (error.exception.status === 401) {
+                        this._authService.logout()
+                            .subscribe(() => {
+                                window.location.href = "/#/login";
+                            });
                     }
                 }),
                 map((response: any) => {

@@ -2,6 +2,7 @@
 using Trackster.Api.Core.Types;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Auth.Types;
+using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Users;
 
 namespace Trackster.Api.Features.Auth.Providers.Email;
@@ -72,7 +73,7 @@ public class EmailAuthProvider : IAuthProvider
             };
         }
 
-        var session = _sessionService.CreateSession(existingUser.Identifier);
+        var session = await _sessionService.CreateSession(existingUser.Identifier);
         _sessionFactory.AddSession(session.Reference(), session);
 
         return new SignInResponse
@@ -159,7 +160,7 @@ public class EmailAuthProvider : IAuthProvider
         
         var createdUsed = await _usersService.CreateUser(userRecord);
 
-        var session = _sessionService.CreateSession(createdUsed.Identifier);
+        var session = await _sessionService.CreateSession(createdUsed.Identifier);
         _sessionFactory.AddSession(session.Reference(), session);
 
         return new RegisterResponse

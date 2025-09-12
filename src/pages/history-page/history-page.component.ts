@@ -3,6 +3,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { IMedia } from "../../services/media-service/types/media.type";
 import { EventService } from "../../services/event-service/event.service";
+import { UserService } from '../../services/user-service/user.service';
 
 @Component({
     selector: 'history-page',
@@ -22,30 +23,36 @@ export class HistoryPageComponent implements OnInit, OnDestroy {
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
     private readonly _eventService: EventService;
+    private readonly _userService: UserService;
 
-    constructor(mediaService: MediaService, eventService: EventService) {
+    constructor(mediaService: MediaService, eventService: EventService, userService: UserService) {
         this._mediaService = mediaService;
         this._eventService = eventService;
+        this._userService = userService;
     }
 
     public ngOnInit(): void {
         this.mediaLoading = true;
 
-        this._mediaService.getHistoryForUser('citr0s', 500, 1)
+        this._userService.getUserBySession()
             .pipe(takeUntil(this._destroy))
-            .subscribe((media) => {
-                this.mediaLoading = false;
-                this.media = this.groupByDay(media, 'watchedAt');
-                this.keys = Object.keys(this.media);
-                this.loadMore();
-            });
+            .subscribe((user) => {
+                this._mediaService.getHistoryForUser(user.username, 500, 1)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((media) => {
+                        this.mediaLoading = false;
+                        this.media = this.groupByDay(media, 'watchedAt');
+                        this.keys = Object.keys(this.media);
+                        this.loadMore();
+                    });
 
-        this._eventService.scrolledToBottom
-            .pipe(takeUntil(this._destroy))
-            .subscribe((scrolledToBottom) => {
-                if (scrolledToBottom) {
-                    this.loadMore();
-                }
+                this._eventService.scrolledToBottom
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((scrolledToBottom) => {
+                        if (scrolledToBottom) {
+                            this.loadMore();
+                        }
+                    });
             });
     }
 

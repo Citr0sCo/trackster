@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomePageComponent } from '../pages/home-page/home-page.component';
-import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MediaService } from '../services/media-service/media.service';
 import { MediaRepository } from '../services/media-service/media.repository';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -20,15 +20,17 @@ import { MediaPosterComponent } from "../components/media-poster/media-poster.co
 import { SettingsPageComponent } from "../pages/settings-page/settings-page.component";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { WatchingNowComponent } from '../components/watching-now/watching-now.component';
-import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
-import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
+import { ShowDetailsPageComponent } from "../pages/show-details-page/show-details-page.component";
+import { MovieDetailsPageComponent } from "../pages/movie-details-page/movie-details-page.component";
 import { StatisticsPageComponent } from '../pages/statistics-page/statistics-page.component';
-import {StreamService} from "../core/event-service.service";
-import {AuthInterceptor} from "../core/auth-interceptor";
-import {DashboardPageComponent} from "../pages/dashboard-page/dashboard-page.component";
-import {LoginPageComponent} from "../pages/login-page/login-page.component";
-import {RegisterPageComponent} from "../pages/register-page/register-page.component";
-import {LogoutPageComponent} from "../pages/logout-page/logout-page.component";
+import { StreamService } from "../core/event-service.service";
+import { AuthInterceptor } from "../core/auth-interceptor";
+import { DashboardPageComponent } from "../pages/dashboard-page/dashboard-page.component";
+import { LoginPageComponent } from "../pages/login-page/login-page.component";
+import { RegisterPageComponent } from "../pages/register-page/register-page.component";
+import { LogoutPageComponent } from "../pages/logout-page/logout-page.component";
+import { UserRepository } from '../services/user-service/user.repository';
+import { UserService } from '../services/user-service/user.service';
 
 @NgModule({
     declarations: [
@@ -68,6 +70,8 @@ import {LogoutPageComponent} from "../pages/logout-page/logout-page.component";
         AuthenticationRepository,
         EventService,
         StreamService,
+        UserService,
+        UserRepository,
         provideHttpClient(withInterceptorsFromDi()),
         {
             provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true
