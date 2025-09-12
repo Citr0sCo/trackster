@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Trackster.Api.Data.Records;
-using Trackster.Api.Features.Sessions.Types;
 
 namespace Trackster.Api.Data;
 
@@ -22,6 +21,7 @@ public class DatabaseContext : DbContext
     public DbSet<ShowRecord> Shows { get; set; }
     public DbSet<SeasonRecord> Seasons { get; set; }
     public DbSet<EpisodeRecord> Episodes { get; set; }
+    public DbSet<WebhookRecord> Webhooks { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

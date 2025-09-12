@@ -31,6 +31,8 @@ import { RegisterPageComponent } from "../pages/register-page/register-page.comp
 import { LogoutPageComponent } from "../pages/logout-page/logout-page.component";
 import { UserRepository } from '../services/user-service/user.repository';
 import { UserService } from '../services/user-service/user.service';
+import {WebhookService} from "../services/webhook-service/webhook.service";
+import {WebhookRepository} from "../services/webhook-service/webhook.repository";
 
 @NgModule({
     declarations: [
@@ -72,6 +74,8 @@ import { UserService } from '../services/user-service/user.service';
         StreamService,
         UserService,
         UserRepository,
+        WebhookService,
+        WebhookRepository,
         provideHttpClient(withInterceptorsFromDi()),
         {
             provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true

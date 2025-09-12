@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Trackster.Api.Features.Webhook.Types;
+namespace Trackster.Api.Features.Webhooks.Types;
 
 public class PlexWebhookRequest
 {
@@ -53,7 +53,7 @@ public class Director
     public string TagKey { get; set; }
 }
 
-public class Guid
+public class GuidPlex
 {
     [JsonProperty("id")]
     public string Id { get; set; }
@@ -191,7 +191,7 @@ public class Metadata
     public UltraBlurColors UltraBlurColors { get; set; }
 
     [JsonProperty("Guid")]
-    public List<Guid> Guid { get; set; }
+    public List<GuidPlex> Guid { get; set; }
 
     [JsonProperty("Director")]
     public List<Director> Director { get; set; }

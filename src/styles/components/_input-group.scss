@@ -7,7 +7,11 @@
         }
 
         .c-field {
-            border-color: var(--border-color-alt);
+          border-color: var(--border-color-alt);
+
+            &[disabled] {
+              border: 1px solid var(--border-color);
+            }
         }
     }
 }

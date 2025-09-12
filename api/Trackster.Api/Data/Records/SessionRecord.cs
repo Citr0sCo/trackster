@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Trackster.Api.Data.Records;
 
-namespace Trackster.Api.Features.Sessions.Types;
+namespace Trackster.Api.Data.Records;
 
 public class SessionRecord
 {

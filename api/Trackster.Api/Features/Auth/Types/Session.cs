@@ -1,5 +1,3 @@
-using Trackster.Api.Features.Sessions.Types;
-
 namespace Trackster.Api.Features.Auth.Types;
 
 public class Session

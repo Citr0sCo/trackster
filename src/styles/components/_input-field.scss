@@ -74,7 +74,7 @@
     }
 
     &[disabled] {
-        background-color: var(--border-color);
+        background-color: rgba(0, 0, 0, 0.25);
     }
 
     &__switch {
@@ -100,7 +100,7 @@
     font-weight: 400;
     resize: vertical;
     appearance: none;
-    padding: 10px;
+    padding: 8px 12px;
     color: var(--text-color);
     caret-color: var(--text-color);
     background-color: rgba(255, 255, 255, 0.05);
