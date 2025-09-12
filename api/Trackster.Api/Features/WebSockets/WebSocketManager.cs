@@ -193,7 +193,7 @@ public class WebSocketManager : IWebSocketManager
 
             if (message?.Key == WebSocketKey.Handshake.ToString())
             {
-                _users.TryAdd(currentSessionId, message.Data.UserReference);
+                _users.TryAdd(currentSessionId, Guid.Parse(message.Data.UserReference.ToString().ToUpper()));
                 Send(currentSessionId, WebSocketKey.Handshake, currentSessionId);
             }
 

@@ -224,7 +224,7 @@ public class MediaService
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber, requestDebug);
-            Console.WriteLine($"[INFO] - Making movie as watching now. Title: {title}, Year: {year}, Looked Up Episode Title: {episode.Title}.");
+            Console.WriteLine($"[INFO] - Making episode as watching now. Title: {title}, Year: {year}, Looked Up Episode Title: {episode.Title}.");
 
             if (episode.Title?.Length == 0)
                 return;
