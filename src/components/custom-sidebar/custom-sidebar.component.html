@@ -1,7 +1,7 @@
 <div class="custom-sidebar" [ngClass]="{'custom-sidebar--hidden': !showMenu}" [@slideInFromLeft]="showMenu ? 'visible' : 'hidden'">
 
     @if (user) {
-        <div class="o-grid">
+        <div class="o-grid o-grid--static">
             <div class="o-grid__col">
                 <div class="custom-sidebar__box">
                     Hello, {{ user.username }}!
