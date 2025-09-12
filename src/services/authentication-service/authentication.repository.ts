@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { mapNetworkError } from '../../core/map-network-error';
 
 @Injectable()
 export class AuthenticationRepository {
@@ -16,7 +15,6 @@ export class AuthenticationRepository {
     public signIn(request: any): Observable<any> {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/auth/sign-in`, request)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return {
                         sessionId: response.SessionId,
@@ -34,7 +32,6 @@ export class AuthenticationRepository {
     public register(request: any): Observable<any> {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/auth/register`, request)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return {
                         sessionId: response.SessionId,
@@ -52,7 +49,6 @@ export class AuthenticationRepository {
     public signOut(identifier: string): Observable<any> {
         return this._httpClient.delete(`${environment.apiBaseUrl}/api/auth/sign-out/${identifier}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return {
                         hasError: response.HasError,
