@@ -11,6 +11,7 @@ using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Notifications;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
+using Trackster.Api.Features.Webhook;
 
 namespace Trackster.Api.Features.Media;
 
@@ -199,16 +200,16 @@ public class MediaService
         };
     }
 
-    public async Task MarkMediaAsWatched(string mediaType, int year, string title, string? parentTitle = null, string? grandParentTitle = null, int seasonNumber = 0, bool requestDebug = false)
+    public async Task MarkMediaAsWatched(MarkMediaAsWatchedRequest request)
     {
-        if (mediaType == MOVIE_MEDIA_TYPE)
-            await MarkMovieAsWatched(title, year, requestDebug);
+        if (request.MediaType == MOVIE_MEDIA_TYPE)
+            await MarkMovieAsWatched(request.Username, request.Title, request.Year, request.RequestDebug);
 
-        if (mediaType == EPISODE_MEDIA_TYPE)
-            await MarkEpisodeAsWatched(grandParentTitle!, parentTitle!, title, year, seasonNumber);
+        if (request.MediaType == EPISODE_MEDIA_TYPE)
+            await MarkEpisodeAsWatched(request.Username, request.GrandParentTitle, request.ParentTitle, request.Title, request.Year, request.SeasonNumber);
     }
 
-    public async void MarkMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
+    public async void MarkMediaAsWatchingNow(string username, string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
@@ -218,7 +219,7 @@ public class MediaService
             if (movie.TMDB?.Length == 0)
                 return;
             
-            _watchingNowService.MarkAsWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsWatchingMovie(username, movie, watchedAmountInMilliseconds, duration);
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
@@ -229,45 +230,45 @@ public class MediaService
             if (episode.Title?.Length == 0)
                 return;
             
-            _watchingNowService.MarkAsWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsWatchingEpisode(username, episode, watchedAmountInMilliseconds, duration);
         }
 
         Console.WriteLine($"Marking a media as watching now. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
     }
 
-    public async void RemoveMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber)
+    public async void RemoveMediaAsWatchingNow(string username, string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
-            _watchingNowService.MarkAsStoppedWatchingMovie("citr0s");
+            _watchingNowService.MarkAsStoppedWatchingMovie(username);
 
         if (mediaType == EPISODE_MEDIA_TYPE)
-            _watchingNowService.MarkAsStoppedWatchingEpisode("citr0s");
+            _watchingNowService.MarkAsStoppedWatchingEpisode(username);
 
         Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {parentTitle}, {seasonNumber}, {year}.");
     }
 
-    public async void PauseMediaAsWatchingNow(string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
+    public async void PauseMediaAsWatchingNow(string username, string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
         {
             var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
-            _watchingNowService.MarkAsPausedWatchingMovie("citr0s", movie, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsPausedWatchingMovie(username, movie, watchedAmountInMilliseconds, duration);
         }
 
         if (mediaType == EPISODE_MEDIA_TYPE)
         {
             var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber, requestDebug);
-            _watchingNowService.MarkAsPausedWatchingEpisode("citr0s", episode, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsPausedWatchingEpisode(username, episode, watchedAmountInMilliseconds, duration);
         }
 
         Console.WriteLine($"Marking a media as paused watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
     }
 
-    private async Task MarkMovieAsWatched(string title, int year, bool requestDebug)
+    private async Task MarkMovieAsWatched(string username, string title, int year, bool requestDebug)
     {
         try
         {
-            var user = await _usersService.GetUserByUsername("citr0s");
+            var user = await _usersService.GetUserByUsername(username);
             var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
             await _moviesService.MarkMovieAsWatched(user, movie, DateTime.UtcNow);
             await _notificationsService.Send($"Movie '{title} ({year})' marked as watched.");
@@ -280,11 +281,11 @@ public class MediaService
         }
     }
 
-    private async Task MarkEpisodeAsWatched(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber, bool requestDebug = false)
+    private async Task MarkEpisodeAsWatched(string username, string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber, bool requestDebug = false)
     {
         try
         {
-            var user = await _usersService.GetUserByUsername("citr0s");
+            var user = await _usersService.GetUserByUsername(username);
             var episode = await _showsService.SearchForEpisode(showTitle, seasonTitle, episodeTitle, year, seasonNumber, requestDebug);
             await _showsService.MarkEpisodeAsWatched(user, episode.Season.Show, episode.Season, episode, DateTime.Now);
             await _notificationsService.Send($"Episode '{episodeTitle}' of show '{showTitle}' marked as watched.");

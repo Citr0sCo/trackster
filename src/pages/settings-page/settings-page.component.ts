@@ -1,9 +1,9 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
-import {MediaService} from '../../services/media-service/media.service';
-import {StreamService} from "../../core/event-service.service";
-import {environment} from "../../environments/environment";
-import {round} from "@popperjs/core/lib/utils/math";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { MediaService } from '../../services/media-service/media.service';
+import { StreamService } from "../../core/event-service.service";
+import { environment } from "../../environments/environment";
+import { round } from "@popperjs/core/lib/utils/math";
 import { UserService } from '../../services/user-service/user.service';
 import { IUser } from '../../services/user-service/types/user.type';
 
@@ -40,7 +40,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
         this._userService.getUserBySession()
             .pipe(takeUntil(this._destroy))
             .subscribe((user) => {
-               this.user = user;
+                this.user = user;
             });
     }
 
@@ -53,23 +53,19 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
                     const progress = JSON.parse(data);
                     this.progress.push(`${progress.Data}\n`);
 
-                    if (progress.Data.indexOf('DONE!') > -1) {
-                        this.isImporting = false;
-                    }
-
-                    if(progress.Total > 0) {
+                    if (progress.Total > 0) {
                         this.total = progress.Total;
                     }
 
-                    if(progress.Processed > 0) {
+                    if (progress.Processed > 0) {
                         this.processed = progress.Processed;
                     }
 
-                    if(progress.Type.length > 0) {
+                    if (progress.Type?.length > 0) {
                         this.mediaType = progress.Type;
                     }
 
-                    if (progress.Data.indexOf('DONE!') > -1) {
+                    if (progress.Data?.indexOf('DONE!') > -1) {
                         this.isImporting = false;
 
                         setTimeout(() => {

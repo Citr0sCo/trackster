@@ -17,7 +17,7 @@ public class SessionsController : ControllerBase
     {
         _service = new SessionService(new SessionRepository());
         _userService = new UsersService(new UsersRepository());
-        _sessionHelper = new SessionHelper();
+        _sessionHelper = new SessionHelper(_service, _userService);
     }
     
     [HttpGet("")]
@@ -29,7 +29,9 @@ public class SessionsController : ControllerBase
 
         if (session == null)
             return NotFound();
+
+        var user = await _userService.GetUserByReference(sessionId, session.UserIdentifier());
         
-        return Ok(await _userService.GetUserByReference(sessionId, session.UserIdentifier()));
+        return Ok(user);
     }
 }

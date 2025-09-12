@@ -1,4 +1,5 @@
 using Trackster.Api.Core.Types;
+using Trackster.Api.Features.Users.Types;
 
 namespace Trackster.Api.Features.Sessions.Types;
 

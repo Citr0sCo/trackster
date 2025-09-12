@@ -53,7 +53,7 @@ public class TraktAuthProvider : IAuthProvider
         throw new NotImplementedException();
     }
 
-    public async Task<TraktProfileResponse?> GetProfile(string username = "citr0s")
+    public async Task<TraktProfileResponse?> GetProfile(string username)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 

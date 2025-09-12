@@ -111,10 +111,6 @@ export class MediaService {
             );
     }
 
-    public importFromTrakt(username: string, debug: boolean): Observable<any> {
-        return this._mediaRepository.importFromTrakt(username, debug);
-    }
-
     public getMovieBySlug(slug: string): Observable<IMovie> {
         return this._mediaRepository.getMovieBySlug(slug);
     }
