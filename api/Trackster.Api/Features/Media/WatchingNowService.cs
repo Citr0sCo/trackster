@@ -1,6 +1,7 @@
 using Trackster.Api.Core.Events.Types;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Types;
+using Trackster.Api.Features.WebSockets;
 using Trackster.Api.Features.WebSockets.Types;
 
 namespace Trackster.Api.Features.Media;
@@ -9,6 +10,7 @@ public class WatchingNowService : ISubscriber
 {
     private bool _isStarted = false;
     private static WatchingNowService? _instance;
+    private readonly IWebSocketManager _webSocketManager;
 
     private readonly Dictionary<Guid, WatchingMovieRecord> _watchingNowMovies;
     private readonly Dictionary<Guid, WatchingEpisodeRecord> _watchingNowEpisodes;
@@ -17,6 +19,7 @@ public class WatchingNowService : ISubscriber
     {
         _watchingNowMovies = new Dictionary<Guid, WatchingMovieRecord>();
         _watchingNowEpisodes = new Dictionary<Guid, WatchingEpisodeRecord>();
+        _webSocketManager = WebSockets.WebSocketManager.Instance();
     }
     
     public static WatchingNowService Instance()
@@ -38,7 +41,9 @@ public class WatchingNowService : ISubscriber
             LastUpdatedAt = DateTime.Now
         };
         
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
+        var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
+        
+        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowMovie, new
         {
             Response = new
             {
@@ -58,7 +63,9 @@ public class WatchingNowService : ISubscriber
             LastUpdatedAt = DateTime.Now
         };
         
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
+        var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
+        
+        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowEpisode, new
         {
             Response = new
             {
@@ -72,7 +79,9 @@ public class WatchingNowService : ISubscriber
         if (_watchingNowMovies.ContainsKey(userReference))
             _watchingNowMovies.Remove(userReference);
         
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
+        var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
+        
+        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowMovie, new
         {
             Response = new
             {
@@ -89,7 +98,9 @@ public class WatchingNowService : ISubscriber
         if (_watchingNowEpisodes.ContainsKey(userReference))
             _watchingNowEpisodes.Remove(userReference);
         
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
+        var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
+        
+        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowEpisode, new
         {
             Response = new
             {
@@ -112,7 +123,9 @@ public class WatchingNowService : ISubscriber
             LastUpdatedAt = DateTime.Now
         };
         
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowMovie, new
+        var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
+        
+        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowMovie, new
         {
             Response = new
             {
@@ -132,23 +145,15 @@ public class WatchingNowService : ISubscriber
             LastUpdatedAt = DateTime.Now
         };
         
-        WebSockets.WebSocketManager.Instance().SendToAllClients(WebSocketKey.WatchingNowEpisode, new
+        var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
+        
+        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowEpisode, new
         {
             Response = new
             {
                 Data = _watchingNowEpisodes[userReference]
             }
         });
-    }
-
-    public Dictionary<Guid, WatchingMovieRecord> GetCurrentlyWatchingMovie()
-    {
-        return _watchingNowMovies;
-    }
-
-    public Dictionary<Guid, WatchingEpisodeRecord> GetCurrentlyWatchingEpisode()
-    {
-        return _watchingNowEpisodes;
     }
 
     public void OnStarted()
@@ -159,14 +164,12 @@ public class WatchingNowService : ISubscriber
         {
             while (_isStarted)
             {
-                var webSocketManager = WebSockets.WebSocketManager.Instance();
-                
-                var currentlyWatchingMovies = GetCurrentlyWatchingMovie();
+                var webSocketManager = _webSocketManager;
 
-                foreach (var user in currentlyWatchingMovies.Keys)
+                foreach (var user in _watchingNowMovies.Keys)
                 {
-                    currentlyWatchingMovies[user].MillisecondsWatched += 5000;
-                    MarkAsWatchingMovie(user, currentlyWatchingMovies[user].Movie, currentlyWatchingMovies[user].MillisecondsWatched, currentlyWatchingMovies[user].Duration);
+                    if (_watchingNowMovies[user].Action == WatchingAction.Start.ToString())
+                        _watchingNowMovies[user].MillisecondsWatched += 5000;
 
                     var webSocketSessionId = webSocketManager.GetWebsocketSessionIdByUserReference(user);
 
@@ -176,18 +179,16 @@ public class WatchingNowService : ISubscriber
                         {
                             Response = new
                             {
-                                Data = currentlyWatchingMovies
+                                Data = _watchingNowMovies[user]
                             }
                         });
                     }   
                 }
-                
-                var currentlyWatchingEpisodes = GetCurrentlyWatchingEpisode();
-                
-                foreach (var user in currentlyWatchingEpisodes.Keys)
+
+                foreach (var user in _watchingNowEpisodes.Keys)
                 {
-                    currentlyWatchingEpisodes[user].MillisecondsWatched += 5000;
-                    MarkAsWatchingEpisode(user, currentlyWatchingEpisodes[user].Episode, currentlyWatchingEpisodes[user].MillisecondsWatched, currentlyWatchingEpisodes[user].Duration);
+                    if (_watchingNowEpisodes[user].Action == WatchingAction.Start.ToString())
+                        _watchingNowEpisodes[user].MillisecondsWatched += 5000;
                     
                     var webSocketSessionId = webSocketManager.GetWebsocketSessionIdByUserReference(user);
 
@@ -197,7 +198,7 @@ public class WatchingNowService : ISubscriber
                         {
                             Response = new
                             {
-                                Data = currentlyWatchingEpisodes
+                                Data = _watchingNowEpisodes[user]
                             }
                         });
                     }
