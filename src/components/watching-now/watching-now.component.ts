@@ -52,6 +52,7 @@ export class WatchingNowComponent implements OnInit {
 
             if (payload.Response.Data.Action === "Start") {
                 this.isVisible = true;
+                this.isPaused = false;
 
                 this.title = payload.Response.Data.Movie.Title;
                 this.slug = payload.Response.Data.Movie.Slug;
@@ -73,6 +74,7 @@ export class WatchingNowComponent implements OnInit {
 
             if (payload.Response.Data.Action === "Stop") {
                 this.isVisible = false;
+                this.isPaused = false;
             }
         });
 
@@ -110,6 +112,7 @@ export class WatchingNowComponent implements OnInit {
 
             if (payload.Response.Data.Action === "Stop") {
                 this.isVisible = false;
+                this.isPaused = false;
             }
         });
 
