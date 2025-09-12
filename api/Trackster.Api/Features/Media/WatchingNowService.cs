@@ -21,7 +21,7 @@ public class WatchingNowService : ISubscriber
         _watchingNowEpisodes = new Dictionary<Guid, WatchingEpisodeRecord>();
         _webSocketManager = WebSockets.WebSocketManager.Instance();
     }
-    
+
     public static WatchingNowService Instance()
     {
         if (_instance == null)
@@ -29,7 +29,7 @@ public class WatchingNowService : ISubscriber
 
         return _instance;
     }
-    
+
     public void MarkAsWatchingMovie(Guid userReference, MovieRecord movie, int millisecondsWatched, int duration)
     {
         _watchingNowMovies[userReference] = new WatchingMovieRecord
@@ -40,16 +40,19 @@ public class WatchingNowService : ISubscriber
             Duration = duration,
             LastUpdatedAt = DateTime.Now
         };
-        
+
         var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
-        
-        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowMovie, new
+
+        if (webSocketSessionId.HasValue)
         {
-            Response = new
+            _webSocketManager.Send(webSocketSessionId.Value, WebSocketKey.WatchingNowMovie, new
             {
-                Data = _watchingNowMovies[userReference]
-            }
-        });
+                Response = new
+                {
+                    Data = _watchingNowMovies[userReference]
+                }
+            });
+        }
     }
 
     public void MarkAsWatchingEpisode(Guid userReference, EpisodeRecord episode, int millisecondsWatched, int duration)
@@ -62,54 +65,63 @@ public class WatchingNowService : ISubscriber
             Duration = duration,
             LastUpdatedAt = DateTime.Now
         };
-        
+
         var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
-        
-        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowEpisode, new
+
+        if (webSocketSessionId.HasValue)
         {
-            Response = new
+            _webSocketManager.Send(webSocketSessionId.Value, WebSocketKey.WatchingNowEpisode, new
             {
-                Data = _watchingNowEpisodes[userReference]
-            }
-        });
+                Response = new
+                {
+                    Data = _watchingNowEpisodes[userReference]
+                }
+            });
+        }
     }
 
     public void MarkAsStoppedWatchingMovie(Guid userReference)
     {
         if (_watchingNowMovies.ContainsKey(userReference))
             _watchingNowMovies.Remove(userReference);
-        
+
         var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
-        
-        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowMovie, new
+
+        if (webSocketSessionId.HasValue)
         {
-            Response = new
+            _webSocketManager.Send(webSocketSessionId.Value, WebSocketKey.WatchingNowMovie, new
             {
-                Data = new
+                Response = new
                 {
-                    Action = WatchingAction.Stop.ToString()
+                    Data = new
+                    {
+                        Action = WatchingAction.Stop.ToString()
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public void MarkAsStoppedWatchingEpisode(Guid userReference)
     {
         if (_watchingNowEpisodes.ContainsKey(userReference))
             _watchingNowEpisodes.Remove(userReference);
-        
+
         var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
-        
-        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowEpisode, new
+
+        if (webSocketSessionId.HasValue)
         {
-            Response = new
+            _webSocketManager.Send(webSocketSessionId.Value, WebSocketKey.WatchingNowEpisode, new
             {
-                Data = new
+                Response = new
                 {
-                    Action = WatchingAction.Stop.ToString()
+                    Data = new
+                    {
+                        Action = WatchingAction.Stop.ToString()
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public void MarkAsPausedWatchingMovie(Guid userReference, MovieRecord movie, int millisecondsWatched, int duration)
@@ -122,19 +134,23 @@ public class WatchingNowService : ISubscriber
             Duration = duration,
             LastUpdatedAt = DateTime.Now
         };
-        
+
         var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
-        
-        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowMovie, new
+
+        if (webSocketSessionId.HasValue)
         {
-            Response = new
+            _webSocketManager.Send(webSocketSessionId.Value, WebSocketKey.WatchingNowMovie, new
             {
-                Data = _watchingNowMovies[userReference]
-            }
-        });
+                Response = new
+                {
+                    Data = _watchingNowMovies[userReference]
+                }
+            });
+        }
     }
 
-    public void MarkAsPausedWatchingEpisode(Guid userReference, EpisodeRecord episode, int millisecondsWatched, int duration)
+    public void MarkAsPausedWatchingEpisode(Guid userReference, EpisodeRecord episode, int millisecondsWatched,
+        int duration)
     {
         _watchingNowEpisodes[userReference] = new WatchingEpisodeRecord
         {
@@ -144,16 +160,19 @@ public class WatchingNowService : ISubscriber
             Duration = duration,
             LastUpdatedAt = DateTime.Now
         };
-        
+
         var webSocketSessionId = _webSocketManager.GetWebsocketSessionIdByUserReference(userReference);
-        
-        _webSocketManager.Send(webSocketSessionId!.Value, WebSocketKey.WatchingNowEpisode, new
+
+        if (webSocketSessionId.HasValue)
         {
-            Response = new
+            _webSocketManager.Send(webSocketSessionId.Value, WebSocketKey.WatchingNowEpisode, new
             {
-                Data = _watchingNowEpisodes[userReference]
-            }
-        });
+                Response = new
+                {
+                    Data = _watchingNowEpisodes[userReference]
+                }
+            });
+        }
     }
 
     public void OnStarted()
@@ -182,14 +201,14 @@ public class WatchingNowService : ISubscriber
                                 Data = _watchingNowMovies[user]
                             }
                         });
-                    }   
+                    }
                 }
 
                 foreach (var user in _watchingNowEpisodes.Keys)
                 {
                     if (_watchingNowEpisodes[user].Action == WatchingAction.Start.ToString())
                         _watchingNowEpisodes[user].MillisecondsWatched += 5000;
-                    
+
                     var webSocketSessionId = webSocketManager.GetWebsocketSessionIdByUserReference(user);
 
                     if (webSocketSessionId.HasValue)
@@ -203,7 +222,7 @@ public class WatchingNowService : ISubscriber
                         });
                     }
                 }
-                
+
                 Thread.Sleep(5000);
             }
         }, CancellationToken.None);
