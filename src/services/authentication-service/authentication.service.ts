@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, pipe, tap } from 'rxjs';
+import {Observable, of, pipe, tap} from 'rxjs';
 import { AuthenticationRepository } from './authentication.repository';
 import { ISignInRequest } from "./types/sign-in.request";
 import { ISignInResponse } from "./types/sign-in.response";
@@ -35,18 +35,26 @@ export class AuthenticationService {
         }));
     }
 
-    public logout(): Observable<ISignInResponse> {
+    public logout(): Observable<any> {
 
         let session: string = this._session?.identifier() ?? '';
+
         if (!session) {
             session = localStorage.getItem('TRACKSTER_SESSION_ID') ?? '';
         }
 
-        return this._authenticationRepository.signOut(session)
-            .pipe(tap(() => {
-                this._session = null;
-                localStorage.removeItem('TRACKSTER_SESSION_ID');
-            }));
+        if(session) {
+            return this._authenticationRepository.signOut(session)
+                .pipe(tap(() => {
+                    this._session = null;
+                    localStorage.removeItem('TRACKSTER_SESSION_ID');
+                }));
+        } else {
+            this._session = null;
+            localStorage.removeItem('TRACKSTER_SESSION_ID');
+
+            return of(true);
+        }
     }
 
     public getAuthToken(): string | null | undefined {

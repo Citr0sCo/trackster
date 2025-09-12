@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mapNetworkError } from '../../core/map-network-error';
 import { IUser } from './types/user.type';
@@ -21,15 +21,6 @@ export class UserRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/sessions`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return {
                         identifier: response.User.Identifier,
@@ -45,15 +36,6 @@ export class UserRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/users/${userReference}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return {
                         identifier: response.User.Identifier,

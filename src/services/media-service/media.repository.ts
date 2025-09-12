@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, tap } from 'rxjs';
+import {catchError, EMPTY, map, Observable, tap} from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mapNetworkError } from '../../core/map-network-error';
 import { Provider } from "../../core/providers.enum";
@@ -31,15 +31,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/posters`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return response;
                 })
@@ -50,15 +41,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies?username=${username}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return response.WatchedMovies.map((movie: any) => {
                         return {
@@ -82,15 +64,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows?username=${username}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return response.WatchedShows.map((show: any) => {
                         return {
@@ -124,15 +97,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/history?username=${username}&results=${results}&page=${page}`).pipe()
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return response.Media.map((media: any) => {
                         return {
@@ -159,15 +123,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/stats?username=${username}`).pipe()
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return {
                         totalWatched: response.Total,
@@ -182,15 +137,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/stats/calendar?username=${username}&daysInThePast=${daysInThePast}`).pipe()
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return response.Stats;
                 })
@@ -201,15 +147,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${slug}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     const media = response.Movie;
                     return {
@@ -234,15 +171,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${slug}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     const show = response.Show;
                     return {
@@ -262,15 +190,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     const season = response.Season;
                     return {
@@ -286,15 +205,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     const episode = response.Episode;
                     return {
@@ -310,15 +220,6 @@ export class MediaRepository {
         return this._httpClient.patch(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}`, {})
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     const episode = response.Episode;
                     return {
@@ -334,15 +235,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}/history?username=${username}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     const episodes = response.WatchedEpisodes;
                     return episodes.map((episode: any) => {
@@ -358,15 +250,6 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${identifier}/history?username=${username}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     const episodes = response.WatchHistory;
                     return episodes.map((episode: any) => {
