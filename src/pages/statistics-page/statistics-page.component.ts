@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { IMedia, MediaType } from '../../services/media-service/types/media.type';
+import { UserService } from '../../services/user-service/user.service';
 
 @Component({
     selector: 'statistics-page',
@@ -26,39 +27,45 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
+    private readonly _userService: UserService;
     private history: Map<string, number> = new Map<string, number>();
 
-    constructor(mediaService: MediaService) {
+    constructor(mediaService: MediaService, userService: UserService) {
         this._mediaService = mediaService;
+        this._userService = userService;
     }
 
     public ngOnInit(): void {
         this.statsLoading = true;
         this.calendarStatsLoading = true;
 
-        this._mediaService.getStats('citr0s')
+        this._userService.getUserBySession()
             .pipe(takeUntil(this._destroy))
-            .subscribe((stats) => {
-                this.statsLoading = false;
+            .subscribe((user) => {
+                this._mediaService.getStats(user.username)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((stats) => {
+                        this.statsLoading = false;
 
-                this.totalWatched = stats.totalWatched;
-                this.totalMovies = stats.totalMoviesWatched;
-                this.totalEpisodes = stats.totalEpisodesWatched;
-            });
+                        this.totalWatched = stats.totalWatched;
+                        this.totalMovies = stats.totalMoviesWatched;
+                        this.totalEpisodes = stats.totalEpisodesWatched;
+                    });
 
-        this._mediaService.getStatsForCalendar('citr0s', 400)
-            .pipe(takeUntil(this._destroy))
-            .subscribe((stats) => {
-                this.calendarStatsLoading = false;
-                this.calendarItems = [];
-                this.history = new Map<string, number>();
+                this._mediaService.getStatsForCalendar(user.username, 400)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((stats) => {
+                        this.calendarStatsLoading = false;
+                        this.calendarItems = [];
+                        this.history = new Map<string, number>();
 
-                for (let entry of Object.entries(stats)) {
-                    this.history.set(entry[0], entry[1]);
-                }
+                        for (let entry of Object.entries(stats)) {
+                            this.history.set(entry[0], entry[1]);
+                        }
 
-                this.generateCalendarMatrix();
-                this.parseMediaForHistory();
+                        this.generateCalendarMatrix();
+                        this.parseMediaForHistory();
+                    });
             });
     }
 

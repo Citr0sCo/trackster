@@ -1,11 +1,12 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
-import {MediaService} from "../../services/media-service/media.service";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {AuthenticationService} from "../../services/authentication-service/authentication.service";
-import {Provider} from "../../core/providers.enum";
-import {ISignInRequest} from "../../services/authentication-service/types/sign-in.request";
-import {ISignInResponse} from "../../services/authentication-service/types/sign-in.response";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { MediaService } from "../../services/media-service/media.service";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { AuthenticationService } from "../../services/authentication-service/authentication.service";
+import { Provider } from "../../core/providers.enum";
+import { ISignInRequest } from "../../services/authentication-service/types/sign-in.request";
+import { ISignInResponse } from "../../services/authentication-service/types/sign-in.response";
+import { UserService } from '../../services/user-service/user.service';
 
 @Component({
     selector: 'login-page',
@@ -38,6 +39,10 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             .subscribe((posters: Array<string>) => {
                 this.activePoster = posters[this.randomIntFromInterval(0, posters.length - 1)]
             });
+
+        if (this._authService.isLoggedIn()) {
+            window.location.href = "/#/app/home";
+        }
     }
 
     public login(): void {
@@ -58,7 +63,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
                 this.response = response;
 
-                if(response.hasError == false) {
+                if (response.hasError == false) {
                     window.location.href = "/";
                 }
             });

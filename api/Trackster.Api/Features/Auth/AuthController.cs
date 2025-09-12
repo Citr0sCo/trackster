@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Trackster.Api.Features.Auth.Types;
+using Trackster.Api.Features.Sessions;
 
 namespace Trackster.Api.Features.Auth;
 

@@ -1,5 +1,22 @@
 <div class="custom-sidebar" [ngClass]="{'custom-sidebar--hidden': !showMenu}" [@slideInFromLeft]="showMenu ? 'visible' : 'hidden'">
 
+    @if (user) {
+        <div class="o-grid">
+            <div class="o-grid__col">
+                <div class="custom-sidebar__box">
+                    Hello, {{ user.username }}!
+                </div>
+            </div>
+            <div class="o-grid__col o-grid__col--fixed">
+                <a class="custom-sidebar__box__link" (click)="toggleMenu();" [routerLink]="'/logout'">
+                    <i class="fa fa-door-open"></i> Log Out
+                </a>
+            </div>
+        </div>
+
+        <hr>
+    }
+
     <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/app/home'" [routerLinkActive]="'custom-sidebar__button--active'">
         <div class="custom-sidebar__button__icon">
             <i class="fa fa-home"></i>
@@ -33,17 +50,6 @@
         </div>
         <div class="custom-sidebar__button__label">
             Settings
-        </div>
-    </div>
-
-    <hr>
-
-    <div class="custom-sidebar__button" (click)="toggleMenu();" [routerLink]="'/logout'" [routerLinkActive]="'custom-sidebar__button--active'">
-        <div class="custom-sidebar__button__icon">
-            <i class="fa fa-door-open"></i>
-        </div>
-        <div class="custom-sidebar__button__label">
-            Log Out
         </div>
     </div>
 

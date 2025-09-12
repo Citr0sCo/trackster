@@ -5,8 +5,10 @@ import { IMovie } from '../../services/media-service/types/movie.type';
 import { IShow } from '../../services/media-service/types/show.type';
 import { IMedia, MediaType } from "../../services/media-service/types/media.type";
 import { MediaMapper } from "../../services/media-service/media.mapper";
-import {IWatchedMovie} from "../../services/media-service/types/watched-movie.type";
-import {IWatchedShow} from "../../services/media-service/types/watched-show.type";
+import { IWatchedMovie } from "../../services/media-service/types/watched-movie.type";
+import { IWatchedShow } from "../../services/media-service/types/watched-show.type";
+import { UserService } from '../../services/user-service/user.service';
+import { AuthenticationService } from '../../services/authentication-service/authentication.service';
 
 @Component({
     selector: 'home-page',
@@ -24,27 +26,33 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
+    private readonly _userService: UserService;
 
-    constructor(mediaService: MediaService) {
+    constructor(mediaService: MediaService, userService: UserService) {
         this._mediaService = mediaService;
+        this._userService = userService;
     }
 
     public ngOnInit(): void {
         this.moviesLoading = true;
         this.showsLoading = true;
 
-        this._mediaService.getAllMoviesFor('citr0s')
+        this._userService.getUserBySession()
             .pipe(takeUntil(this._destroy))
-            .subscribe((movies) => {
-                this.movies = movies;
-                this.moviesLoading = false;
-            });
+            .subscribe((user) => {
+                this._mediaService.getAllMoviesFor(user.username)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((movies) => {
+                        this.movies = movies;
+                        this.moviesLoading = false;
+                    });
 
-        this._mediaService.getAllShowsFor('citr0s')
-            .pipe(takeUntil(this._destroy))
-            .subscribe((shows) => {
-                this.shows = shows;
-                this.showsLoading = false;
+                this._mediaService.getAllShowsFor(user.username)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((shows) => {
+                        this.shows = shows;
+                        this.showsLoading = false;
+                    });
             });
     }
 

@@ -24,12 +24,14 @@
         }
 
         @if (progress.length > 0) {
-            <pre class="log-window">@for (key of progress; track key) { {{ key }} }</pre>
+            <pre class="log-window">@for (key of progress; track key) {
+                {{ key }}
+            }</pre>
         }
 
         <hr>
 
-        <input type="text" placeholder="Username" class="c-field" [(ngModel)]="username">
+        <input type="text" placeholder="Username" class="c-field" [value]="user?.username">
 
         <button class="btn btn-primary w-100 mt-3" (click)="saveSettings()">Save</button>
     </div>
