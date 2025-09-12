@@ -1,26 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {catchError, EMPTY, map, Observable, tap} from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { mapNetworkError } from '../../core/map-network-error';
 import { IWebhook } from './types/webhook.type';
-import { AuthenticationService } from '../authentication-service/authentication.service';
 
 @Injectable()
 export class WebhookRepository {
 
     private _httpClient: HttpClient;
-    private _authService: AuthenticationService;
 
-    constructor(httpClient: HttpClient, authService: AuthenticationService) {
+    constructor(httpClient: HttpClient) {
         this._httpClient = httpClient;
-        this._authService = authService;
     }
 
     public getWebhook(userReference: string): Observable<IWebhook> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/webhooks/${userReference}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return {
                         identifier: response.Identifier,
@@ -36,7 +31,6 @@ export class WebhookRepository {
     public createWebhook(request: any): Observable<IWebhook> {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/webhooks/${request.UserIdentifier}`, request)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return {
                         identifier: response.Identifier,

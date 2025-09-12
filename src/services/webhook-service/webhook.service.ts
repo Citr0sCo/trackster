@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { WebhookRepository } from './webhook.repository';
-import { Observable, of, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { IWebhook } from './types/webhook.type';
 
 @Injectable()

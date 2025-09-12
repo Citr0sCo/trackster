@@ -2,6 +2,7 @@ import {inject, Injectable} from "@angular/core";
 import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from "@angular/common/http";
 import {catchError, EMPTY, Observable} from "rxjs";
 import {AuthenticationService} from "../services/authentication-service/authentication.service";
+import {mapNetworkError} from "./map-network-error";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -18,14 +19,17 @@ export class AuthInterceptor implements HttpInterceptor {
             headers: req.headers.append('X-Authentication-Token', authToken ?? ''),
         });
         return next.handle(newReq)
-            .pipe(catchError((error) => {
-                if (error.exception.status === 401) {
-                    this._authService.logout()
-                        .subscribe(() => {
-                            window.location.href = "/#/login";
-                        });
-                }
-                return EMPTY;
-            }),);
+            .pipe(
+                mapNetworkError(),
+                catchError((error) => {
+                    if (error.exception.status === 401) {
+                        this._authService.logout()
+                            .subscribe(() => {
+                                window.location.href = "/#/login";
+                            });
+                    }
+                    return EMPTY;
+                })
+            );
     }
 }

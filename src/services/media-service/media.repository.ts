@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {catchError, EMPTY, map, Observable, tap} from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { mapNetworkError } from '../../core/map-network-error';
-import { Provider } from "../../core/providers.enum";
-import { ImportType } from "../../core/import-type.enum";
 import { IMovie } from "./types/movie.type";
 import { IShow } from "./types/show.type";
 import { IMedia } from "./types/media.type";
@@ -30,7 +27,6 @@ export class MediaRepository {
     public getPosters(): Observable<Array<string>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/posters`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return response;
                 })
@@ -40,7 +36,6 @@ export class MediaRepository {
     public getAllMoviesFor(username: string): Observable<Array<IWatchedMovie>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies?username=${username}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return response.WatchedMovies.map((movie: any) => {
                         return {
@@ -63,7 +58,6 @@ export class MediaRepository {
     public getAllShowsFor(username: string): Observable<Array<IWatchedShow>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows?username=${username}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return response.WatchedShows.map((show: any) => {
                         return {
@@ -96,7 +90,6 @@ export class MediaRepository {
     public getHistoryForUser(username: string, results: number, page: number): Observable<Array<IMedia>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/history?username=${username}&results=${results}&page=${page}`).pipe()
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return response.Media.map((media: any) => {
                         return {
@@ -122,7 +115,6 @@ export class MediaRepository {
     public getStats(username: string): Observable<IStats> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/stats?username=${username}`).pipe()
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return {
                         totalWatched: response.Total,
@@ -136,7 +128,6 @@ export class MediaRepository {
     public getStatsForCalendar(username: string, daysInThePast: number): Observable<Array<any>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/stats/calendar?username=${username}&daysInThePast=${daysInThePast}`).pipe()
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     return response.Stats;
                 })
@@ -146,7 +137,6 @@ export class MediaRepository {
     public getMovieBySlug(slug: string): Observable<IMovie> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${slug}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     const media = response.Movie;
                     return {
@@ -170,7 +160,6 @@ export class MediaRepository {
     public getShowBySlug(slug: string): Observable<IShow> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${slug}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     const show = response.Show;
                     return {
@@ -189,7 +178,6 @@ export class MediaRepository {
     public getSeasonById(identifier: string, seasonNumber: number): Observable<ISeason> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     const season = response.Season;
                     return {
@@ -204,7 +192,6 @@ export class MediaRepository {
     public getEpisodeById(identifier: string, seasonNumber: number, episodeNumber: number): Observable<IEpisode> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     const episode = response.Episode;
                     return {
@@ -219,7 +206,6 @@ export class MediaRepository {
     public updateEpisodeById(identifier: string, seasonNumber: number, episodeNumber: number): Observable<IEpisode> {
         return this._httpClient.patch(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}`, {})
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     const episode = response.Episode;
                     return {
@@ -234,7 +220,6 @@ export class MediaRepository {
     public getEpisodeWatchHistory(username: string, identifier: string, seasonNumber: number, episodeNumber: number): Observable<Array<IWatchedEpisode>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}/history?username=${username}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     const episodes = response.WatchedEpisodes;
                     return episodes.map((episode: any) => {
@@ -249,7 +234,6 @@ export class MediaRepository {
     public getMovieWatchHistoryById(username: string, identifier: string): Observable<Array<IWatchedMovie>> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${identifier}/history?username=${username}`)
             .pipe(
-                mapNetworkError(),
                 map((response: any) => {
                     const episodes = response.WatchHistory;
                     return episodes.map((episode: any) => {
