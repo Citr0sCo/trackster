@@ -46,10 +46,10 @@ export class AuthenticationService {
         }
 
         return this._authenticationRepository.signOut(session)
-            .pipe(tap((response: ISignInResponse) => {
-                this._session = new Session(response.sessionId);
-                localStorage.removeItem('TRACKSTER_SESSION_ID');
+            .pipe(tap(() => {
+                this._session = null;
                 this._userService.removeUser();
+                localStorage.removeItem('TRACKSTER_SESSION_ID');
             }));
     }
 
