@@ -27,8 +27,4 @@ export class UserService {
     public getUser(userReference: string): Observable<IUser> {
         return this._repository.getUser(userReference);
     }
-
-    public removeUser(): void {
-        this._user = null;
-    }
 }
