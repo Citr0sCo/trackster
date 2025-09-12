@@ -26,12 +26,15 @@ public class WebSocketManager : IWebSocketManager
     private static IWebSocketManager? _instance;
     private static bool _isRunning = true;
     private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly ConcurrentDictionary<Guid, Guid> _users;
 
     private WebSocketManager()
     {
         _cancellationTokenSource = new CancellationTokenSource();
         
         _clients = new ConcurrentDictionary<Guid, InternalWebSocket>();
+
+        _users = new ConcurrentDictionary<Guid, Guid>();
 
         Task.Run(() =>
         {
@@ -221,6 +224,9 @@ public class WebSocketManager : IWebSocketManager
     {
         try
         {
+            if(_users.TryRemove(sessionId, out var userId))
+                Console.WriteLine($"Removed user ({userId}) from websocket list ({sessionId}).");
+            
             if (!_clients.TryRemove(sessionId, out var webSocket))
                 return;
 
@@ -276,6 +282,11 @@ public class WebSocketManager : IWebSocketManager
         foreach (var client in _clients.Values)
         {
             client.Close("Closing all.", _cancellationTokenSource.Token);
+        }
+
+        foreach (var client in _users.Keys)
+        {
+            _users.TryRemove(client, out var user);
         }
     }
 
