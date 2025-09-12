@@ -67,18 +67,22 @@ public class MoviesService : IMoviesService
     {
         var searchResults = await _detailsProvider.FindMovieByTitleAndYear(title, year, requestDebug);
         var tmdbReference = searchResults.Results.FirstOrDefault()?.Id.ToString();
-        var movie = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "", requestDebug);
-        
-        return new MovieRecord
+        var details = await _detailsProvider.GetDetailsForMovie(tmdbReference ?? "", requestDebug);
+
+        var movie = new MovieRecord
         {
             Identifier = Guid.NewGuid(),
             Title = title,
             Slug = SlugHelper.GenerateSlugFor(title),
             TMDB = tmdbReference,
             Year = year,
-            Overview = movie.Overview,
-            Poster = $"https://image.tmdb.org/t/p/w300{movie.PosterUrl}"
+            Overview = details.Overview,
+            Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}"
         };
+
+        await _repository.SaveMovie(movie);
+        
+        return movie;
     }
 
     public async Task ImportMovie(UserRecord user, MovieRecord movie)

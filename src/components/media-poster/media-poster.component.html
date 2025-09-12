@@ -1,5 +1,5 @@
 @if (media) {
-    <a [routerLink]="media.mediaType === 'Movie' ? ['/app/movies', media.slug ?? media.identifier] : ['/app/shows', media.slug ?? media.identifier, 'seasons', media.seasonNumber, 'episodes', media.episodeNumber]">
+    <a [routerLink]="media.mediaType === 'Movie' ? ['/app/movies', media.slug] : ['/app/shows', media.slug, 'seasons', media.seasonNumber, 'episodes', media.episodeNumber]">
         <div class="movie-poster-wrapper">
             <div class="movie-poster" style="background-image: url({{media.posterUrl}});">
                 <div class="movie-poster__watched_at">

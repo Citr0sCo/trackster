@@ -21,6 +21,8 @@ export class WatchingNowComponent implements OnInit {
     public isPaused: boolean = false;
     public isVisible: boolean = false;
     public isDesktop: boolean = false;
+    public type: string | null = null;
+    public slug: string | null = null;
 
     private _webSocketService: WebSocketService;
 
@@ -45,10 +47,14 @@ export class WatchingNowComponent implements OnInit {
         });
 
         this._webSocketService.subscribe(WebSocketKey.WatchingNowMovie, (payload) => {
+
+            this.type = 'Movie';
+
             if (payload.Response.Data.Action === "Start") {
                 this.isVisible = true;
 
                 this.title = payload.Response.Data.Movie.Title;
+                this.slug = payload.Response.Data.Movie.Slug;
                 this.year = payload.Response.Data.Movie.Year;
                 this.progress = payload.Response.Data.MillisecondsWatched;
                 this.duration = payload.Response.Data.Duration;
@@ -59,6 +65,7 @@ export class WatchingNowComponent implements OnInit {
                 this.isPaused = true;
 
                 this.title = payload.Response.Data.Movie.Title;
+                this.slug = payload.Response.Data.Movie.Slug;
                 this.year = payload.Response.Data.Movie.Year;
                 this.progress = payload.Response.Data.MillisecondsWatched;
                 this.duration = payload.Response.Data.Duration;
@@ -71,6 +78,8 @@ export class WatchingNowComponent implements OnInit {
 
         this._webSocketService.subscribe(WebSocketKey.WatchingNowEpisode, (payload) => {
 
+            this.type = 'Episode';
+
             if (payload.Response.Data.Action === "Start") {
                 this.isVisible = true;
                 this.isPaused = false;
@@ -78,6 +87,7 @@ export class WatchingNowComponent implements OnInit {
                 this.title = payload.Response.Data.Episode.Title;
                 this.parentTitle = payload.Response.Data.Episode.Season.Title;
                 this.grandParentTitle = payload.Response.Data.Episode.Season.Show.Title;
+                this.slug = payload.Response.Data.Episode.Season.Show.Slug;
                 this.seasonNumber = payload.Response.Data.Episode.Season.Number;
                 this.episodeNumber = payload.Response.Data.Episode.Number;
                 this.year = payload.Response.Data.Episode.Season.Show.Year;
@@ -92,6 +102,7 @@ export class WatchingNowComponent implements OnInit {
                 this.title = payload.Response.Data.Episode.Title;
                 this.parentTitle = payload.Response.Data.Episode.Season.Title;
                 this.grandParentTitle = payload.Response.Data.Episode.Season.Show.Title;
+                this.slug = payload.Response.Data.Episode.Season.Show.Slug;
                 this.year = payload.Response.Data.Episode.Season.Show.Year;
                 this.progress = payload.Response.Data.MillisecondsWatched;
                 this.duration = payload.Response.Data.Duration;

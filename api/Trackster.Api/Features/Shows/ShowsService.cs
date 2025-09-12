@@ -116,13 +116,17 @@ public class ShowsService : IShowsService
             Title = parsedSeason.Title
         };
 
-        return new EpisodeRecord
+        var episode = new EpisodeRecord
         {
             Identifier = Guid.NewGuid(),
             Season = season,
             Number = parsedEpisode?.EpisodeNumber ?? 0,
             Title = parsedEpisode?.Title ?? "",
         };
+
+        await _repository.SaveEpisode(show, season, episode);
+        
+        return episode;
     }
 
     public GetShowResponse GetShowBySlug(string slug)
