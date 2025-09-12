@@ -79,7 +79,8 @@ public class WebhooksService
             Identifier = webhookRecord.Identifier,
             ApiKey = webhookRecord.ApiKey,
             Provider = webhookRecord.Provider,
-            UserIdentifier = webhookRecord.User.Identifier
+            UserIdentifier = webhookRecord.User.Identifier,
+            Url = $"{Environment.GetEnvironmentVariable("ASPNETCORE_BASE_URL")}/api/webhooks/{webhookRecord.Provider.ToString().ToLower()}/{webhookRecord.ApiKey}"
         };
     }
 }
