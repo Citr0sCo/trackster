@@ -26,15 +26,12 @@ public class WebSocketManager : IWebSocketManager
     private static IWebSocketManager? _instance;
     private static bool _isRunning = true;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly ConcurrentDictionary<Guid, Guid> _users;
 
     private WebSocketManager()
     {
         _cancellationTokenSource = new CancellationTokenSource();
         
         _clients = new ConcurrentDictionary<Guid, InternalWebSocket>();
-
-        _users = new ConcurrentDictionary<Guid, Guid>();
 
         Task.Run(() =>
         {
@@ -126,10 +123,7 @@ public class WebSocketManager : IWebSocketManager
 
     public Guid? GetWebsocketSessionIdByUserReference(Guid userReference)
     {
-        if(_users.TryGetValue(userReference, out var sessionId))
-            return sessionId;
-
-        return null;
+        return _clients.FirstOrDefault(x => x.Value.UserReference == userReference).Key;
     }
 
     public void Send(Guid sessionId, WebSocketKey key, object data)
@@ -182,22 +176,21 @@ public class WebSocketManager : IWebSocketManager
 
             if (message?.SessionId != null && _clients.TryGetValue((Guid)message.SessionId, out var client))
             {
-                Update((Guid)message.SessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now });
+                Update((Guid)message.SessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now, UserReference = message.Data.UserReference });
                 currentSessionId = (Guid)message.SessionId;
             }
             else
             {
-                Add(sessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now });
+                Add(sessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now, UserReference = message.Data.UserReference });
                 currentSessionId = sessionId;
             }
 
             if (message?.Key == WebSocketKey.Handshake.ToString())
             {
-                _users.TryAdd(currentSessionId, Guid.Parse(message.Data.UserReference.ToString().ToUpper()));
                 Send(currentSessionId, WebSocketKey.Handshake, currentSessionId);
             }
 
-            Update(currentSessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now });
+            Update(currentSessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now, UserReference = message.Data.UserReference });
 
             Console.WriteLine("Received message from client:", JsonConvert.SerializeObject(message?.Data));
         }
@@ -228,9 +221,6 @@ public class WebSocketManager : IWebSocketManager
     {
         try
         {
-            if(_users.TryRemove(sessionId, out var userId))
-                Console.WriteLine($"Removed user ({userId}) from websocket list ({sessionId}).");
-            
             if (!_clients.TryRemove(sessionId, out var webSocket))
                 return;
 
@@ -286,11 +276,6 @@ public class WebSocketManager : IWebSocketManager
         foreach (var client in _clients.Values)
         {
             client.Close("Closing all.", _cancellationTokenSource.Token);
-        }
-
-        foreach (var client in _users.Keys)
-        {
-            _users.TryRemove(client, out var user);
         }
     }
 

@@ -5,6 +5,7 @@ namespace Trackster.Api.Features.WebSockets;
 public class InternalWebSocket
 {
     public DateTime LastSeen { get; set; }
+    public Guid UserReference { get; set; }
 
     private readonly WebSocket _socket;
 
