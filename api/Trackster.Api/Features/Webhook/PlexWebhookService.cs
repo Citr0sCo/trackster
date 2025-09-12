@@ -1,6 +1,7 @@
 using Trackster.Api.Features.Webhook.Types;
 using Newtonsoft.Json;
 using Trackster.Api.Features.Media;
+using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
@@ -26,22 +27,35 @@ public class PlexWebhookService
         //Console.WriteLine("Player - " + JsonConvert.SerializeObject(parsedJson.Player, Formatting.Indented));
         Console.WriteLine("--- Plex Webhook Parse End ---");
 
-        if (parsedJson.Account.Title.ToLower() != "citr0s".ToLower())
+        var username = "citr0s";
+        
+        if (parsedJson.Account.Title.ToLower() != username.ToLower())
             return;
 
         var mediaType = parsedJson.Metadata.Type.ToLower();
         var eventType = parsedJson.Event.ToLower();
         
         if (eventType == "media.scrobble")
-            await _mediaService.MarkMediaAsWatched(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+        {
+            await _mediaService.MarkMediaAsWatched(new MarkMediaAsWatchedRequest
+            {
+                Username = username, 
+                MediaType = mediaType, 
+                Year = parsedJson.Metadata.Year, 
+                Title = parsedJson.Metadata.Title, 
+                ParentTitle = parsedJson.Metadata.ParentTitle, 
+                GrandParentTitle = parsedJson.Metadata.GrandparentTitle, 
+                ParentIndex = parsedJson.Metadata.ParentIndex
+            });
+        }
 
         if (eventType == "media.play" || eventType == "media.resume")
-            _mediaService.MarkMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
+            _mediaService.MarkMediaAsWatchingNow(username, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
         
         if (eventType == "media.stop" || eventType == "media.pause")
-            _mediaService.RemoveMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+            _mediaService.RemoveMediaAsWatchingNow(username, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
         
         if (eventType == "media.pause")
-            _mediaService.PauseMediaAsWatchingNow(mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
+            _mediaService.PauseMediaAsWatchingNow(username, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
     }
 }

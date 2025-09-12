@@ -15,7 +15,7 @@ public class UsersController : ControllerBase
     public UsersController()
     {
         _service = new UsersService(new UsersRepository());
-        _sessionHelper = new SessionHelper();
+        _sessionHelper = new SessionHelper(new SessionService(new SessionRepository()), _service);
     }
     
     [HttpGet("{reference}")]

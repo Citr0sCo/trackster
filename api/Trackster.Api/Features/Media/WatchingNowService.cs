@@ -8,7 +8,7 @@ namespace Trackster.Api.Features.Media;
 public class WatchingNowService : ISubscriber
 {
     private bool _isStarted = false;
-    private static WatchingNowService _instance;
+    private static WatchingNowService? _instance;
 
     private readonly Dictionary<string, WatchingMovieRecord> _watchingNowMovies;
     private readonly Dictionary<string, WatchingEpisodeRecord> _watchingNowEpisodes;

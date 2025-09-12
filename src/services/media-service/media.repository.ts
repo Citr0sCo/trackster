@@ -197,22 +197,6 @@ export class MediaRepository {
             );
     }
 
-    public importFromTrakt(username: string, debug: boolean): Observable<any> {
-        return this._httpClient.post(`${environment.apiBaseUrl}/api/media/import`, { Type: ImportType.Trakt, Username: username, Debug: debug })
-            .pipe(
-                mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
-            );
-    }
-
     public getMovieBySlug(slug: string): Observable<IMovie> {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${slug}`)
             .pipe(
