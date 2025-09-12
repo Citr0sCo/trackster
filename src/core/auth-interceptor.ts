@@ -22,6 +22,7 @@ export class AuthInterceptor implements HttpInterceptor {
             .pipe(
                 mapNetworkError(),
                 catchError((error) => {
+                    console.log(error);
                     if (error.exception.status === 401) {
                         this._authService.logout()
                             .subscribe(() => {
