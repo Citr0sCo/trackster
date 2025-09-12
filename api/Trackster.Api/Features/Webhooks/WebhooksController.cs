@@ -54,6 +54,7 @@ public class WebhooksController : ControllerBase
         }
     }
 
+    [AuthRequired]
     [HttpGet("{userReference}")]
     public async Task<IActionResult> GetWebhook(Guid userReference)
     {
@@ -70,6 +71,7 @@ public class WebhooksController : ControllerBase
         return Ok(webhook);
     }
 
+    [AuthRequired]
     [HttpPost("{userReference}")]
     public async Task<IActionResult> CreateWebhook(CreateWebhookRequest request)
     {
