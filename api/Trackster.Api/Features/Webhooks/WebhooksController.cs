@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Trackster.Api.Features.Users;
 using Trackster.Api.Features.Webhooks.Types;
+using Trackster.Api.Attributes;
 
 namespace Trackster.Api.Features.Webhooks;
 
