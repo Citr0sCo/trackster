@@ -8,7 +8,7 @@
                     <i class="fa fa-play"></i>
                 }
             </div>
-            <div class="o-grid__col" [routerLink]="type === 'Movie' ? ['/app/movies', slug] : ['/app/shows', slug, 'seasons', seasonNumber, 'episodes', episodeNumber]">
+            <div class="o-grid__col" style="cursor:pointer;" [routerLink]="type === 'Movie' ? ['/app/movies', slug] : ['/app/shows', slug, 'seasons', seasonNumber, 'episodes', episodeNumber]">
                 @if (isDesktop) {
                     @if (grandParentTitle) {
                         {{ trimTitle(grandParentTitle) }} &bull;
