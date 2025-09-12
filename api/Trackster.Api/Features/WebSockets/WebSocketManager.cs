@@ -126,10 +126,7 @@ public class WebSocketManager : IWebSocketManager
 
     public Guid? GetWebsocketSessionIdByUserReference(Guid userReference)
     {
-        if(_users.TryGetValue(userReference, out var sessionId))
-            return sessionId;
-
-        return null;
+        return _clients.FirstOrDefault(x => x.Value.UserReference == userReference).Key;
     }
 
     public void Send(Guid sessionId, WebSocketKey key, object data)
@@ -182,22 +179,21 @@ public class WebSocketManager : IWebSocketManager
 
             if (message?.SessionId != null && _clients.TryGetValue((Guid)message.SessionId, out var client))
             {
-                Update((Guid)message.SessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now });
+                Update((Guid)message.SessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now, UserReference = message.Data.UserReference });
                 currentSessionId = (Guid)message.SessionId;
             }
             else
             {
-                Add(sessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now });
+                Add(sessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now, UserReference = message.Data.UserReference });
                 currentSessionId = sessionId;
             }
 
             if (message?.Key == WebSocketKey.Handshake.ToString())
             {
-                _users.TryAdd(currentSessionId, Guid.Parse(message.Data.UserReference.ToString().ToUpper()));
                 Send(currentSessionId, WebSocketKey.Handshake, currentSessionId);
             }
 
-            Update(currentSessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now });
+            Update(currentSessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now, UserReference = message.Data.UserReference });
 
             Console.WriteLine("Received message from client:", JsonConvert.SerializeObject(message?.Data));
         }
