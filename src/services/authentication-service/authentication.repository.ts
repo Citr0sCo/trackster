@@ -3,32 +3,20 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mapNetworkError } from '../../core/map-network-error';
-import { AuthenticationService } from './authentication.service';
 
 @Injectable()
 export class AuthenticationRepository {
 
     private _httpClient: HttpClient;
-    private _authService: AuthenticationService;
 
-    constructor(httpClient: HttpClient, authService: AuthenticationService) {
+    constructor(httpClient: HttpClient) {
         this._httpClient = httpClient;
-        this._authService = authService;
     }
 
     public signIn(request: any): Observable<any> {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/auth/sign-in`, request)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return {
                         sessionId: response.SessionId,
@@ -47,15 +35,6 @@ export class AuthenticationRepository {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/auth/register`, request)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return {
                         sessionId: response.SessionId,

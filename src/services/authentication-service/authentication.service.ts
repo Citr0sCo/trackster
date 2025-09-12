@@ -6,18 +6,15 @@ import { ISignInResponse } from "./types/sign-in.response";
 import { Session } from "../../core/session";
 import { IRegisterRequest } from "./types/register.request";
 import { IRegisterResponse } from "./types/register.response";
-import { UserService } from '../user-service/user.service';
 
 @Injectable()
 export class AuthenticationService {
 
     private _authenticationRepository: AuthenticationRepository;
     private _session: Session | null = null;
-    private _userService: UserService;
 
-    constructor(authenticationRepository: AuthenticationRepository, userService: UserService) {
+    constructor(authenticationRepository: AuthenticationRepository) {
         this._authenticationRepository = authenticationRepository;
-        this._userService = userService;
 
         const storedSessionId = localStorage.getItem('TRACKSTER_SESSION_ID');
 
@@ -48,7 +45,6 @@ export class AuthenticationService {
         return this._authenticationRepository.signOut(session)
             .pipe(tap(() => {
                 this._session = null;
-                this._userService.removeUser();
                 localStorage.removeItem('TRACKSTER_SESSION_ID');
             }));
     }
