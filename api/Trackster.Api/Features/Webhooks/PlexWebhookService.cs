@@ -1,12 +1,12 @@
-using Trackster.Api.Features.Webhook.Types;
 using Newtonsoft.Json;
 using Trackster.Api.Features.Media;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
+using Trackster.Api.Features.Webhooks.Types;
 
-namespace Trackster.Api.Features.Webhook;
+namespace Trackster.Api.Features.Webhooks;
 
 public class PlexWebhookService
 {
@@ -17,7 +17,7 @@ public class PlexWebhookService
         _mediaService = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()));
     }
     
-    public async Task HandlePlexWebhook(PlexWebhookRequest? parsedJson)
+    public async Task HandlePlexWebhook(PlexWebhookRequest? parsedJson, string username)
     {
         Console.WriteLine("--- Plex Webhook Parse Start ---");
         Console.WriteLine("Event - " + parsedJson.Event);
@@ -27,8 +27,6 @@ public class PlexWebhookService
         //Console.WriteLine("Player - " + JsonConvert.SerializeObject(parsedJson.Player, Formatting.Indented));
         Console.WriteLine("--- Plex Webhook Parse End ---");
 
-        var username = "citr0s";
-        
         if (parsedJson.Account.Title.ToLower() != username.ToLower())
             return;
 

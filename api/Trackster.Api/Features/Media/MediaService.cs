@@ -11,7 +11,6 @@ using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Notifications;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
-using Trackster.Api.Features.Webhook;
 
 namespace Trackster.Api.Features.Media;
 

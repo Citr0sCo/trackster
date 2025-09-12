@@ -1,11 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { MediaService } from '../../services/media-service/media.service';
-import { StreamService } from "../../core/event-service.service";
-import { environment } from "../../environments/environment";
-import { round } from "@popperjs/core/lib/utils/math";
-import { UserService } from '../../services/user-service/user.service';
-import { IUser } from '../../services/user-service/types/user.type';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Subject, takeUntil} from 'rxjs';
+import {StreamService} from "../../core/event-service.service";
+import {environment} from "../../environments/environment";
+import {round} from "@popperjs/core/lib/utils/math";
+import {UserService} from '../../services/user-service/user.service';
+import {IUser} from '../../services/user-service/types/user.type';
+import {WebhookService} from "../../services/webhook-service/webhook.service";
+import {IWebhook, WebhookProvider} from "../../services/webhook-service/types/webhook.type";
 
 @Component({
     selector: 'settings-page',
@@ -16,6 +17,7 @@ import { IUser } from '../../services/user-service/types/user.type';
 export class SettingsPageComponent implements OnInit, OnDestroy {
 
     public isImporting: boolean = false;
+    public isCreatingWebhook: boolean = false;
     public isDebug: boolean = false;
     public progress: Array<string> = [];
     public mediaType: string = '';
@@ -23,16 +25,17 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public total: number = 0;
     public readonly round = round;
     public user: IUser | null = null;
+    public webhook: IWebhook | null = null;
 
     private readonly _destroy: Subject<void> = new Subject();
-    private readonly _mediaService: MediaService;
     private readonly _streamService: StreamService;
     private readonly _userService: UserService;
+    private readonly _webhookService: WebhookService;
 
-    constructor(mediaService: MediaService, streamService: StreamService, userService: UserService) {
-        this._mediaService = mediaService;
+    constructor(streamService: StreamService, userService: UserService, webhookService: WebhookService) {
         this._streamService = streamService;
         this._userService = userService;
+        this._webhookService = webhookService;
     }
 
     public ngOnInit(): void {
@@ -41,6 +44,12 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((user) => {
                 this.user = user;
+
+                this._webhookService.getWebhook(this.user.identifier)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((webhook) => {
+                        this.webhook = webhook;
+                    });
             });
     }
 
@@ -91,6 +100,23 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     public saveSettings(): void {
 
+    }
+
+    public generateWebhookUrl(): void {
+        this.isCreatingWebhook = true;
+
+        const webhook = {
+            userIdentifier: this.user?.identifier,
+            provider: WebhookProvider.Plex
+        } as IWebhook;
+
+        this._webhookService.createWebhook(webhook)
+            .pipe(takeUntil(this._destroy))
+            .subscribe((webhook) => {
+                console.log(webhook);
+                this.webhook = webhook;
+                this.isCreatingWebhook = false;
+            });
     }
 
     public ngOnDestroy(): void {

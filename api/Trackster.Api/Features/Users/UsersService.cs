@@ -32,6 +32,33 @@ public class UsersService : IUsersService
         return await _repository.GetUserByEmail(email);
     }
 
+    public async Task<GetUserDetailsResponse> GetUserByReference(Guid reference)
+    {
+        var user = await _repository.GetUserByReference(reference);
+
+        if (user == null)
+        {
+            return new GetUserDetailsResponse
+            {
+                HasError = true,
+                Error = new Error
+                {
+                    UserMessage = "User does not exist",
+                }
+            };
+        }
+
+        return new GetUserDetailsResponse
+        {
+            User = new User
+            {
+                Identifier = user.Identifier,
+                Username = user.Username,
+                CreatedAt = user.CreatedAt,
+            }
+        };
+    }
+
     public async Task<GetUserDetailsResponse> GetUserByReference(Guid sessionId, Guid reference)
     {
         var user = await _repository.GetUserByReference(reference);

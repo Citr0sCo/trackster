@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Trackster.Api.Data;
+using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Auth.Types;
-using Trackster.Api.Features.Sessions.Types;
 
 namespace Trackster.Api.Features.Sessions;
 
