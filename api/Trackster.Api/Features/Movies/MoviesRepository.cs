@@ -7,6 +7,7 @@ namespace Trackster.Api.Features.Movies;
 
 public interface IMoviesRepository
 {
+    Task SaveMovie(MovieRecord movie);
     Task ImportMovie(UserRecord user, MovieRecord movie);
     List<WatchedMovie> GetAllWatchedMovies(string username, int results, int page);
     Movie? GetMovieBySlug(string slug);
@@ -263,6 +264,32 @@ public class MoviesRepository : IMoviesRepository
                     context.Add(user);
                 }
 
+                var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.TMDB);
+
+                if (existingMovie == null)
+                {    
+                    Console.WriteLine($"[INFO] - Movie '{movie.Title}' doesn't exist. Creating...");
+                    context.Add(movie);
+                }
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+            }
+        }
+    }
+
+    public async Task SaveMovie(MovieRecord movie)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
                 var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.TMDB);
 
                 if (existingMovie == null)

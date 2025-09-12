@@ -23,6 +23,7 @@ public interface IShowsRepository
     ShowRecord? GetShowByReference(Guid identifier);
     SeasonRecord? GetSeasonByReference(Guid identifier);
     Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord);
+    Task SaveEpisode(ShowRecord show, SeasonRecord season, EpisodeRecord episode);
 }
 
 public class ShowsRepository : IShowsRepository
@@ -327,6 +328,46 @@ public class ShowsRepository : IShowsRepository
                 if (existingUser == null)
                     context.Add(user);
 
+                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
+                if (existingShow == null)
+                    context.Add(show);
+
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB 
+                                                                         && x.Number == season.Number);
+                if (existingSeason == null)
+                {
+                    season.Show = existingShow ?? show;
+                    context.Add(season);
+                }
+
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB 
+                                                                           && x.Season.Number == season.Number
+                                                                           && x.Number == episode.Number);
+                if (existingEpisode == null)
+                {
+                    episode.Season = existingSeason ?? season;
+                    episode.Season.Show = existingShow ?? show;
+                    context.Add(episode);
+                }
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+            }
+        }
+    }
+
+    public async Task SaveEpisode(ShowRecord show, SeasonRecord season, EpisodeRecord episode)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
                 var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
                 if (existingShow == null)
                     context.Add(show);
