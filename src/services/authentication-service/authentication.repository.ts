@@ -16,7 +16,7 @@ export class AuthenticationRepository {
         this._authService = authService;
     }
 
-    public signIn(request: any) : Observable<any> {
+    public signIn(request: any): Observable<any> {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/auth/sign-in`, request)
             .pipe(
                 mapNetworkError(),
@@ -43,7 +43,7 @@ export class AuthenticationRepository {
             );
     }
 
-    public register(request: any) : Observable<any> {
+    public register(request: any): Observable<any> {
         return this._httpClient.post(`${environment.apiBaseUrl}/api/auth/register`, request)
             .pipe(
                 mapNetworkError(),
@@ -74,15 +74,6 @@ export class AuthenticationRepository {
         return this._httpClient.delete(`${environment.apiBaseUrl}/api/auth/sign-out/${identifier}`)
             .pipe(
                 mapNetworkError(),
-                tap((tap) => {
-                }, (error) => {
-                    if (error.exception.status === 401) {
-                        this._authService.logout()
-                            .subscribe(() => {
-                                window.location.href = "/#/login";
-                            });
-                    }
-                }),
                 map((response: any) => {
                     return {
                         hasError: response.HasError,
