@@ -113,7 +113,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
         this._webhookService.createWebhook(webhook)
             .pipe(takeUntil(this._destroy))
             .subscribe((webhook) => {
-                console.log(webhook);
                 this.webhook = webhook;
                 this.isCreatingWebhook = false;
             });
