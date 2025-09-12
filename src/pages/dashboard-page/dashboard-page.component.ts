@@ -1,7 +1,9 @@
-import {AfterViewInit, Component} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
 import {EventService} from "../../services/event-service/event.service";
 import {WebSocketService} from "../../services/websocket-service/web-socket.service";
 import {WebSocketKey} from "../../services/websocket-service/types/web-socket.key";
+import {UserService} from "../../services/user-service/user.service";
+import {Subject, takeUntil} from "rxjs";
 
 @Component({
     selector: 'login-page',
@@ -9,19 +11,29 @@ import {WebSocketKey} from "../../services/websocket-service/types/web-socket.ke
     styleUrls: ['./dashboard-page.component.scss'],
     standalone: false
 })
-export class DashboardPageComponent implements AfterViewInit {
+export class DashboardPageComponent implements AfterViewInit, OnInit, OnDestroy {
 
-    private _eventService: EventService;
-    private _webSocketService: WebSocketService;
+    private readonly _destroy: Subject<void> = new Subject();
+    private readonly _eventService: EventService;
+    private readonly  _webSocketService: WebSocketService;
+    private readonly  _userService: UserService;
 
-    constructor(eventService: EventService) {
+    constructor(eventService: EventService, userService: UserService) {
         this._eventService = eventService;
+        this._userService = userService;
         this._webSocketService = WebSocketService.instance();
     }
 
-    public ngAfterViewInit(): void {
+    public ngOnInit(): void {
 
-        this._webSocketService.send(WebSocketKey.Handshake, { Test: 'Hello World!' });
+        this._userService.getUserBySession()
+            .pipe(takeUntil(this._destroy))
+            .subscribe((user) => {
+                this._webSocketService.send(WebSocketKey.Handshake, { Test: 'Hello World!', UserReference: user.identifier });
+            });
+    }
+
+    public ngAfterViewInit(): void {
 
         const element = document.querySelector('.main-content');
         element!.addEventListener('scroll', () => {
@@ -31,5 +43,9 @@ export class DashboardPageComponent implements AfterViewInit {
                 this._eventService.notScrolledToBottomOfThePage();
             }
         });
+    }
+
+    public ngOnDestroy(): void {
+        this._destroy.next();
     }
 }

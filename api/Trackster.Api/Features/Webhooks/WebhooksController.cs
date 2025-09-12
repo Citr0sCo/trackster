@@ -42,7 +42,7 @@ public class WebhooksController : ControllerBase
 
             var userResponse = await _userService.GetUserByReference(webhookResponse.UserIdentifier);
 
-            await _service.HandlePlexWebhook(webhookRequest, userResponse.User.Username);
+            await _service.HandlePlexWebhook(webhookRequest, userResponse.User);
 
             return Ok();
         }
