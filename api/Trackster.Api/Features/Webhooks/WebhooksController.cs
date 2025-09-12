@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Trackster.Api.Features.Users;
 using Trackster.Api.Features.Webhooks.Types;
+using Trackster.Api.Attributes;
 
 namespace Trackster.Api.Features.Webhooks;
 
@@ -54,6 +55,7 @@ public class WebhooksController : ControllerBase
         }
     }
 
+    [AuthRequired]
     [HttpGet("{userReference}")]
     public async Task<IActionResult> GetWebhook(Guid userReference)
     {
@@ -70,6 +72,7 @@ public class WebhooksController : ControllerBase
         return Ok(webhook);
     }
 
+    [AuthRequired]
     [HttpPost("{userReference}")]
     public async Task<IActionResult> CreateWebhook(CreateWebhookRequest request)
     {
