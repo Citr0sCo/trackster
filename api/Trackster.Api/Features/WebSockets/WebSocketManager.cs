@@ -17,6 +17,7 @@ public interface IWebSocketManager : ISubscriber
     void SendToAllClients(WebSocketKey key, object data);
     void CloseAll();
     CancellationToken CancellationToken();
+    Guid? GetWebsocketSessionIdByUserReference(Guid userReference);
 }
 
 public class WebSocketManager : IWebSocketManager
@@ -25,6 +26,7 @@ public class WebSocketManager : IWebSocketManager
     private static IWebSocketManager? _instance;
     private static bool _isRunning = true;
     private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly Dictionary<Guid, Guid> _users = new Dictionary<Guid, Guid>();
 
     private WebSocketManager()
     {
@@ -120,6 +122,14 @@ public class WebSocketManager : IWebSocketManager
         }
     }
 
+    public Guid? GetWebsocketSessionIdByUserReference(Guid userReference)
+    {
+        if(_users.TryGetValue(userReference, out var sessionId))
+            return sessionId;
+
+        return null;
+    }
+
     public void Send(Guid sessionId, WebSocketKey key, object data)
     {
         try
@@ -180,7 +190,10 @@ public class WebSocketManager : IWebSocketManager
             }
 
             if (message?.Key == WebSocketKey.Handshake.ToString())
+            {
+                _users[currentSessionId] = message.Data.UserReference;
                 Send(currentSessionId, WebSocketKey.Handshake, currentSessionId);
+            }
 
             Update(currentSessionId, new InternalWebSocket(webSocket) { LastSeen = DateTime.Now });
 
@@ -213,6 +226,8 @@ public class WebSocketManager : IWebSocketManager
     {
         try
         {
+            _users.Remove(sessionId);
+            
             if (!_clients.TryRemove(sessionId, out var webSocket))
                 return;
 
@@ -268,6 +283,11 @@ public class WebSocketManager : IWebSocketManager
         foreach (var client in _clients.Values)
         {
             client.Close("Closing all.", _cancellationTokenSource.Token);
+        }
+
+        foreach (var client in _users.Keys)
+        {
+            _users.Remove(client);
         }
     }
 

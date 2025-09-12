@@ -4,6 +4,7 @@ using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
+using Trackster.Api.Features.Users.Types;
 using Trackster.Api.Features.Webhooks.Types;
 
 namespace Trackster.Api.Features.Webhooks;
@@ -17,7 +18,7 @@ public class PlexWebhookService
         _mediaService = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()));
     }
     
-    public async Task HandlePlexWebhook(PlexWebhookRequest? parsedJson, string username)
+    public async Task HandlePlexWebhook(PlexWebhookRequest? parsedJson, User user)
     {
         Console.WriteLine("--- Plex Webhook Parse Start ---");
         Console.WriteLine("Event - " + parsedJson.Event);
@@ -27,7 +28,7 @@ public class PlexWebhookService
         //Console.WriteLine("Player - " + JsonConvert.SerializeObject(parsedJson.Player, Formatting.Indented));
         Console.WriteLine("--- Plex Webhook Parse End ---");
 
-        if (parsedJson.Account.Title.ToLower() != username.ToLower())
+        if (parsedJson.Account.Title.ToLower() != user.Username.ToLower())
             return;
 
         var mediaType = parsedJson.Metadata.Type.ToLower();
@@ -37,7 +38,7 @@ public class PlexWebhookService
         {
             await _mediaService.MarkMediaAsWatched(new MarkMediaAsWatchedRequest
             {
-                Username = username, 
+                Username = user.Username, 
                 MediaType = mediaType, 
                 Year = parsedJson.Metadata.Year, 
                 Title = parsedJson.Metadata.Title, 
@@ -48,12 +49,12 @@ public class PlexWebhookService
         }
 
         if (eventType == "media.play" || eventType == "media.resume")
-            _mediaService.MarkMediaAsWatchingNow(username, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
+            _mediaService.MarkMediaAsWatchingNow(user.Identifier, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
         
         if (eventType == "media.stop" || eventType == "media.pause")
-            _mediaService.RemoveMediaAsWatchingNow(username, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
+            _mediaService.RemoveMediaAsWatchingNow(user.Identifier, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
         
         if (eventType == "media.pause")
-            _mediaService.PauseMediaAsWatchingNow(username, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
+            _mediaService.PauseMediaAsWatchingNow(user.Identifier, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
     }
 }
