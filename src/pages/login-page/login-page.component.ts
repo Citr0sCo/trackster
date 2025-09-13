@@ -21,7 +21,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     public formGroup: FormGroup = new FormGroup<any>({
         email: new FormControl('', [Validators.required, Validators.email]),
         password: new FormControl('', [Validators.required]),
-        remember: new FormControl(false, [Validators.required]),
+        remember: new FormControl(false, []),
     });
     public response: ISignInResponse | null = null;
 
