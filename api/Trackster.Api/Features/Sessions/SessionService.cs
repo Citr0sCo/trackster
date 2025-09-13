@@ -16,7 +16,7 @@ public class SessionService
         var sessionRecord = await _sessionRepository.GetSession(reference);
 
         if (sessionRecord != null)
-            return new Session(sessionRecord.Identifier, sessionRecord.User.Identifier);
+            return new Session(sessionRecord);
 
         return null;
     }
