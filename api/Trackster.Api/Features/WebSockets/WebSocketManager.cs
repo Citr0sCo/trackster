@@ -143,8 +143,9 @@ public class WebSocketManager : IWebSocketManager
             });
 
             Console.WriteLine(JsonConvert.SerializeObject(client));
+            Console.WriteLine(JsonConvert.SerializeObject(serializedMessage));
 
-            client.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(serializedMessage), 0, serializedMessage.Length), WebSocketMessageType.Text, WebSocketMessageFlags.EndOfMessage, _cancellationTokenSource.Token);
+            client.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(serializedMessage), 0, Encoding.UTF8.GetBytes(serializedMessage).Length), WebSocketMessageType.Text, WebSocketMessageFlags.EndOfMessage, _cancellationTokenSource.Token);
             Console.WriteLine($"Sent message to client {sessionId}.");
         }
         catch (WebSocketException e)
