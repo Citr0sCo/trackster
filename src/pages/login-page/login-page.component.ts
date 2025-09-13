@@ -21,6 +21,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     public formGroup: FormGroup = new FormGroup<any>({
         email: new FormControl('', [Validators.required, Validators.email]),
         password: new FormControl('', [Validators.required]),
+        remember: new FormControl(false, [Validators.required]),
     });
     public response: ISignInResponse | null = null;
 
@@ -50,10 +51,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
         const email = this.formGroup.controls['email'].value;
         const password = this.formGroup.controls['password'].value;
+        const remember = this.formGroup.controls['remember'].value;
 
         const request: ISignInRequest = {
             email: email,
-            password: password
+            password: password,
+            remember: remember
         };
 
         this._authService.signIn(Provider.Email, request)

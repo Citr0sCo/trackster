@@ -1,4 +1,5 @@
 ﻿using Trackster.Api.Features.Auth.Types;
+using Trackster.Api.Features.Sessions.Types;
 
 namespace Trackster.Api.Features.Sessions;
 
@@ -21,9 +22,9 @@ public class SessionService
         return null;
     }
     
-    public async Task<Session> CreateSession(Guid userReference)
+    public async Task<Session> CreateSession(Guid userReference, bool remember = false)
     {
-        var session = new Session(Guid.NewGuid(), userReference);
+        var session = new Session(Guid.NewGuid(), userReference, remember);
         await _sessionRepository.CreateSession(session);
         
         return session;
