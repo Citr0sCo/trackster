@@ -8,7 +8,6 @@ public class MarkMediaAsWatchedRequest
     public string Title { get; set; }
     public string ParentTitle { get; set; }
     public string GrandParentTitle { get; set; }
-    public int ParentIndex { get; set; }
-    public bool RequestDebug { get; set; }
     public int SeasonNumber { get; set; }
+    public bool RequestDebug { get; set; }
 }

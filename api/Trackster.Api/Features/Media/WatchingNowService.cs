@@ -149,8 +149,7 @@ public class WatchingNowService : ISubscriber
         }
     }
 
-    public void MarkAsPausedWatchingEpisode(Guid userReference, EpisodeRecord episode, int millisecondsWatched,
-        int duration)
+    public void MarkAsPausedWatchingEpisode(Guid userReference, EpisodeRecord episode, int millisecondsWatched, int duration)
     {
         _watchingNowEpisodes[userReference] = new WatchingEpisodeRecord
         {
