@@ -11,6 +11,7 @@ using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Notifications;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
+using Trackster.Api.Features.Webhooks.Types;
 
 namespace Trackster.Api.Features.Media;
 
@@ -208,34 +209,34 @@ public class MediaService
             await MarkEpisodeAsWatched(request.Username, request.GrandParentTitle, request.ParentTitle, request.Title, request.Year, request.SeasonNumber);
     }
 
-    public async void MarkMediaAsWatchingNow(Guid userReference, string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
+    public async Task MarkMediaAsWatchingNow(MarkMediaAsWatchingNowRequest request)
     {
-        if (mediaType == MOVIE_MEDIA_TYPE)
+        if (request.MediaType == MOVIE_MEDIA_TYPE)
         {
-            var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
-            Console.WriteLine($"[INFO] - Making movie as watching now. Title: {title}, Year: {year}, Looked Up MovieTmdbId: {movie.TMDB}.");
+            var movie = await _moviesService.SearchForMovieBy(request.Title, request.Year, request.Debug);
+            Console.WriteLine($"[INFO] - Making movie as watching now. Title: {request.Title}, Year: {request.Year}, Looked Up MovieTmdbId: {movie.TMDB}.");
             
             if (movie.TMDB?.Length == 0)
                 return;
             
-            _watchingNowService.MarkAsWatchingMovie(userReference, movie, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsWatchingMovie(request.UserIdentifier, movie, request.MillisecondsWatched, request.Duration);
         }
 
-        if (mediaType == EPISODE_MEDIA_TYPE)
+        if (request.MediaType == EPISODE_MEDIA_TYPE)
         {
-            var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber, requestDebug);
-            Console.WriteLine($"[INFO] - Making episode as watching now. Title: {title}, Year: {year}, Looked Up Episode Title: {episode.Title}.");
+            var episode = await _showsService.SearchForEpisode(request.GrandParentTitle, request.ParentTitle, request.Title, request.Year, request.SeasonNumber, request.Debug);
+            Console.WriteLine($"[INFO] - Making episode as watching now. Title: {request.Title}, Year: {request.Year}, Looked Up Episode Title: {episode.Title}.");
 
             if (episode.Title?.Length == 0)
                 return;
             
-            _watchingNowService.MarkAsWatchingEpisode(userReference, episode, watchedAmountInMilliseconds, duration);
+            _watchingNowService.MarkAsWatchingEpisode(request.UserIdentifier, episode, request.MillisecondsWatched, request.Duration);
         }
 
-        Console.WriteLine($"Marking a media as watching now. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
+        Console.WriteLine($"Marking a media as watching now. {request.Title}, {request.GrandParentTitle}, {request.SeasonNumber}, {request.Year}.");
     }
 
-    public async void RemoveMediaAsWatchingNow(Guid userReference, string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber)
+    public void RemoveMediaAsWatchingNow(Guid userReference, string mediaType)
     {
         if (mediaType == MOVIE_MEDIA_TYPE)
             _watchingNowService.MarkAsStoppedWatchingMovie(userReference);
@@ -243,24 +244,24 @@ public class MediaService
         if (mediaType == EPISODE_MEDIA_TYPE)
             _watchingNowService.MarkAsStoppedWatchingEpisode(userReference);
 
-        Console.WriteLine($"Marking a media as stopped watching. {title}, {grandParentTitle}, {parentTitle}, {seasonNumber}, {year}.");
+        Console.WriteLine($"Marking a media as stopped watching.");
     }
 
-    public async void PauseMediaAsWatchingNow(Guid userReference, string mediaType, int year, string title, string parentTitle, string grandParentTitle, int seasonNumber, int watchedAmountInMilliseconds, int duration, bool requestDebug = false)
+    public async Task PauseMediaAsWatchingNow(MarkMediaAsPausedRequest request)
     {
-        if (mediaType == MOVIE_MEDIA_TYPE)
+        if (request.MediaType == MOVIE_MEDIA_TYPE)
         {
-            var movie = await _moviesService.SearchForMovieBy(title, year, requestDebug);
-            _watchingNowService.MarkAsPausedWatchingMovie(userReference, movie, watchedAmountInMilliseconds, duration);
+            var movie = await _moviesService.SearchForMovieBy(request.Title, request.Year, request.Debug);
+            _watchingNowService.MarkAsPausedWatchingMovie(request.UserIdentifier, movie, request.MillisecondsWatched, request.Duration);
         }
 
-        if (mediaType == EPISODE_MEDIA_TYPE)
+        if (request.MediaType == EPISODE_MEDIA_TYPE)
         {
-            var episode = await _showsService.SearchForEpisode(grandParentTitle, parentTitle, title, year, seasonNumber, requestDebug);
-            _watchingNowService.MarkAsPausedWatchingEpisode(userReference, episode, watchedAmountInMilliseconds, duration);
+            var episode = await _showsService.SearchForEpisode(request.GrandParentTitle, request.ParentTitle, request.Title, request.Year, request.SeasonNumber, request.Debug);
+            _watchingNowService.MarkAsPausedWatchingEpisode(request.UserIdentifier, episode, request.MillisecondsWatched, request.Duration);
         }
 
-        Console.WriteLine($"Marking a media as paused watching. {title}, {grandParentTitle}, {seasonNumber}, {year}.");
+        Console.WriteLine($"Marking a media as paused watching. {request.Title}, {request.GrandParentTitle}, {request.SeasonNumber}, {request.Year}.");
     }
 
     private async Task MarkMovieAsWatched(string username, string title, int year, bool requestDebug)

@@ -17,7 +17,7 @@ public class PlexWebhookService
     {
         _mediaService = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()));
     }
-    
+
     public async Task HandlePlexWebhook(PlexWebhookRequest? parsedJson, User user)
     {
         Console.WriteLine("--- Plex Webhook Parse Start ---");
@@ -33,28 +33,54 @@ public class PlexWebhookService
 
         var mediaType = parsedJson.Metadata.Type.ToLower();
         var eventType = parsedJson.Event.ToLower();
-        
+
         if (eventType == "media.scrobble")
         {
             await _mediaService.MarkMediaAsWatched(new MarkMediaAsWatchedRequest
             {
-                Username = user.Username, 
+                Username = user.Username,
+                MediaType = mediaType,
+                Year = parsedJson.Metadata.Year,
+                Title = parsedJson.Metadata.Title,
+                ParentTitle = parsedJson.Metadata.ParentTitle,
+                GrandParentTitle = parsedJson.Metadata.GrandparentTitle,
+                SeasonNumber = parsedJson.Metadata.ParentIndex,
+            });
+        }
+
+        if (eventType == "media.play" || eventType == "media.resume")
+        {
+            await _mediaService.MarkMediaAsWatchingNow(new MarkMediaAsWatchingNowRequest
+            {
+                UserIdentifier = user.Identifier,
+                MediaType = mediaType,
+                Year = parsedJson.Metadata.Year,
+                Title = parsedJson.Metadata.Title,
+                ParentTitle = parsedJson.Metadata.ParentTitle,
+                GrandParentTitle = parsedJson.Metadata.GrandparentTitle,
+                MillisecondsWatched = parsedJson.Metadata.ViewOffsetInMilliseconds,
+                Duration = parsedJson.Metadata.Duration,
+                SeasonNumber = parsedJson.Metadata.ParentIndex
+            });
+        }
+        
+        if (eventType == "media.pause")
+        {
+            await _mediaService.PauseMediaAsWatchingNow(new MarkMediaAsPausedRequest
+            {
+                UserIdentifier = user.Identifier, 
                 MediaType = mediaType, 
                 Year = parsedJson.Metadata.Year, 
                 Title = parsedJson.Metadata.Title, 
                 ParentTitle = parsedJson.Metadata.ParentTitle, 
                 GrandParentTitle = parsedJson.Metadata.GrandparentTitle, 
-                ParentIndex = parsedJson.Metadata.ParentIndex
+                SeasonNumber = parsedJson.Metadata.ParentIndex, 
+                MillisecondsWatched = parsedJson.Metadata.ViewOffsetInMilliseconds, 
+                Duration = parsedJson.Metadata.Duration
             });
         }
 
-        if (eventType == "media.play" || eventType == "media.resume")
-            _mediaService.MarkMediaAsWatchingNow(user.Identifier, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
-        
-        if (eventType == "media.stop" || eventType == "media.pause")
-            _mediaService.RemoveMediaAsWatchingNow(user.Identifier, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex);
-        
-        if (eventType == "media.pause")
-            _mediaService.PauseMediaAsWatchingNow(user.Identifier, mediaType, parsedJson.Metadata.Year, parsedJson.Metadata.Title, parsedJson.Metadata.ParentTitle, parsedJson.Metadata.GrandparentTitle, parsedJson.Metadata.ParentIndex, parsedJson.Metadata.ViewOffsetInMilliseconds, parsedJson.Metadata.Duration);
+        if (eventType == "media.stop")
+            _mediaService.RemoveMediaAsWatchingNow(user.Identifier, mediaType);
     }
 }
