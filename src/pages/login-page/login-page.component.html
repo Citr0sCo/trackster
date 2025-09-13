@@ -19,6 +19,12 @@
                 <div class="c-input-group u-mb-1">
                     <input type="password" class="c-field" formControlName="password" placeholder="password">
                 </div>
+                <div class="c-input-group u-mb-1">
+                        <label for="remember-login" class="c-field">
+                            <input type="checkbox" formControlName="remember" id="remember-login" class="u-mr-1">
+                            Remember Login?
+                        </label>
+                </div>
                 <div class="c-input-group">
                     <button class="btn btn-primary w-100" (click)="login()" [disabled]="!formGroup.valid || isLoading">
                         Login

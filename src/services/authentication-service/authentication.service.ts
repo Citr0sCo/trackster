@@ -28,7 +28,8 @@ export class AuthenticationService {
             Provider: provider,
             Code: payload.code,
             Email: payload.email,
-            Password: payload.password
+            Password: payload.password,
+            Remember: payload.remember
         }).pipe(tap((response: ISignInResponse) => {
             this._session = new Session(response.sessionId);
             localStorage.setItem('TRACKSTER_SESSION_ID', this._session.identifier());

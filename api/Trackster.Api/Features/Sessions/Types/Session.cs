@@ -1,4 +1,6 @@
-namespace Trackster.Api.Features.Auth.Types;
+using Trackster.Api.Data.Records;
+
+namespace Trackster.Api.Features.Sessions.Types;
 
 public class Session
 {
@@ -6,11 +8,18 @@ public class Session
     private readonly Guid _userReference;
     private DateTime _ttl;
 
-    public Session(Guid sessionReference, Guid userReference)
+    public Session(Guid sessionReference, Guid userReference, bool remember)
     {
         _sessionReference = sessionReference;
         _userReference = userReference;
-        _ttl  = DateTime.Now.AddMinutes(30);
+        _ttl  = remember ? DateTime.Now.AddDays(30) : DateTime.Now.AddMinutes(30);
+    }
+    
+    public Session(SessionRecord record)
+    {
+        _sessionReference = record.Identifier;
+        _userReference = record.User.Identifier;
+        _ttl  = record.TimeToLive;
     }
 
     public Guid Reference()

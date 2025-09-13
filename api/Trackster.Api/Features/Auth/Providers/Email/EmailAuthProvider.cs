@@ -73,7 +73,7 @@ public class EmailAuthProvider : IAuthProvider
             };
         }
 
-        var session = await _sessionService.CreateSession(existingUser.Identifier);
+        var session = await _sessionService.CreateSession(existingUser.Identifier, request.Remember);
         _sessionFactory.AddSession(session.Reference(), session);
 
         return new SignInResponse
