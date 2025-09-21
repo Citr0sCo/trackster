@@ -434,6 +434,8 @@ public class MediaService
 
     private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord, bool requestDebug)
     {
+        Console.WriteLine($"[INFO] - Show to process: {JsonConvert.SerializeObject(show)}");
+
         var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, requestDebug);
         
         if(requestDebug)
