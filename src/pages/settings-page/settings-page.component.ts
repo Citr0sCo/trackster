@@ -56,7 +56,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public importFromTrakt(): void {
         this.isImporting = true;
 
-        this._streamService.startStream(`${environment.apiBaseUrl}/api/media/import`)
+        this._streamService.startStream(`${environment.apiBaseUrl}/api/media/import`, this.isDebug)
             .pipe(takeUntil(this._destroy))
             .subscribe((data) => {
                     const progress = JSON.parse(data);
