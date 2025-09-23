@@ -14,9 +14,9 @@ export class StreamService {
         this._authService = authService;
     }
 
-    public startStream(url: string): Observable<any> {
+    public startStream(url: string, isDebug: boolean): Observable<any> {
         return new Observable((observer) => {
-            this.eventSource = new EventSource(`${url}?token=${encodeURIComponent(this._authService.getAuthToken()!)}`);
+            this.eventSource = new EventSource(`${url}?token=${encodeURIComponent(this._authService.getAuthToken()!)}&isDebug=${isDebug ? 'true' : 'false'}`);
 
             this.eventSource.onmessage = event => {
                 observer.next(event.data);

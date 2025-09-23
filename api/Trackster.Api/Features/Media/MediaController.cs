@@ -45,7 +45,7 @@ public class MediaController : ControllerBase
     }
     
     [HttpGet("import")]
-    public async Task<IActionResult> ImportMedia([FromQuery] Guid token)
+    public async Task<IActionResult> ImportMedia([FromQuery] Guid token, [FromQuery] bool isDebug = false)
     {
         Response.ContentType = "text/event-stream";
 
@@ -54,7 +54,7 @@ public class MediaController : ControllerBase
         if (user == null)
             return BadRequest();
         
-        await foreach (var item in _service.ImportMedia(new ImportMediaRequest { Type = ImportType.Trakt, Username = user.Username }))
+        await foreach (var item in _service.ImportMedia(new ImportMediaRequest { Type = ImportType.Trakt, Username = user.Username, Debug = isDebug }))
         {
             var json = System.Text.Json.JsonSerializer.Serialize(item);
             await Response.WriteAsync($"data: {json}\n\n");
