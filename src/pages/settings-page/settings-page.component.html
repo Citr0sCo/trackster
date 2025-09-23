@@ -24,9 +24,7 @@
         }
 
         @if (progress.length > 0) {
-            <pre class="log-window">@for (key of progress; track key) {
-                {{ key }}
-            }</pre>
+            <pre class="log-window">@for (key of progress; track key) { {{ key }} }</pre>
         }
 
         <hr>
