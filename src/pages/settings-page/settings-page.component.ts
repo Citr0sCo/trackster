@@ -60,7 +60,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((data) => {
                     const progress = JSON.parse(data);
-                    this.progress.push(`${progress.Data}\n`);
+                    this.progress.push(progress.Data);
 
                     if (progress.Total > 0) {
                         this.total = progress.Total;
