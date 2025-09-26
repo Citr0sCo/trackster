@@ -10,12 +10,13 @@ public interface IMoviesService
     GetAllMoviesResponse GetAllWatchedMovies(string username, int results, int page);
     GetMovieResponse GetMovieBySlug(string slug);
     Task<MovieRecord> SearchForMovieBy(string title, int year, bool requestDebug);
-    Task ImportMovie(UserRecord user, MovieRecord movie);
+    Task ImportMovie(UserRecord user, MovieRecord movie, List<GenreRecord> genres);
 
     GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug);
     MovieRecord? GetMovieByTmdbId(string tmdbId);
     Task MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt);
     MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
+    Task<List<GenreRecord>> FindOrCreateGenres(List<string> genres);
 }
 
 public class MoviesService : IMoviesService
@@ -47,16 +48,7 @@ public class MoviesService : IMoviesService
         {
             return new GetMovieResponse
             {
-                Movie = new Movie
-                {
-                    Identifier = movie.Identifier,
-                    Slug = movie.Slug,
-                    Title = movie.Title,
-                    Year = movie.Year,
-                    Overview = movie.Overview,
-                    Poster = movie.Poster,
-                    TMDB = movie.TMDB
-                }
+                Movie = movie
             };
         }
         
@@ -85,9 +77,9 @@ public class MoviesService : IMoviesService
         return movie;
     }
 
-    public async Task ImportMovie(UserRecord user, MovieRecord movie)
+    public async Task ImportMovie(UserRecord user, MovieRecord movie, List<GenreRecord> genres)
     {
-        await _repository.ImportMovie(user, movie);
+        await _repository.ImportMovie(user, movie, genres);
     }
     
     public GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug)
@@ -124,5 +116,35 @@ public class MoviesService : IMoviesService
     public MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt)
     {
        return _repository.GetWatchedMovieByLastWatchedAt(username, tmdbId, watchedAt);
+    }
+
+    public async Task<List<GenreRecord>> FindOrCreateGenres(List<string> genres)
+    {
+        return await _repository.FindOrCreateGenres(genres);
+    }
+
+    public async Task<GetMovieResponse> ImportDataForMovie(string slug)
+    {
+        var movie = _repository.GetMovieBySlug(slug);
+
+        if (movie != null)
+        {
+            var details = await _detailsProvider.GetDetailsForMovie(movie.TMDB);
+
+            var genres = await _repository.FindOrCreateGenres(details.Genres.ConvertAll((genre) => genre.Name));
+            
+            var updatedMovie = await _repository.UpdateMovie(new MovieRecord
+            {
+                Identifier = movie.Identifier,
+                Title = details.Title
+            }, genres);
+
+            return new GetMovieResponse
+            {
+                Movie = MovieMapper.Map(updatedMovie, genres)
+            };
+        }
+        
+        return new GetMovieResponse();
     }
 }

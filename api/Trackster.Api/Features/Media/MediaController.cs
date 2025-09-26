@@ -36,7 +36,7 @@ public class MediaController : ControllerBase
     {
         return _service.GetStats(username);
     }
-    
+        
     [AuthRequired]
     [HttpGet("stats/calendar")]
     public GetStatsForCalendarResonse GetStatsForCalendar([FromQuery]string username, [FromQuery]int daysInThePast = 365)

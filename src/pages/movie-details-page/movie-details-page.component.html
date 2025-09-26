@@ -1,7 +1,14 @@
 <div class="media-details-component">
     <div class="container">
 
-        <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
+        <div class="o-grid">
+            <div class="o-grid__col">
+                <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
+            </div>
+            <div class="o-grid__col text-right">
+                <button (click)="updateMovie()" class="btn btn-primary btn-sm mb-3"><i class="fa fa-sync" [ngClass]="{'fa-spin': isUpdating}"></i> Refresh Metdata</button>
+            </div>
+        </div>
 
         @if (movie) {
             <div class="media-overview o-grid">
@@ -13,7 +20,13 @@
                 <div class="o-grid__col">
                     <div class="media-details">
                         <h1>{{ movie.title }} <small style="font-size: 1.25rem;">{{ movie.year }}</small></h1>
-                        <p>{{ movie.overview }}</p>
+                        <p class="u-mb-0">{{ movie.overview }}</p>
+
+                        <div class="c-badge-wrapper u-mb-2">
+                            @for (genre of movie.genres; track genre) {
+                                <div class="c-badge">{{ genre.name }}</div>
+                            }
+                        </div>
 
                         @for (episode of watchHistory; track episode) {
                             <h6>Last Watched &#64; {{ episode.watchedAt | date:'HH:mm dd-MM-y' }} ({{ episode.watchedAt | timeago }})</h6>

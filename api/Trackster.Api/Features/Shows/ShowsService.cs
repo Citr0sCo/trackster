@@ -8,13 +8,13 @@ namespace Trackster.Api.Features.Shows;
 
 public interface IShowsService
 {
-    GetAllShowsResponse GetAllWatchedShows(string username, int results, int page);
+    GetAllWatchedEpisodesResponse GetAllWatchedEpisodes(string username, int results, int page);
     Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber, bool requestDebug);
     GetShowResponse GetShowBySlug(string slug);
     Task<ShowRecord?> GetShowByTmdbId(string tmdbId);
     Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier);
     Task<EpisodeRecord?> GetEpisodeBy(int episodeNumber, Guid seasonIdentifier);
-    Task ImportShow(UserRecord user, ShowRecord show);
+    Task ImportShow(UserRecord user, ShowRecord show, List<GenreRecord> genres);
     Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season);
     Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     GetSeasonResponse GetSeasonByNumber(string slug, int seasonNumber);
@@ -37,13 +37,13 @@ public class ShowsService : IShowsService
         _detailsProvider = new TmdbImportProvider();
     }
     
-    public GetAllShowsResponse GetAllWatchedShows(string username, int results, int page)
+    public GetAllWatchedEpisodesResponse GetAllWatchedEpisodes(string username, int results, int page)
     {
-        var shows = _repository.GetAllWatchedShows(username, results, page);
+        var episodes = _repository.GetAllWatchedEpisodes(username, results, page);
 
-        return new GetAllShowsResponse
+        return new GetAllWatchedEpisodesResponse
         {
-            WatchedShows = shows
+            WatchedEpisodes = episodes
         };
     }
     
@@ -137,16 +137,7 @@ public class ShowsService : IShowsService
         {
             return new GetShowResponse
             {
-                Show = new Show
-                {
-                    Identifier = show.Identifier,
-                    Slug = show.Slug,
-                    Title = show.Title,
-                    Year = show.Year,
-                    Overview = show.Overview,
-                    Poster = show.Poster,
-                    TMDB = show.TMDB
-                }
+                Show = show
             };
         }
         
@@ -168,9 +159,9 @@ public class ShowsService : IShowsService
         return await _repository.GetEpisodeBy(episodeNumber, seasonIdentifier);
     }
 
-    public async Task ImportShow(UserRecord user, ShowRecord show)
+    public async Task ImportShow(UserRecord user, ShowRecord show, List<GenreRecord> genres)
     {
-        await _repository.ImportShow(user, show);
+        await _repository.ImportShow(user, show, genres);
     }
 
     public async Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season)
@@ -191,12 +182,7 @@ public class ShowsService : IShowsService
         {
             return new GetSeasonResponse
             {
-                Season = new Season
-                {
-                    Identifier = season.Identifier,
-                    Title = season.Title,
-                    Number = season.Number
-                }
+                Season = season
             };
         }
         
@@ -211,12 +197,7 @@ public class ShowsService : IShowsService
         {
             return new GetEpisodeResponse
             {
-                Episode = new Episode
-                {
-                    Identifier = episode.Identifier,
-                    Title = episode.Title,
-                    Number = episode.Number
-                }
+                Episode = episode
             };
         }
         
@@ -231,20 +212,19 @@ public class ShowsService : IShowsService
         {
             var details = await _detailsProvider.GetEpisodeDetails(episode.Season.Show.TMDB, seasonNumber, episodeNumber, requestDebug);
 
+            var showDetails = await _detailsProvider.GetDetailsForShow(episode.Season.Show.TMDB, requestDebug);
+
+            var genres = await _repository.FindOrCreateGenres(showDetails.Genres.ConvertAll((genre) => genre.Name));
+
             var updatedEpisode = await _repository.UpdateEpisode(new EpisodeRecord
             {
                 Identifier = episode.Identifier,
                 Title = details.Title ?? episode.Season.Show.Title,
-            });
-            
+            }, genres);
+
             return new GetEpisodeResponse
             {
-                Episode = new Episode
-                {
-                    Identifier = episode.Identifier,
-                    Title = updatedEpisode.Title,
-                    Number = episode.Number
-                }
+                Episode = ShowMapper.MapEpisode(updatedEpisode, genres)
             };
         }
         

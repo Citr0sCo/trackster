@@ -1,6 +1,6 @@
 import {IMedia, MediaType} from "./types/media.type";
-import {IWatchedMovie} from "./types/watched-movie.type";
-import {IWatchedShow} from "./types/watched-show.type";
+import {IWatchedMovie} from "../movie-service/types/watched-movie.type";
+import {IWatchedEpisode} from "../show-service/types/watched-episode.type";
 
 export class MediaMapper {
     public static fromMovie(watchedMovie: IWatchedMovie) : IMedia {
@@ -21,21 +21,21 @@ export class MediaMapper {
         };
     }
 
-    public static fromShow(show: IWatchedShow) : IMedia {
+    public static fromEpisode(record: IWatchedEpisode) : IMedia {
         return {
-            identifier: show.show.identifier,
-            title: show.episode.title,
-            slug: show.show.slug,
-            parentTitle: show.season.title,
-            grandParentTitle: show.show.title,
-            watchedAt: show.watchedAt,
+            identifier: record.episode.season.show.identifier,
+            title: record.episode.title,
+            slug: record.episode.season.show.slug,
+            parentTitle: record.episode.season.title,
+            grandParentTitle: record.episode.season.show.title,
+            watchedAt: record.watchedAt,
             mediaType: MediaType.Episode.toString(),
-            overview: show.show.overview,
-            posterUrl: show.show.posterUrl,
-            tmdb: show.show.tmdb,
-            year: show.show.year,
-            seasonNumber: show.season.number,
-            episodeNumber: show.episode.number
+            overview: record.episode.season.show.overview,
+            posterUrl: record.episode.season.show.posterUrl,
+            tmdb: record.episode.season.show.tmdb,
+            year: record.episode.season.show.year,
+            seasonNumber: record.episode.season.number,
+            episodeNumber: record.episode.number
         };
     }
 }

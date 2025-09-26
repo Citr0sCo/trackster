@@ -1,11 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {MediaService} from "../../services/media-service/media.service";
 import {Subject, takeUntil, zip} from "rxjs";
-import {IShow} from "../../services/media-service/types/show.type";
-import {IEpisode} from "../../services/media-service/types/episode.type";
-import {ISeason} from "../../services/media-service/types/season.type";
-import {IWatchedEpisode} from "../../services/media-service/types/watched-episode.type";
+import {ShowService} from "../../services/show-service/show.service";
+import {IShow} from "../../services/show-service/types/show.type";
+import {ISeason} from "../../services/show-service/types/season.type";
+import {IEpisode} from "../../services/show-service/types/episode.type";
+import {IWatchedEpisode} from "../../services/show-service/types/watched-episode.type";
+import {UserService} from "../../services/user-service/user.service";
+import {IUser} from "../../services/user-service/types/user.type";
 
 @Component({
     selector: 'show-details-page',
@@ -24,15 +26,18 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
     public isUpdating: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
-    private _activatedRoute: ActivatedRoute;
-    private _mediaService: MediaService;
+    private readonly _activatedRoute: ActivatedRoute;
+    private readonly _showService: ShowService;
+    private readonly _userService: UserService;
+
     private slug: string = '';
     private seasonId: number = 0;
     private episodeId: number = 0;
 
-    constructor(activatedRoute: ActivatedRoute, mediaService: MediaService) {
+    constructor(activatedRoute: ActivatedRoute, showService: ShowService, userService: UserService) {
         this._activatedRoute = activatedRoute;
-        this._mediaService = mediaService;
+        this._showService = showService;
+        this._userService = userService;
     }
 
     public ngOnInit(): void {
@@ -42,23 +47,25 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((params) => {
 
-                const show = this._mediaService.getShowBySlug(params['slug']);
-                const season = this._mediaService.getSeasonByNumber(params['slug'], params['seasonId']);
-                const episode = this._mediaService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
-                const watchHistory = this._mediaService.getEpisodeWatchHistory('citr0s', params['slug'], params['seasonId'], params['episodeId']);
-
-                this.slug = params['slug'];
-                this.seasonId = params['seasonId'];
-                this.episodeId = params['episodeId'];
-
-                zip(show, season, episode, watchHistory)
+                this._userService.getUserBySession()
                     .pipe(takeUntil(this._destroy))
-                    .subscribe(([show, season, episode, watchHistory]) => {
-                        this.isLoading = false;
-                        this.show = show;
-                        this.season = season;
-                        this.episode = episode;
-                        this.watchHistory = watchHistory;
+                    .subscribe((user: IUser) => {
+                        const episode = this._showService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
+                        const watchHistory = this._showService.getEpisodeWatchHistory(user.username, params['slug'], params['seasonId'], params['episodeId']);
+
+                        this.slug = params['slug'];
+                        this.seasonId = params['seasonId'];
+                        this.episodeId = params['episodeId'];
+
+                        zip(episode, watchHistory)
+                            .pipe(takeUntil(this._destroy))
+                            .subscribe(([episode, watchHistory]) => {
+                                this.isLoading = false;
+                                this.episode = episode;
+                                this.season = episode.season;
+                                this.show = episode.season.show;
+                                this.watchHistory = watchHistory;
+                            });
                     });
         });
     }
@@ -70,20 +77,18 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
     public updateEpisode(): void {
         this.isUpdating = true;
 
-        const episode = this._mediaService
+        this._showService
             .updateEpisodeById(this.slug, this.seasonId, this.episodeId)
             .pipe(takeUntil(this._destroy))
             .subscribe((episode) => {
                 this.isUpdating = false;
-
-                this.episode!.title = episode.title;
-                this.episode!.title = episode.title;
+                this.episode = episode;
+                this.season = episode.season;
+                this.show = episode.season.show;
             });
     }
 
     public ngOnDestroy(): void {
         this._destroy.next();
     }
-
-    protected readonly pageXOffset = pageXOffset;
 }

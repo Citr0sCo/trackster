@@ -33,6 +33,10 @@ import { UserRepository } from '../services/user-service/user.repository';
 import { UserService } from '../services/user-service/user.service';
 import {WebhookService} from "../services/webhook-service/webhook.service";
 import {WebhookRepository} from "../services/webhook-service/webhook.repository";
+import {MovieService} from "../services/movie-service/movie.service";
+import {MovieRepository} from "../services/movie-service/movie.repository";
+import {ShowService} from "../services/show-service/show.service";
+import {ShowRepository} from "../services/show-service/show.repository";
 
 @NgModule({
     declarations: [
@@ -76,6 +80,10 @@ import {WebhookRepository} from "../services/webhook-service/webhook.repository"
         UserRepository,
         WebhookService,
         WebhookRepository,
+        MovieService,
+        MovieRepository,
+        ShowService,
+        ShowRepository,
         provideHttpClient(withInterceptorsFromDi()),
         {
             provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true

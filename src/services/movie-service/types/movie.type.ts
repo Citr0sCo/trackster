@@ -1,4 +1,6 @@
-export interface IShow {
+import {IGenre} from "../../media-service/types/genre.type";
+
+export interface IMovie {
     identifier: string;
     title: string;
     slug: string;
@@ -6,4 +8,5 @@ export interface IShow {
     tmdb: string;
     posterUrl: string;
     overview: string;
+    genres: Array<IGenre>;
 }
