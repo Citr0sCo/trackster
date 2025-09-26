@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {MediaService} from "../../services/media-service/media.service";
 import {Subject, takeUntil, zip} from "rxjs";
-import {IMovie} from "../../services/media-service/types/movie.type";
-import {IWatchedEpisode} from "../../services/media-service/types/watched-episode.type";
 import {MovieService} from "../../services/movie-service/movie.service";
+import {IMovie} from "../../services/movie-service/types/movie.type";
+import {IWatchedMovie} from "../../services/movie-service/types/watched-movie.type";
+import {UserService} from "../../services/user-service/user.service";
 
 @Component({
     selector: 'movie-details-page',
@@ -15,18 +15,20 @@ import {MovieService} from "../../services/movie-service/movie.service";
 export class MovieDetailsPageComponent implements OnInit, OnDestroy {
 
     public movie: IMovie | null = null;
-    public watchHistory: Array<IWatchedEpisode> = [];
+    public watchHistory: Array<IWatchedMovie> = [];
 
     public isLoading: boolean = false;
     public isUpdating: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
-    private _activatedRoute: ActivatedRoute;
-    private _movieService: MovieService;
+    private readonly _activatedRoute: ActivatedRoute;
+    private readonly _movieService: MovieService;
+    private readonly _userService: UserService;
 
-    constructor(activatedRoute: ActivatedRoute, movieService: MovieService) {
+    constructor(activatedRoute: ActivatedRoute, movieService: MovieService, userService: UserService) {
         this._activatedRoute = activatedRoute;
         this._movieService = movieService;
+        this._userService = userService;
     }
 
     public ngOnInit(): void {
@@ -36,15 +38,19 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((params) => {
 
-                const movie = this._movieService.getMovieBySlug(params['slug']);
-                const watchHistory = this._movieService.getMovieWatchHistoryById('citr0s', params['slug']);
-
-                zip(movie, watchHistory)
+                this._userService.getUserBySession()
                     .pipe(takeUntil(this._destroy))
-                    .subscribe(([movie, watchHistory]) => {
-                        this.isLoading = false;
-                        this.movie = movie;
-                        this.watchHistory = watchHistory;
+                    .subscribe((user) => {
+                        const movie = this._movieService.getMovieBySlug(params['slug']);
+                        const watchHistory = this._movieService.getMovieWatchHistoryById(user.username, params['slug']);
+
+                        zip(movie, watchHistory)
+                            .pipe(takeUntil(this._destroy))
+                            .subscribe(([movie, watchHistory]) => {
+                                this.isLoading = false;
+                                this.movie = movie;
+                                this.watchHistory = watchHistory;
+                            });
                     });
         });
     }
@@ -61,8 +67,7 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((movie) => {
                 this.isUpdating = false;
-
-                this.movie!.title = movie.title;
+                this.movie = movie;
             });
     }
 

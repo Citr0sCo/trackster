@@ -17,13 +17,13 @@ public class MoviesController : ControllerBase
     }
     
     [HttpGet("")]
-    public GetAllMoviesResponse GetAllWatchedMovies([FromQuery]string username, [FromQuery]int results = 50, [FromQuery]int page = 1)
+    public GetAllMoviesResponse GetAll([FromQuery]string username, [FromQuery]int results = 50, [FromQuery]int page = 1)
     {
         return _service.GetAllWatchedMovies(username, results, page);
     }
     
     [HttpGet("{slug}")]
-    public IActionResult GetMediaByIdentifier([FromRoute]string slug)
+    public IActionResult GetByIdentifier([FromRoute]string slug)
     {
         var response = _service.GetMovieBySlug(slug);
         
@@ -33,8 +33,19 @@ public class MoviesController : ControllerBase
         return Ok(response);
     }
     
+    [HttpPatch("{slug}")]
+    public async Task<IActionResult> UpdateMetadata([FromRoute]string slug)
+    {
+        var response = await _service.ImportDataForMovie(slug);
+        
+        if(response == null)
+            return NotFound();
+        
+        return Ok(response);
+    }
+    
     [HttpGet("{slug}/history")]
-    public IActionResult GetWatchedHistoryBySlug([FromQuery]string username, [FromRoute]string slug)
+    public IActionResult GetWatchHistory([FromQuery]string username, [FromRoute]string slug)
     {   
         var response = _service.GetWatchedHistoryBySlug(username, slug);
         

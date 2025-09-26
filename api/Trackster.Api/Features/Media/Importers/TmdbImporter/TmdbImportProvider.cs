@@ -12,7 +12,7 @@ public class TmdbImportProvider
         _authToken = Environment.GetEnvironmentVariable("ASPNETCORE_TMDB_API_KEY")!;
     }
     
-    public async Task<TmdbMovieDetails> GetDetailsForMovie(string reference, bool requestDebug)
+    public async Task<TmdbMovieDetails> GetDetailsForMovie(string reference, bool requestDebug = false)
     {
         try
         {

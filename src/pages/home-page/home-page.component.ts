@@ -1,16 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { MediaService } from '../../services/media-service/media.service';
-import { IMovie } from '../../services/media-service/types/movie.type';
-import { IShow } from '../../services/media-service/types/show.type';
-import { IMedia, MediaType } from "../../services/media-service/types/media.type";
+import { IMedia } from "../../services/media-service/types/media.type";
 import { MediaMapper } from "../../services/media-service/media.mapper";
-import { IWatchedMovie } from "../../services/media-service/types/watched-movie.type";
-import { IWatchedShow } from "../../services/media-service/types/watched-show.type";
 import { UserService } from '../../services/user-service/user.service';
-import { AuthenticationService } from '../../services/authentication-service/authentication.service';
 import {MovieService} from "../../services/movie-service/movie.service";
 import {ShowService} from "../../services/show-service/show.service";
+import {IWatchedMovie} from "../../services/movie-service/types/watched-movie.type";
+import {IWatchedShow} from "../../services/show-service/types/watched-show.type";
 
 @Component({
     selector: 'home-page',

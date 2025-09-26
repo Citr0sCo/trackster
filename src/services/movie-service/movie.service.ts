@@ -33,7 +33,7 @@ export class MovieService {
         return this._repository.getMovieBySlug(slug);
     }
 
-    public getMovieWatchHistoryById(username: string, identifier: any) {
+    public getMovieWatchHistoryById(username: string, identifier: any): Observable<Array<IWatchedMovie>> {
         return this._repository.getMovieWatchHistoryById(username, identifier);
     }
 

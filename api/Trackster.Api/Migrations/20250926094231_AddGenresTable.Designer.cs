@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Trackster.Api.Data;
 
@@ -10,9 +11,11 @@ using Trackster.Api.Data;
 namespace Trackster.Api.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250926094231_AddGenresTable")]
+    partial class AddGenresTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -85,18 +88,17 @@ namespace Trackster.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("GenreId")
+                    b.Property<Guid>("GenreIdentifier")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("MovieId")
+                    b.Property<Guid>("MovieIdentifier")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Identifier");
 
-                    b.HasIndex("GenreId");
+                    b.HasIndex("GenreIdentifier");
 
-                    b.HasIndex("MovieId", "GenreId")
-                        .IsUnique();
+                    b.HasIndex("MovieIdentifier");
 
                     b.ToTable("MovieGenres");
                 });
@@ -205,18 +207,17 @@ namespace Trackster.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("GenreId")
+                    b.Property<Guid>("GenreIdentifier")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ShowId")
+                    b.Property<Guid>("ShowIdentifier")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Identifier");
 
-                    b.HasIndex("GenreId");
+                    b.HasIndex("GenreIdentifier");
 
-                    b.HasIndex("ShowId", "GenreId")
-                        .IsUnique();
+                    b.HasIndex("ShowIdentifier");
 
                     b.ToTable("ShowGenres");
                 });
@@ -339,13 +340,13 @@ namespace Trackster.Api.Migrations
                 {
                     b.HasOne("Trackster.Api.Data.Records.GenreRecord", "Genre")
                         .WithMany()
-                        .HasForeignKey("GenreId")
+                        .HasForeignKey("GenreIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Trackster.Api.Data.Records.MovieRecord", "Movie")
                         .WithMany()
-                        .HasForeignKey("MovieId")
+                        .HasForeignKey("MovieIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -399,13 +400,13 @@ namespace Trackster.Api.Migrations
                 {
                     b.HasOne("Trackster.Api.Data.Records.GenreRecord", "Genre")
                         .WithMany()
-                        .HasForeignKey("GenreId")
+                        .HasForeignKey("GenreIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Trackster.Api.Data.Records.ShowRecord", "Show")
                         .WithMany()
-                        .HasForeignKey("ShowId")
+                        .HasForeignKey("ShowIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

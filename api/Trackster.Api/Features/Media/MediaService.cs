@@ -366,8 +366,10 @@ public class MediaService
                 Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
                 Overview = details?.Overview,
             };
+            
+            var genres = await _moviesService.FindOrCreateGenres(details?.Genres.ConvertAll((genre) => genre.Name) ?? []);
 
-            await _moviesService.ImportMovie(userRecord, movieRecord);
+            await _moviesService.ImportMovie(userRecord, movieRecord, genres);
         }
     }
 

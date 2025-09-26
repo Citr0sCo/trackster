@@ -1,6 +1,6 @@
 import {IMedia, MediaType} from "./types/media.type";
-import {IWatchedMovie} from "./types/watched-movie.type";
-import {IWatchedShow} from "./types/watched-show.type";
+import {IWatchedMovie} from "../movie-service/types/watched-movie.type";
+import {IWatchedShow} from "../show-service/types/watched-show.type";
 
 export class MediaMapper {
     public static fromMovie(watchedMovie: IWatchedMovie) : IMedia {

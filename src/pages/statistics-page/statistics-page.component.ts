@@ -14,7 +14,7 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
 
     public statsLoading: boolean = false;
     public calendarStatsLoading: boolean = false;
-    public username: string = 'citr0s';
+    public username: string = '';
     public media: Array<IMedia> = [];
     public totalWatched: number = 0;
     public totalMovies: number = 0;

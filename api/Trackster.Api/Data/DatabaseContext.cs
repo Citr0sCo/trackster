@@ -22,6 +22,9 @@ public class DatabaseContext : DbContext
     public DbSet<SeasonRecord> Seasons { get; set; }
     public DbSet<EpisodeRecord> Episodes { get; set; }
     public DbSet<WebhookRecord> Webhooks { get; set; }
+    public DbSet<MovieGenreRecord> MovieGenres { get; set; }
+    public DbSet<ShowGenreRecord> ShowGenres { get; set; }
+    public DbSet<GenreRecord> Genres { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -37,5 +40,12 @@ public class DatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<MovieGenreRecord>()
+            .HasIndex(e => new { e.MovieId, e.GenreId })
+            .IsUnique();
+        
+        modelBuilder.Entity<ShowGenreRecord>()
+            .HasIndex(e => new { e.ShowId, e.GenreId })
+            .IsUnique();
     }
 }
