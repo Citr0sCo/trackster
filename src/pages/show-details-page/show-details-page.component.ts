@@ -6,6 +6,7 @@ import {IShow} from "../../services/media-service/types/show.type";
 import {IEpisode} from "../../services/media-service/types/episode.type";
 import {ISeason} from "../../services/media-service/types/season.type";
 import {IWatchedEpisode} from "../../services/media-service/types/watched-episode.type";
+import {ShowService} from "../../services/show-service/show.service";
 
 @Component({
     selector: 'show-details-page',
@@ -25,14 +26,14 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
 
     private readonly _destroy: Subject<void> = new Subject();
     private _activatedRoute: ActivatedRoute;
-    private _mediaService: MediaService;
+    private _showService: ShowService;
     private slug: string = '';
     private seasonId: number = 0;
     private episodeId: number = 0;
 
-    constructor(activatedRoute: ActivatedRoute, mediaService: MediaService) {
+    constructor(activatedRoute: ActivatedRoute, showService: ShowService) {
         this._activatedRoute = activatedRoute;
-        this._mediaService = mediaService;
+        this._showService = showService;
     }
 
     public ngOnInit(): void {
@@ -42,10 +43,10 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((params) => {
 
-                const show = this._mediaService.getShowBySlug(params['slug']);
-                const season = this._mediaService.getSeasonByNumber(params['slug'], params['seasonId']);
-                const episode = this._mediaService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
-                const watchHistory = this._mediaService.getEpisodeWatchHistory('citr0s', params['slug'], params['seasonId'], params['episodeId']);
+                const show = this._showService.getShowBySlug(params['slug']);
+                const season = this._showService.getSeasonByNumber(params['slug'], params['seasonId']);
+                const episode = this._showService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
+                const watchHistory = this._showService.getEpisodeWatchHistory('citr0s', params['slug'], params['seasonId'], params['episodeId']);
 
                 this.slug = params['slug'];
                 this.seasonId = params['seasonId'];
@@ -70,13 +71,12 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
     public updateEpisode(): void {
         this.isUpdating = true;
 
-        const episode = this._mediaService
+        this._showService
             .updateEpisodeById(this.slug, this.seasonId, this.episodeId)
             .pipe(takeUntil(this._destroy))
             .subscribe((episode) => {
                 this.isUpdating = false;
 
-                this.episode!.title = episode.title;
                 this.episode!.title = episode.title;
             });
     }
@@ -84,6 +84,4 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
     public ngOnDestroy(): void {
         this._destroy.next();
     }
-
-    protected readonly pageXOffset = pageXOffset;
 }

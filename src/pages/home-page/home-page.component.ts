@@ -9,6 +9,8 @@ import { IWatchedMovie } from "../../services/media-service/types/watched-movie.
 import { IWatchedShow } from "../../services/media-service/types/watched-show.type";
 import { UserService } from '../../services/user-service/user.service';
 import { AuthenticationService } from '../../services/authentication-service/authentication.service';
+import {MovieService} from "../../services/movie-service/movie.service";
+import {ShowService} from "../../services/show-service/show.service";
 
 @Component({
     selector: 'home-page',
@@ -25,12 +27,14 @@ export class HomePageComponent implements OnInit, OnDestroy {
     public showsLoading: boolean = false;
 
     private readonly _destroy: Subject<void> = new Subject();
-    private readonly _mediaService: MediaService;
     private readonly _userService: UserService;
+    private _movieService: MovieService;
+    private _showService: ShowService;
 
-    constructor(mediaService: MediaService, userService: UserService) {
-        this._mediaService = mediaService;
+    constructor(userService: UserService, movieService: MovieService, showService: ShowService) {
         this._userService = userService;
+        this._movieService = movieService;
+        this._showService = showService;
     }
 
     public ngOnInit(): void {
@@ -40,14 +44,14 @@ export class HomePageComponent implements OnInit, OnDestroy {
         this._userService.getUserBySession()
             .pipe(takeUntil(this._destroy))
             .subscribe((user) => {
-                this._mediaService.getAllMoviesFor(user.username)
+                this._movieService.getAllMoviesFor(user.username)
                     .pipe(takeUntil(this._destroy))
                     .subscribe((movies) => {
                         this.movies = movies;
                         this.moviesLoading = false;
                     });
 
-                this._mediaService.getAllShowsFor(user.username)
+                this._showService.getAllShowsFor(user.username)
                     .pipe(takeUntil(this._destroy))
                     .subscribe((shows) => {
                         this.shows = shows;
@@ -65,7 +69,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
 
     public bustCache(): void {
-        this._mediaService.bustCache();
+        this._movieService.bustCache();
+        this._showService.bustCache();
         this.ngOnInit();
     }
 

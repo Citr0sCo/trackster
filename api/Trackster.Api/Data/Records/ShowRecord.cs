@@ -6,7 +6,6 @@ public class ShowRecord
 {
     [Key]
     public Guid Identifier { get; set; }
-
     public string Title { get; set; }
     public int Year { get; set; }
     public string TMDB { get; set; }

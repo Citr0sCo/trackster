@@ -1,7 +1,14 @@
 <div class="media-details-component">
     <div class="container">
 
-        <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
+        <div class="o-grid">
+            <div class="o-grid__col">
+                <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
+            </div>
+            <div class="o-grid__col text-right">
+                <button (click)="updateMovie()" class="btn btn-primary btn-sm mb-3"><i class="fa fa-sync" [ngClass]="{'fa-spin': isUpdating}"></i> Refresh Metdata</button>
+            </div>
+        </div>
 
         @if (movie) {
             <div class="media-overview o-grid">
