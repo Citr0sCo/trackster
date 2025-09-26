@@ -7,6 +7,7 @@ public class TmdbShowDetails
     public TmdbShowDetails()
     {
         Seasons = new List<Season>();
+        Genres = new List<Genre>();
     }
     
     [JsonProperty("id")] 
@@ -27,11 +28,14 @@ public class TmdbShowDetails
     [JsonProperty("first_air_date")]
     public DateTime FirstAirDate { get; set; }
     
+    [JsonProperty("genres")]
+    public List<Genre> Genres { get; set; }
+    
     //public bool adult { get; set; }
     //public string backdrop_path { get; set; }
     //public List<CreatedBy> created_by { get; set; }
     //public List<int> episode_run_time { get; set; }
-    //public List<Genre> genres { get; set; }
+    
     //public string homepage { get; set; }
     //public bool in_production { get; set; }
     //public List<string> languages { get; set; }
@@ -66,8 +70,11 @@ public class TmdbShowDetails
 
     public class Genre
     {
-        public int id { get; set; }
-        public string name { get; set; }
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        
+        [JsonProperty("name")]
+        public string Name { get; set; }
     }
 
     public class LastEpisodeToAir

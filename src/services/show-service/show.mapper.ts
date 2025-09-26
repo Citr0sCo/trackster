@@ -1,41 +1,42 @@
-import {IMedia, MediaType} from "./types/media.type";
-import {IWatchedMovie} from "./types/watched-movie.type";
-import {IWatchedShow} from "./types/watched-show.type";
+import {IEpisode} from "./types/episode.type";
+import {IShow} from "./types/show.type";
+import {ISeason} from "./types/season.type";
 
 export class ShowMapper {
-    public static fromMovie(watchedMovie: IWatchedMovie) : IMedia {
+
+    static map(show: any) : IShow {
         return {
-            identifier: watchedMovie.movie.identifier,
-            title: watchedMovie.movie.title,
-            slug: watchedMovie.movie.slug,
-            parentTitle: null,
-            grandParentTitle: null,
-            watchedAt: watchedMovie.watchedAt,
-            mediaType: MediaType.Movie.toString(),
-            overview: watchedMovie.movie.overview,
-            posterUrl: watchedMovie.movie.posterUrl,
-            tmdb: watchedMovie.movie.tmdb,
-            year: watchedMovie.movie.year,
-            seasonNumber: 0,
-            episodeNumber: 0,
+            identifier: show.Identifier,
+            title: show.Title,
+            slug: show.Slug,
+            year: show.Year,
+            tmdb: show.TMDB,
+            posterUrl: show.Poster,
+            overview: show.Overview,
+            genres: show.Genres.map((x: any) => {
+                return {
+                    identifier: x.Identifier,
+                    name: x.Name,
+                };
+            }),
         };
     }
 
-    public static fromShow(show: IWatchedShow) : IMedia {
+    static mapSeason(season: any) : ISeason {
         return {
-            identifier: show.show.identifier,
-            title: show.episode.title,
-            slug: show.show.slug,
-            parentTitle: show.season.title,
-            grandParentTitle: show.show.title,
-            watchedAt: show.watchedAt,
-            mediaType: MediaType.Episode.toString(),
-            overview: show.show.overview,
-            posterUrl: show.show.posterUrl,
-            tmdb: show.show.tmdb,
-            year: show.show.year,
-            seasonNumber: show.season.number,
-            episodeNumber: show.episode.number
+            identifier: season.Identifier,
+            title: season.Title,
+            number: season.Number,
+            show: this.map(season.Show),
+        };
+    }
+
+    public static mapEpisode(episode: any) : IEpisode {
+        return {
+            identifier: episode.Identifier,
+            title: episode.Title,
+            number: episode.Number,
+            season: this.mapSeason(episode.Season),
         };
     }
 }

@@ -9,7 +9,7 @@ public class MovieGenreRecord
     
     public Guid MovieId { get; set; }
     public MovieRecord Movie { get; set; }
-    
+
     public Guid GenreId { get; set; }
     public GenreRecord Genre { get; set; }
 }

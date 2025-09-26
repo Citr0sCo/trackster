@@ -1,3 +1,5 @@
+import {IGenre} from "../../media-service/types/genre.type";
+
 export interface IShow {
     identifier: string;
     title: string;
@@ -6,4 +8,5 @@ export interface IShow {
     tmdb: string;
     posterUrl: string;
     overview: string;
+    genres: Array<IGenre>;
 }

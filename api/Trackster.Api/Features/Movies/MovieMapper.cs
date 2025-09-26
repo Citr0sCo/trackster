@@ -1,4 +1,5 @@
 using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies.Types;
 
 namespace Trackster.Api.Features.Movies;

@@ -6,7 +6,7 @@ import { UserService } from '../../services/user-service/user.service';
 import {MovieService} from "../../services/movie-service/movie.service";
 import {ShowService} from "../../services/show-service/show.service";
 import {IWatchedMovie} from "../../services/movie-service/types/watched-movie.type";
-import {IWatchedShow} from "../../services/show-service/types/watched-show.type";
+import {IWatchedEpisode} from "../../services/show-service/types/watched-episode.type";
 
 @Component({
     selector: 'home-page',
@@ -17,7 +17,7 @@ import {IWatchedShow} from "../../services/show-service/types/watched-show.type"
 export class HomePageComponent implements OnInit, OnDestroy {
 
     public movies: Array<IWatchedMovie> = [];
-    public shows: Array<IWatchedShow> = [];
+    public shows: Array<IWatchedEpisode> = [];
 
     public moviesLoading: boolean = false;
     public showsLoading: boolean = false;
@@ -60,8 +60,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
         return MediaMapper.fromMovie(movie);
     }
 
-    public showToMedia(show: IWatchedShow): IMedia {
-        return MediaMapper.fromShow(show);
+    public showToMedia(show: IWatchedEpisode): IMedia {
+        return MediaMapper.fromEpisode(show);
     }
 
     public bustCache(): void {

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable, of, tap, } from 'rxjs';
 import { ShowRepository } from './show.repository';
 import { IShow } from './types/show.type';
-import { IWatchedShow } from "./types/watched-show.type";
 import { ISeason } from "./types/season.type";
 import { IEpisode } from "./types/episode.type";
 import { IWatchedEpisode } from "./types/watched-episode.type";
@@ -12,13 +11,13 @@ export class ShowService {
 
     private _repository: ShowRepository;
 
-    private _cachedAllShows: Array<IWatchedShow> = [];
+    private _cachedAllShows: Array<IWatchedEpisode> = [];
 
     constructor(repository: ShowRepository) {
         this._repository = repository;
     }
 
-    public getAllShowsFor(username: string): Observable<Array<IWatchedShow>> {
+    public getAllShowsFor(username: string): Observable<Array<IWatchedEpisode>> {
 
         if (this._cachedAllShows.length > 0) {
             return of(this._cachedAllShows);

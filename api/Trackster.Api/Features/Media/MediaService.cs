@@ -4,6 +4,7 @@ using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.OverseerrImporter;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
+using Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 using Trackster.Api.Features.Media.Importers.TraktImporter;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
@@ -59,8 +60,8 @@ public class MediaService
             var value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (value == "Development")
             {
-                movies = movies.OrderByDescending(x => x.LastWatchedAt).Take(25).ToList();
-                shows = shows.OrderByDescending(x => x.LastWatchedAt).Take(25).ToList();
+                movies = movies.OrderByDescending(x => x.LastWatchedAt).Take(5).ToList();
+                shows = shows.OrderByDescending(x => x.LastWatchedAt).Take(5).ToList();
             }
 
             var user = await ProcessUser(request);
@@ -91,7 +92,7 @@ public class MediaService
     public GetHistoryForUserResponse GetHistoryForUser(string username, int results, int page)
     {
         var movies = _moviesService.GetAllWatchedMovies(username, results, page);
-        var shows = _showsService.GetAllWatchedShows(username, results, page);
+        var shows = _showsService.GetAllWatchedEpisodes(username, results, page);
 
         var media = new List<Types.Media>();
 
@@ -111,21 +112,21 @@ public class MediaService
             });
         }
 
-        foreach (var show in shows.WatchedShows)
+        foreach (var show in shows.WatchedEpisodes)
         {
             media.Add(new Types.Media
             {
-                Identifier = show.Show.Identifier,
+                Identifier = show.Episode.Season.Show.Identifier,
                 Title = show.Episode.Title,
-                ParentTitle = show.Season.Title,
-                GrandParentTitle = show.Show.Title,
-                Slug = show.Show.Slug,
-                Year = show.Show.Year,
-                Overview = show.Show.Overview,
-                Poster = show.Show.Poster,
-                TMDB = show.Show.TMDB,
+                ParentTitle = show.Episode.Season.Title,
+                GrandParentTitle = show.Episode.Season.Show.Title,
+                Slug = show.Episode.Season.Show.Slug,
+                Year = show.Episode.Season.Show.Year,
+                Overview = show.Episode.Season.Show.Overview,
+                Poster = show.Episode.Season.Show.Poster,
+                TMDB = show.Episode.Season.Show.TMDB,
                 Type = MediaType.Episode.ToString(),
-                SeasonNumber = show.Season.Number,
+                SeasonNumber = show.Episode.Season.Number,
                 EpisodeNumber = show.Episode.Number,
                 WatchedAt = show.WatchedAt,
             });
@@ -140,7 +141,7 @@ public class MediaService
     public GetStatsForCalendarResonse GetStatsForCalendar(string username, int daysInThePast)
     {
         var movies = _moviesService.GetAllWatchedMovies(username, 10000, 1);
-        var shows = _showsService.GetAllWatchedShows(username, 10000, 1);
+        var shows = _showsService.GetAllWatchedEpisodes(username, 10000, 1);
 
         var stats = new Dictionary<string, int>();
 
@@ -157,7 +158,7 @@ public class MediaService
                 stats[key]++;
         }
 
-        foreach (var show in shows.WatchedShows)
+        foreach (var show in shows.WatchedEpisodes)
         {
             if(show.WatchedAt < lowestDate)
                 continue;
@@ -190,13 +191,13 @@ public class MediaService
     public GetStatsResponse GetStats(string username)
     {
         var movies = _moviesService.GetAllWatchedMovies(username, 10000, 1);
-        var shows = _showsService.GetAllWatchedShows(username, 10000, 1);
+        var shows = _showsService.GetAllWatchedEpisodes(username, 10000, 1);
 
         return new GetStatsResponse
         {
-            Total = movies.WatchedMovies.Count + shows.WatchedShows.Count,
+            Total = movies.WatchedMovies.Count + shows.WatchedEpisodes.Count,
             MoviesWatched = movies.WatchedMovies.Count,
-            EpisodesWatched = shows.WatchedShows.Count
+            EpisodesWatched = shows.WatchedEpisodes.Count
         };
     }
 
@@ -384,7 +385,15 @@ public class MediaService
         var processedShows = 0;
         foreach (var show in shows)
         {
-            await ProcessShow(show, user, requestDebug);
+            var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB, requestDebug);
+
+            if (details.Identifier == 0)
+            {
+                Console.WriteLine($"[ERROR] - Failed to find show details ({show.Show.Ids.TMDB}).");
+                continue;
+            }
+            
+            await ProcessShow(show, details, user, requestDebug);
 
             var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(user.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
 
@@ -394,7 +403,7 @@ public class MediaService
 
                 foreach (var watchHistory in watchingHistory)
                 {
-                    var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, requestDebug);
+                    var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, details, requestDebug);
                     
                     if (showRecord.Identifier.ToString() == Guid.Empty.ToString())
                     {  
@@ -410,7 +419,7 @@ public class MediaService
                         continue;
                     }
                     
-                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  watchHistory.Episode.Number, requestDebug);
+                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord, watchHistory.Episode.Number, requestDebug);
 
                     if (episodeRecord.Identifier.ToString() == Guid.Empty.ToString())
                     {
@@ -434,14 +443,22 @@ public class MediaService
         }
     }
 
-    private async Task ProcessShow(TraktShowResponse show, UserRecord userRecord, bool requestDebug)
-    {
-        var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, requestDebug);
+    private async Task ProcessShow(TraktShowResponse show, TmdbShowDetails details, UserRecord userRecord, bool requestDebug)
+    {   
+        var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, details, requestDebug);
+        
+        if(showRecord.TMDB == null)
+        {
+            Console.WriteLine($"[ERROR] - Show Tmdb not found: Show.Title: '{showRecord.Title}'. {JsonConvert.SerializeObject(show)}");
+            return;
+        }
         
         if(requestDebug)
-            Console.WriteLine($"[DEBUG] - Got Show Record. ShowTbdbId: {show.Show.Ids.TMDB}. {JsonConvert.SerializeObject(show)}");
+            Console.WriteLine($"[DEBUG] - Got Show Record. ShowTmdbId: {show.Show.Ids.TMDB}. {JsonConvert.SerializeObject(show)}");
         
-        _showsService.ImportShow(userRecord, showRecord).Wait();
+        var genres = await _moviesService.FindOrCreateGenres(details?.Genres.ConvertAll((genre) => genre.Name) ?? []);
+        
+        _showsService.ImportShow(userRecord, showRecord, genres).Wait();
             
         foreach (var season in show.Seasons)
         {
@@ -454,7 +471,7 @@ public class MediaService
                     
             foreach (var episode in season.Episodes)
             {
-                var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord,  episode.Number, requestDebug);
+                var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord, episode.Number, requestDebug);
                 
                 if(requestDebug)
                     Console.WriteLine($"[DEBUG] - Got Episode Record. ShowRecordId: {showRecord.Identifier}, SeasonIdentifier: {seasonRecord.Identifier}, EpisodeNumber: {episode.Number}. {JsonConvert.SerializeObject(episode)}");
@@ -487,20 +504,12 @@ public class MediaService
         return movieRecord;
     }
 
-    private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId, bool requestDebug)
+    private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId, TmdbShowDetails details, bool requestDebug)
     {
         var showRecord = await _showsService.GetShowByTmdbId(tmdbId);
 
         if (showRecord != null)
             return showRecord;
-        
-        var details = await _detailsProvider.GetDetailsForShow(tmdbId, requestDebug);
-
-        if (details.Identifier == 0)
-        {
-            Console.WriteLine($"[ERROR] - Failed to find show details ({tmdbId}).");
-            return new ShowRecord();
-        }
         
         showRecord = new ShowRecord
         {
@@ -510,7 +519,7 @@ public class MediaService
             Year = details.FirstAirDate.Year,
             TMDB = tmdbId,
             Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
-            Overview = details.Overview,
+            Overview = details.Overview
         };
 
         return showRecord;
@@ -543,8 +552,7 @@ public class MediaService
             if (episodeRecord != null)
                 return episodeRecord;
 
-            var episodeDetails =
-                await _detailsProvider.GetEpisodeDetails(show.TMDB, season.Number, episodeNumber, requestDebug);
+            var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.TMDB, season.Number, episodeNumber, requestDebug);
 
             episodeRecord = new EpisodeRecord
             {

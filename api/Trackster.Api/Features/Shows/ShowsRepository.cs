@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Shows.Types;
 
 namespace Trackster.Api.Features.Shows;
@@ -10,20 +11,21 @@ public interface IShowsRepository
     Task<ShowRecord?> GetShowByTmdbId(string tmdbId);
     Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier);
     Task<EpisodeRecord?> GetEpisodeBy(int episodeNumber, Guid seasonIdentifier);
-    List<WatchedShow> GetAllWatchedShows(string username, int results, int page);
+    List<WatchedEpisode> GetAllWatchedEpisodes(string username, int results, int page);
     Show? GetShowBySlug(string slug);
     Season? GetSeasonByNumber(string slug, int seasonNumber);
     Episode? GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber);
     List<WatchedEpisode> GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber);
-    Task ImportShow(UserRecord user, ShowRecord show);
+    Task ImportShow(UserRecord user, ShowRecord show, List<GenreRecord> genres);
     Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season);
     Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
     Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt);
     EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
     ShowRecord? GetShowByReference(Guid identifier);
     SeasonRecord? GetSeasonByReference(Guid identifier);
-    Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord);
+    Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord, List<GenreRecord> genres);
     Task SaveEpisode(ShowRecord show, SeasonRecord season, EpisodeRecord episode);
+    Task<List<GenreRecord>> FindOrCreateGenres(List<string> genres);
 }
 
 public class ShowsRepository : IShowsRepository
@@ -82,41 +84,37 @@ public class ShowsRepository : IShowsRepository
         }
     }
 
-    public List<WatchedShow> GetAllWatchedShows(string username, int results, int page)
+    public List<WatchedEpisode> GetAllWatchedEpisodes(string username, int results, int page)
     {
         using (var context = new DatabaseContext())
         {
             try
             {
-                return context.EpisodeUserLinks
+                var userEpisodes = context.EpisodeUserLinks
+                    .Include(x => x.Episode)
+                    .ThenInclude(x => x.Season)
+                    .ThenInclude(x => x.Show)
                     .Where(x => x.User.Username.ToUpper() == username.ToUpper())
                     .OrderByDescending(x => x.WatchedAt)
                     .Skip((page - 1) * results)
                     .Take(results)
-                    .Select(x => new WatchedShow
+                    .ToList();
+                
+                var showIds = userEpisodes
+                    .Select(x => x.Episode.Season.Show.Identifier)
+                    .Distinct()
+                    .ToList();
+                
+                var genres = context.ShowGenres
+                    .Include(showGenreRecord => showGenreRecord.Show)
+                    .Include(showGenreRecord => showGenreRecord.Genre)
+                    .Where(x => showIds.Contains(x.Show.Identifier))
+                    .ToList();
+                
+                return userEpisodes
+                    .Select(x => new WatchedEpisode
                     {
-                        Show = new Show
-                        {
-                            Identifier = x.Episode.Season.Show.Identifier,
-                            Title = x.Episode.Season.Show.Title,
-                            Slug = x.Episode.Season.Show.Slug,
-                            Year = x.Episode.Season.Show.Year,
-                            TMDB =  x.Episode.Season.Show.TMDB,
-                            Poster = x.Episode.Season.Show.Poster,
-                            Overview = x.Episode.Season.Show.Overview,
-                        },
-                        Season = new Season
-                        {
-                            Identifier = x.Episode.Season.Identifier,
-                            Number = x.Episode.Season.Number,
-                            Title = x.Episode.Season.Title,
-                        },
-                        Episode = new Episode
-                        {
-                            Identifier = x.Episode.Identifier,
-                            Number = x.Episode.Number,
-                            Title = x.Episode.Title,
-                        },
+                        Episode = ShowMapper.MapEpisode(x.Episode, genres.Where(y => y.Show.Identifier == x.Episode.Season.Show.Identifier).Select(x => x.Genre).ToList()),
                         WatchedAt = x.WatchedAt
                     })
                     .ToList();
@@ -127,7 +125,7 @@ public class ShowsRepository : IShowsRepository
             }
         }
 
-        return new List<WatchedShow>();
+        return new List<WatchedEpisode>();
     }
 
     public Show? GetShowBySlug(string slug)
@@ -142,16 +140,14 @@ public class ShowsRepository : IShowsRepository
                 if (show == null)
                     return null;
 
-                return new Show
-                {
-                    Identifier = show.Identifier,
-                    Title = show.Title,
-                    Slug = show.Slug,
-                    Year = show.Year,
-                    TMDB =  show.TMDB,
-                    Poster = show.Poster,
-                    Overview = show.Overview
-                };
+                var genres = context.ShowGenres
+                    .Include(x => x.Genre)
+                    .Include(x => x.Show)
+                    .Where(x => x.Show.Identifier == show.Identifier)
+                    .Select(x => x.Genre)
+                    .ToList();
+
+                return ShowMapper.Map(show, genres);
             }
             catch (Exception)
             {
@@ -167,18 +163,21 @@ public class ShowsRepository : IShowsRepository
             try
             {
                 var season = context.Seasons
+                    .Include(x => x.Show)
                     .Where(x => x.Show.Slug.ToUpper() == slug.ToUpper())
                     .FirstOrDefault(x => x.Number == seasonNumber);
 
                 if (season == null)
                     return null;
 
-                return new Season
-                {
-                    Identifier = season.Identifier,
-                    Title = season.Title,
-                    Number = season.Number
-                };
+                var genres = context.ShowGenres
+                    .Include(x => x.Genre)
+                    .Include(x => x.Show)
+                    .Where(x => x.Show.Identifier == season.Show.Identifier)
+                    .Select(x => x.Genre)
+                    .ToList();
+
+                return ShowMapper.MapSeason(season, genres);
             }
             catch (Exception)
             {
@@ -203,22 +202,14 @@ public class ShowsRepository : IShowsRepository
                 if (episode == null)
                     return null;
 
-                return new Episode
-                {
-                    Identifier = episode.Identifier,
-                    Title = episode.Title,
-                    Number = episode.Number,
-                    Season = new Season
-                    {
-                        Identifier = episode.Season.Identifier,
-                        Show = new Show
-                        {
-                            Identifier = episode.Season.Show.Identifier,
-                            TMDB = episode.Season.Show.TMDB,
-                            Title = episode.Season.Show.Title,
-                        }
-                    }
-                };
+                var genres = context.ShowGenres
+                    .Include(x => x.Genre)
+                    .Include(x => x.Show)
+                    .Where(x => x.Show.Identifier == episode.Season.Show.Identifier)
+                    .Select(x => x.Genre)
+                    .ToList();
+
+                return ShowMapper.MapEpisode(episode, genres);
             }
             catch (Exception)
             {
@@ -258,7 +249,7 @@ public class ShowsRepository : IShowsRepository
         }
     }
 
-    public async Task ImportShow(UserRecord user, ShowRecord show)
+    public async Task ImportShow(UserRecord user, ShowRecord show, List<GenreRecord> genres)
     {
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
@@ -266,12 +257,43 @@ public class ShowsRepository : IShowsRepository
             try
             {
                 var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == user.Username.ToUpper());
+
                 if (existingUser == null)
+                {
+                    Console.WriteLine($"[INFO] - User '{user.Username}' doesn't exist. Creating...");
                     context.Add(user);
+                }
 
                 var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
+                
                 if (existingShow == null)
+                {
+                    Console.WriteLine($"[INFO] - Show '{show.Title}' doesn't exist. Creating...");
                     context.Add(show);
+                }
+                
+                foreach (var genre in genres)
+                {
+                    var existingGenre = context.Genres.FirstOrDefault(x => x.Identifier == genre.Identifier);
+
+                    if (existingGenre == null)
+                    {    
+                        Console.WriteLine($"[INFO] - Genre '{genre.Name}' doesn't exist. Creating...");
+                        context.Add(genre);
+                    }
+                    
+                    var existingShowGenre = context.ShowGenres.FirstOrDefault(x => x.Show.Identifier == show.Identifier && x.Genre.Identifier == genre.Identifier);
+
+                    if (existingShowGenre != null)
+                        continue;
+                    
+                    context.ShowGenres.Add(new ShowGenreRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        Show = existingShow ?? show,
+                        Genre = existingGenre ?? genre,
+                    });
+                }
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -398,6 +420,48 @@ public class ShowsRepository : IShowsRepository
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
             }
+        }
+    }
+
+    public async Task<List<GenreRecord>> FindOrCreateGenres(List<string> genres)
+    {
+        await using (var context = new DatabaseContext())
+        await using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var genreRecords = new List<GenreRecord>();
+                
+                foreach (var genre in genres)
+                {
+                    var existingGenre = context.Genres.FirstOrDefault(x => x.Name.ToUpper() == genre.ToUpper());
+
+                    if (existingGenre == null)
+                    {
+                        existingGenre = new GenreRecord
+                        {
+                            Identifier = Guid.NewGuid(),
+                            Name = genre,
+                        };
+                        
+                        context.Genres.Add(existingGenre);
+                    }
+                    
+                    genreRecords.Add(existingGenre);
+                }
+                
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                
+                return genreRecords;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+            }
+
+            return new List<GenreRecord>();
         }
     }
 
@@ -557,19 +621,44 @@ public class ShowsRepository : IShowsRepository
         }
     }
 
-    public async Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord)
+    public async Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord, List<GenreRecord> genres)
     {
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
-                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == episodeRecord.Identifier.ToString().ToUpper());
+                var existingEpisode = context.Episodes
+                    .Include(x => x.Season)
+                    .ThenInclude(x => x.Show)
+                    .FirstOrDefault(x => x.Identifier.ToString().ToUpper() == episodeRecord.Identifier.ToString().ToUpper());
 
                 if (existingEpisode == null)
                     return episodeRecord;
                 
                 existingEpisode.Title = episodeRecord.Title;
+                
+                foreach (var genre in genres)
+                {
+                    var existingGenre = context.Genres.FirstOrDefault(x => x.Identifier == genre.Identifier);
+
+                    if (existingGenre == null)
+                        continue;
+                    
+                    var existingMovieGenre = context.ShowGenres.FirstOrDefault(x => x.Show.Identifier == existingEpisode.Season.Show.Identifier && x.Genre.Identifier == genre.Identifier);
+
+                    if (existingMovieGenre != null)
+                        continue;
+
+                    var showGenreRecord = new ShowGenreRecord
+                    {
+                        Identifier = Guid.NewGuid(),
+                        Show = existingEpisode.Season.Show,
+                        Genre = existingGenre,
+                    };
+                    
+                    context.ShowGenres.Add(showGenreRecord);
+                }
                 
                 context.Episodes.Update(existingEpisode);
 

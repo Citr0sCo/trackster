@@ -50,8 +50,6 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
                 this._userService.getUserBySession()
                     .pipe(takeUntil(this._destroy))
                     .subscribe((user: IUser) => {
-                        const show = this._showService.getShowBySlug(params['slug']);
-                        const season = this._showService.getSeasonByNumber(params['slug'], params['seasonId']);
                         const episode = this._showService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
                         const watchHistory = this._showService.getEpisodeWatchHistory(user.username, params['slug'], params['seasonId'], params['episodeId']);
 
@@ -59,13 +57,13 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
                         this.seasonId = params['seasonId'];
                         this.episodeId = params['episodeId'];
 
-                        zip(show, season, episode, watchHistory)
+                        zip(episode, watchHistory)
                             .pipe(takeUntil(this._destroy))
-                            .subscribe(([show, season, episode, watchHistory]) => {
+                            .subscribe(([episode, watchHistory]) => {
                                 this.isLoading = false;
-                                this.show = show;
-                                this.season = season;
                                 this.episode = episode;
+                                this.season = episode.season;
+                                this.show = episode.season.show;
                                 this.watchHistory = watchHistory;
                             });
                     });
@@ -84,8 +82,9 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((episode) => {
                 this.isUpdating = false;
-
-                this.episode!.title = episode.title;
+                this.episode = episode;
+                this.season = episode.season;
+                this.show = episode.season.show;
             });
     }
 

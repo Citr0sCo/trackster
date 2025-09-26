@@ -2,6 +2,7 @@
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies.Types;
 
 namespace Trackster.Api.Features.Movies;
@@ -395,7 +396,7 @@ public class MoviesRepository : IMoviesRepository
                     {
                         Identifier = Guid.NewGuid(),
                         Movie = movie,
-                        Genre = genre,
+                        Genre = existingGenre ?? genre,
                     });
                 }
 

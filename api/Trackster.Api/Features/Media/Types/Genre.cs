@@ -1,4 +1,4 @@
-namespace Trackster.Api.Features.Movies.Types;
+namespace Trackster.Api.Features.Media.Types;
 
 public class Genre
 {

@@ -1,3 +1,5 @@
+using Trackster.Api.Features.Media.Types;
+
 namespace Trackster.Api.Features.Movies.Types;
 
 public class Movie
