@@ -4023,10 +4023,10 @@ jasmine-core@^4.1.0:
   resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-4.6.1.tgz#5ebb8afa07282078f8d7b15871737a83b74e58f2"
   integrity sha512-VYz/BjjmC3klLJlLwA4Kw8ytk0zDSmbbDLNs794VnWmkcCB7I9aAL/D48VNQtmITyPvea2C3jdUMfc3kAoy0PQ==
 
-jasmine-core@~5.10.0:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-5.10.0.tgz#7e6c3efde6eb1ec9afc58d4373f6ace1e91c459e"
-  integrity sha512-MrChbWV5LBo+EaeKwTM1eZ6oYSz1brvFExnRafraEkJkbJ9evbUxABhnIgGQimhpMxhg+BD6QmOvb/e3NXsNdg==
+jasmine-core@~5.11.0:
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-5.11.0.tgz#1343e324a0148508511031a1d5fc0d4b7ee92446"
+  integrity sha512-MPJ8L5yyNul0F2SuEsLASwESXQjJvBXnKu31JWFyRZSvuv2B79K4GDWN3pSqvLheUNh7Fyb6dXwd4rsz95O2Kg==
 
 js-tokens@^4.0.0:
   version "4.0.0"
