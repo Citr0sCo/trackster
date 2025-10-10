@@ -1,4 +1,3 @@
-using Trackster.Api.Features.Auth.Types;
 using Trackster.Api.Features.Sessions.Types;
 
 namespace Trackster.Api.Features.Sessions;

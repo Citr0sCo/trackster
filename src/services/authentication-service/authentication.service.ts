@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {Observable, of, pipe, tap} from 'rxjs';
+import { Observable, of, pipe, tap } from 'rxjs';
 import { AuthenticationRepository } from './authentication.repository';
 import { ISignInRequest } from "./types/sign-in.request";
 import { ISignInResponse } from "./types/sign-in.response";
@@ -29,7 +29,8 @@ export class AuthenticationService {
             Code: payload.code,
             Email: payload.email,
             Password: payload.password,
-            Remember: payload.remember
+            Remember: payload.remember,
+            UserIdentifier: payload.userIdentifier
         }).pipe(tap((response: ISignInResponse) => {
             this._session = new Session(response.sessionId);
             localStorage.setItem('TRACKSTER_SESSION_ID', this._session.identifier());
@@ -44,7 +45,7 @@ export class AuthenticationService {
             session = localStorage.getItem('TRACKSTER_SESSION_ID') ?? '';
         }
 
-        if(session) {
+        if (session) {
             return this._authenticationRepository.signOut(session)
                 .pipe(tap(() => {
                     this._session = null;

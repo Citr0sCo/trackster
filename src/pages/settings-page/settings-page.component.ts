@@ -1,12 +1,12 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
-import {StreamService} from "../../core/event-service.service";
-import {environment} from "../../environments/environment";
-import {round} from "@popperjs/core/lib/utils/math";
-import {UserService} from '../../services/user-service/user.service';
-import {IUser} from '../../services/user-service/types/user.type';
-import {WebhookService} from "../../services/webhook-service/webhook.service";
-import {IWebhook, WebhookProvider} from "../../services/webhook-service/types/webhook.type";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { StreamService } from "../../core/event-service.service";
+import { environment } from "../../environments/environment";
+import { round } from "@popperjs/core/lib/utils/math";
+import { UserService } from '../../services/user-service/user.service';
+import { IUser } from '../../services/user-service/types/user.type';
+import { WebhookService } from "../../services/webhook-service/webhook.service";
+import { IWebhook, WebhookProvider } from "../../services/webhook-service/types/webhook.type";
 
 @Component({
     selector: 'settings-page',

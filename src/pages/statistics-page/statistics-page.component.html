@@ -2,7 +2,7 @@
     <div class="container">
         <div class="o-grid u-mb-2 o-grid--static">
             <div class="o-grid__col">
-                <h3>Statistics</h3>
+                <h3><i class="fa fa-chart-line"></i> Statistics</h3>
             </div>
             <div class="o-grid__col o-grid__col--fixed">
                 <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
@@ -12,6 +12,8 @@
                 </div>
             </div>
         </div>
+
+        <hr>
 
         @if (!statsLoading) {
             <div class="o-grid">

@@ -20,10 +20,10 @@
                     <input type="password" class="c-field" formControlName="password" placeholder="password">
                 </div>
                 <div class="c-input-group u-mb-1">
-                        <label for="remember-login" class="c-field">
-                            <input type="checkbox" formControlName="remember" id="remember-login" class="u-mr-1">
-                            Remember Login?
-                        </label>
+                    <label for="remember-login" class="c-field">
+                        <input type="checkbox" formControlName="remember" id="remember-login" class="u-mr-1">
+                        Remember Login?
+                    </label>
                 </div>
                 <div class="c-input-group">
                     <button class="btn btn-primary w-100" (click)="login()" [disabled]="!formGroup.valid || isLoading">
@@ -35,9 +35,15 @@
                 </div>
             </form>
 
+            <div class="sign-in-spacer"><span class="text">or</span></div>
+
+            <auth-with-trakt-button></auth-with-trakt-button>
+
             <hr>
 
-            <a [routerLink]="'/register'" style="text-decoration: none; color:#fff;">Register</a>
+            <p>Not a member yet?</p>
+
+            <button class="btn w-100" [routerLink]="'/register'" style="text-decoration: none; color:#fff;">Register</button>
         </div>
     </div>
     <div class="login-poster-wrapper">

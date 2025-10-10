@@ -6,7 +6,6 @@ import { AuthenticationService } from "../../services/authentication-service/aut
 import { Provider } from "../../core/providers.enum";
 import { ISignInRequest } from "../../services/authentication-service/types/sign-in.request";
 import { ISignInResponse } from "../../services/authentication-service/types/sign-in.response";
-import { UserService } from '../../services/user-service/user.service';
 
 @Component({
     selector: 'login-page',
@@ -42,7 +41,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             });
 
         if (this._authService.isLoggedIn()) {
-            window.location.href = "/#/app/home";
+            window.location.href = "/app/home";
         }
     }
 

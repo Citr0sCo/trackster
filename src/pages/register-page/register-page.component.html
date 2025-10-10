@@ -35,9 +35,15 @@
                 </div>
             </form>
 
+            <div class="sign-in-spacer"><span class="text">or</span></div>
+
+            <auth-with-trakt-button></auth-with-trakt-button>
+
             <hr>
 
-            <a [routerLink]="'/login'" style="text-decoration: none; color:#fff;">Login</a>
+            <p>Already a member?</p>
+
+            <button class="btn w-100" [routerLink]="'/login'" style="text-decoration: none; color:#fff;">Login</button>
         </div>
     </div>
     <div class="login-poster-wrapper">

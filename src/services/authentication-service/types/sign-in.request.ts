@@ -3,4 +3,5 @@ export interface ISignInRequest {
     email?: string;
     password?: string;
     remember?: boolean;
+    userIdentifier?: string;
 }

@@ -1,50 +1,72 @@
 <div class="settings-page-component">
     <div class="container">
+
+        <h3><i class="fa fa-cog"></i> Settings</h3>
+
+        <hr>
+
         <div class="o-grid">
-            <div class="o-grid__col">
-                <div class="c-input-group" style="margin-right:5px;" (click)="isDebug = !isDebug">
-                    <div class="c-field" style="margin-top:15px;">
-                        <input type="checkbox" [checked]="isDebug">
-                        <div class="c-label">Debug</div>
+            <div class="o-grid__col o-grid__col--equal u-mr-3 u-mr-0-mobile">
+
+                <h4>Profile</h4>
+
+                <div class="c-input-group">
+                    <div class="c-label">Plex Webhook</div>
+                    <div class="o-grid o-grid--static">
+                        <div class="o-grid__col">
+                            <input type="text" placeholder="Webhook URL" class="c-field c-field--icon-post" [value]="webhook?.url" disabled="disabled">
+                        </div>
+                        <div class="o-grid__col o-grid__col--fixed">
+                            <div class="c-icon c-icon--post" style="cursor:pointer;" (click)="generateWebhookUrl()"><i class="fa fa-sync" [ngClass]="{'fa-spin': isCreatingWebhook}"></i></div>
+                        </div>
                     </div>
                 </div>
+
+                <hr>
+
+                <input type="text" placeholder="Username" class="c-field" [value]="user?.username">
+
+                <button class="btn btn-primary w-100 mt-3" (click)="saveSettings()">Save</button>
             </div>
-            <div class="o-grid__col">
-                <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'" [isLoading]="isImporting"></wide-button>
+            <div class="o-grid__col o-grid__col--equal">
+
+                <h4>Integrations</h4>
+
+                <div class="c-label">Import Data From Trakt</div>
+                <div class="o-grid o-grid--static">
+                    <div class="o-grid__col">
+                        <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'" [isLoading]="isImporting"></wide-button>
+                    </div>
+                    <div class="o-grid__col o-grid__col--fixed">
+                        <div class="c-input-group u-ml-2" (click)="isDebug = !isDebug">
+                            <div class="c-field">
+                                <input type="checkbox" [checked]="isDebug">
+                                <div class="c-label">Debug</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (total > 0) {
+                    <div class="progress-bar__wrapper u-mb-2">
+                        <div class="progress-bar__text">
+                            {{ processed }}/{{ total }} ({{ round((processed / total) * 100) }}%) {{ mediaType }}s
+                        </div>
+                        <div class="progress-bar__inner" style="width:{{ (processed / total) * 100 }}%"></div>
+                    </div>
+                }
+
+                @if (progress.length > 0) {
+                    <pre class="log-window">@for (key of progress; track key) {
+                        {{ key }}
+                    }</pre>
+                }
+
+                <hr>
+
+                <div class="c-label">Third Party Integrations</div>
+                <auth-with-trakt-button></auth-with-trakt-button>
             </div>
         </div>
-
-        @if (total > 0) {
-            <div class="progress-bar__wrapper u-mb-2">
-                <div class="progress-bar__text">
-                    {{ processed }}/{{ total }} ({{ round((processed / total) * 100) }}%) {{ mediaType }}s
-                </div>
-                <div class="progress-bar__inner" style="width:{{ (processed / total) * 100 }}%"></div>
-            </div>
-        }
-
-        @if (progress.length > 0) {
-            <pre class="log-window">@for (key of progress; track key) { {{ key }} }</pre>
-        }
-
-        <hr>
-
-        <div class="c-input-group">
-            <div class="c-label">Plex Webhook</div>
-            <div class="o-grid o-grid--static">
-                <div class="o-grid__col">
-                    <input type="text" placeholder="Webhook URL" class="c-field c-field--icon-post" [value]="webhook?.url" disabled="disabled">
-                </div>
-                <div class="o-grid__col o-grid__col--fixed">
-                    <div class="c-icon c-icon--post" style="cursor:pointer;" (click)="generateWebhookUrl()"><i class="fa fa-sync" [ngClass]="{'fa-spin': isCreatingWebhook}"></i></div>
-                </div>
-            </div>
-        </div>
-
-        <hr>
-
-        <input type="text" placeholder="Username" class="c-field" [value]="user?.username">
-
-        <button class="btn btn-primary w-100 mt-3" (click)="saveSettings()">Save</button>
     </div>
 </div>

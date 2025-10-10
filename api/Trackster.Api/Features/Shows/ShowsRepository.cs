@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
-using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Shows.Types;
 
 namespace Trackster.Api.Features.Shows;

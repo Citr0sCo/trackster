@@ -1,21 +1,25 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomePageComponent } from '../pages/home-page/home-page.component';
-import {AuthorizeTraktComponent} from "../pages/authorize-trakt-page/authorize-trakt.component";
+import { AuthorizeTraktComponent } from "../pages/authorize-trakt-page/authorize-trakt.component";
 import { HistoryPageComponent } from '../pages/history-page/history-page.component';
-import {SettingsPageComponent} from "../pages/settings-page/settings-page.component";
-import {MovieDetailsPageComponent} from "../pages/movie-details-page/movie-details-page.component";
-import {ShowDetailsPageComponent} from "../pages/show-details-page/show-details-page.component";
+import { SettingsPageComponent } from "../pages/settings-page/settings-page.component";
+import { MovieDetailsPageComponent } from "../pages/movie-details-page/movie-details-page.component";
+import { ShowDetailsPageComponent } from "../pages/show-details-page/show-details-page.component";
 import { StatisticsPageComponent } from '../pages/statistics-page/statistics-page.component';
-import {LoginPageComponent} from "../pages/login-page/login-page.component";
-import {DashboardPageComponent} from "../pages/dashboard-page/dashboard-page.component";
-import {RegisterPageComponent} from "../pages/register-page/register-page.component";
-import {LogoutPageComponent} from "../pages/logout-page/logout-page.component";
+import { LoginPageComponent } from "../pages/login-page/login-page.component";
+import { DashboardPageComponent } from "../pages/dashboard-page/dashboard-page.component";
+import { RegisterPageComponent } from "../pages/register-page/register-page.component";
+import { LogoutPageComponent } from "../pages/logout-page/logout-page.component";
 
 const routes: Routes = [
     {
         path: 'login',
         component: LoginPageComponent
+    },
+    {
+        path: 'authorize/trakt',
+        component: AuthorizeTraktComponent
     },
     {
         path: 'register',
@@ -46,10 +50,6 @@ const routes: Routes = [
                 component: SettingsPageComponent
             },
             {
-                path: 'authorize/trakt',
-                component: AuthorizeTraktComponent
-            },
-            {
                 path: 'movies/:slug',
                 component: MovieDetailsPageComponent
             },
@@ -64,7 +64,7 @@ const routes: Routes = [
 
 @NgModule({
     imports: [
-        RouterModule.forRoot(routes, { useHash: true })
+        RouterModule.forRoot(routes, { useHash: false })
     ],
     exports: [
         RouterModule

@@ -25,7 +25,7 @@ export class AuthInterceptor implements HttpInterceptor {
                     if (error.exception.status === 401) {
                         this._authService.logout()
                             .subscribe(() => {
-                                window.location.href = "/#/login";
+                                window.location.href = "/login";
                             });
                     }
                     return EMPTY;

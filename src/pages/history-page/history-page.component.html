@@ -2,7 +2,7 @@
     <div class="container">
         <div class="o-grid o-grid--static">
             <div class="o-grid__col">
-                <h3>History</h3>
+                <h3><i class="fa fa-history"></i> History</h3>
             </div>
             <div class="o-grid__col o-grid__col--fixed">
                 <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
@@ -12,6 +12,8 @@
                 </div>
             </div>
         </div>
+
+        <hr>
 
         @if (media != null && keys.length > 0) {
             <div class="o-grid o-grid--space-between o-grid--row">

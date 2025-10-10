@@ -17,11 +17,11 @@
     font-weight: 400;
     resize: vertical;
     appearance: none;
-    padding: 10px;
     color: var(--text-color);
     caret-color: var(--text-color);
     background-color: var(--input-background);
     transition: all ease-in var(--animation-speed);
+    padding: 8px 10px;
 
     &--small {
         padding: 5px;

@@ -8,7 +8,11 @@ namespace Trackster.Api.Features.Users;
 public interface IUsersService
 {
     Task<UserRecord?> GetUserByUsername(string username);
-    Task<UserRecord> CreateUser(UserRecord user);
+    Task<UserRecord?> GetUserByEmail(string email);
+    Task<GetUserDetailsResponse> GetUserByReference(Guid reference);
+    Task<GetUserDetailsResponse> GetUserByReference(Guid sessionId, Guid reference);
+    Task<UserRecord?> CreateUser(UserRecord user);
+    Task<UserRecord> UpdateUser(User user);
 }
 
 public class UsersService : IUsersService
@@ -50,12 +54,7 @@ public class UsersService : IUsersService
 
         return new GetUserDetailsResponse
         {
-            User = new User
-            {
-                Identifier = user.Identifier,
-                Username = user.Username,
-                CreatedAt = user.CreatedAt,
-            }
+            User = UserMapper.Map(user)
         };
     }
 
@@ -102,8 +101,13 @@ public class UsersService : IUsersService
         };
     }
 
-    public async Task<UserRecord> CreateUser(UserRecord user)
+    public async Task<UserRecord?> CreateUser(UserRecord user)
     {
         return await _repository.CreateUser(user);
+    }
+
+    public async Task<UserRecord> UpdateUser(User user)
+    {
+        return await _repository.UpdateUser(UserMapper.MapRecord(user));
     }
 }

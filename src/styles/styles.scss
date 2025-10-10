@@ -205,9 +205,22 @@ body {
     background-color: var(--card-bg-color)
 }
 
-.btn-primary {
-    background-color: $brand-primary !important;
-    border-color: darken($brand-primary, 5%) !important;
+.btn {
+    background: var(--btn-bg-color) !important;
+    border-color: transparent !important;
+
+    &:hover {
+        background: var(--btn-bg-color-hover) !important;
+    }
+
+    &.btn-primary {
+        background: linear-gradient(45deg, $brand-primary, $brand-primary-alt) !important;
+        border-color: transparent !important;
+
+        &:hover {
+            background: linear-gradient(45deg, $brand-primary, $brand-primary) !important;
+        }
+    }
 }
 
 .o-btn {
@@ -219,7 +232,6 @@ body {
     padding: 10px 15px;
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: $border-radius;
-    margin-bottom: 5px;
     cursor: pointer;
 
     &--active {
@@ -261,5 +273,29 @@ body {
     }
 
     &__label {
+    }
+}
+
+.u-ml-0-mobile {
+    @media(max-width: $mobile-width) {
+        margin-left: 0 !important;
+    }
+}
+
+.u-mr-0-mobile {
+    @media(max-width: $mobile-width) {
+        margin-right: 0 !important;
+    }
+}
+
+.u-pl-0-mobile {
+    @media(max-width: $mobile-width) {
+        padding-left: 0 !important;
+    }
+}
+
+.u-pr-0-mobile {
+    @media(max-width: $mobile-width) {
+        padding-right: 0 !important;
     }
 }
