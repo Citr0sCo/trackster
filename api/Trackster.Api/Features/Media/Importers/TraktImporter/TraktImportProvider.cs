@@ -12,7 +12,7 @@ public class TraktImportProvider
         _apiKey = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_API_KEY")!;
     }
 
-    public async Task<List<TraktMovieResponse>> GetMovies(string username)
+    public async Task<List<TraktMovieResponse>> GetMovies(string username, bool requestDebug)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
@@ -24,13 +24,17 @@ public class TraktImportProvider
             using (var response = await httpClient.GetAsync($"users/{username}/watched/movies"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
+                
+                if(requestDebug)
+                    Console.WriteLine($"[DEBUG] - Received response from Trakt for movies {responseData}.");
+                
                 var parsedData = JsonConvert.DeserializeObject<List<TraktMovieResponse>>(responseData);
                 return parsedData ?? new List<TraktMovieResponse>();
             }
         }
     }
 
-    public async Task<List<TraktShowResponse>> GetShows(string username)
+    public async Task<List<TraktShowResponse>> GetShows(string username, bool requestDebug)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
@@ -42,6 +46,10 @@ public class TraktImportProvider
             using (var response = await httpClient.GetAsync($"users/{username}/watched/shows"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
+                
+                if(requestDebug)
+                    Console.WriteLine($"[DEBUG] - Received response from Trakt for shows {responseData}.");
+                
                 var parsedData = JsonConvert.DeserializeObject<List<TraktShowResponse>>(responseData);
                 return parsedData ?? new List<TraktShowResponse>();
             }

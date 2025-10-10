@@ -54,8 +54,8 @@ public class MediaService
                 Data = "[INFO] - Starting Trakt import..."
             };
             
-            var movies = await _traktProvider.GetMovies(request.Username);
-            var shows = await _traktProvider.GetShows(request.Username);
+            var movies = await _traktProvider.GetMovies(request.Username, request.Debug);
+            var shows = await _traktProvider.GetShows(request.Username, request.Debug);
 
             var value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (value == "Development")
