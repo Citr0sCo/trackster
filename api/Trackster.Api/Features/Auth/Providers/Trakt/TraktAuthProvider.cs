@@ -28,9 +28,6 @@ public class TraktAuthProvider : IAuthProvider
         _clientId = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_ID");
         _clientSecret = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_SECRET");
         _baseUri = Environment.GetEnvironmentVariable("ASPNETCORE_BASE_URL");
-
-        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-            _baseUri = "http://localhost:4200";
     }
 
     public async Task<SignInResponse> SignIn(SignInRequest request)
@@ -48,12 +45,11 @@ public class TraktAuthProvider : IAuthProvider
                 code = request.Code,
                 client_id = _clientId,
                 client_secret = _clientSecret,
-                redirect_uri = $"{_baseUri}/app/authorize/trakt",
+                redirect_uri = $"{_baseUri}/authorize/trakt",
                 grant_type = "authorization_code",
             };
 
-            using (var content = new StringContent(JsonConvert.SerializeObject(body), System.Text.Encoding.Default,
-                       "application/json"))
+            using (var content = new StringContent(JsonConvert.SerializeObject(body), System.Text.Encoding.Default, "application/json"))
             {
                 using (var response = await httpClient.PostAsync("oauth/token", content))
                 {
@@ -87,18 +83,58 @@ public class TraktAuthProvider : IAuthProvider
                         };
                     }
 
-                    var userResponse = await _usersService.GetUserByReference(request.UserIdentifier ?? Guid.Empty);
+                    var profile = await GetSettings(parsedData.AccessToken);
 
-                    if (userResponse == null)
+                    var user = new User
                     {
-                        return new SignInResponse
+                        Identifier = Guid.NewGuid(),
+                        Username = profile.User.Username,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        ThirdPartyIntegrations = new List<ThirdPartyIntegration>()
+                    }; 
+
+                    if (request.UserIdentifier.HasValue)
+                    {
+                        var userResponse = await _usersService.GetUserByReference(request.UserIdentifier!.Value);
+
+                        if (userResponse.HasError)
                         {
-                            HasError = true,
-                            Error = new Error
+                            return new SignInResponse
                             {
-                                UserMessage = "User not found",
+                                HasError = true,
+                                Error = userResponse.Error
+                            };
+                        }
+                        
+                        user = userResponse.User;
+                    }
+                    else
+                    {
+                        var userResponse = await _usersService.GetUserByUsername(user.Username);
+
+                        if (userResponse == null)
+                        {
+                            var userRecord = await _usersService.CreateUser(UserMapper.MapRecord(user));
+
+                            if (userRecord == null)
+                            {
+                                return new SignInResponse
+                                {
+                                    HasError = true,
+                                    Error = new Error
+                                    {
+                                        UserMessage = "Failed to create a user",
+                                    }
+                                };
                             }
-                        };
+                            
+                            user = UserMapper.Map(userRecord);
+                        }
+                        else
+                        {
+                            user = UserMapper.Map(userResponse);
+                        }
                     }
                     
                     var thirdPartyIntegration = new ThirdPartyIntegration
@@ -110,9 +146,9 @@ public class TraktAuthProvider : IAuthProvider
                         ExpiresAt = DateTime.Now.AddSeconds(parsedData.ExpiresInSeconds)
                     };
 
-                    if (userResponse.User.ThirdPartyIntegrations.Any(x => x.Provider == Provider.Trakt))
+                    if (user.ThirdPartyIntegrations.Any(x => x.Provider == Provider.Trakt))
                     {
-                        foreach (var userThirdPartyIntegration in userResponse.User.ThirdPartyIntegrations)
+                        foreach (var userThirdPartyIntegration in user.ThirdPartyIntegrations)
                         {
                             if (userThirdPartyIntegration.Provider == Provider.Trakt)
                             {
@@ -125,26 +161,22 @@ public class TraktAuthProvider : IAuthProvider
                     }
                     else
                     {
-                        userResponse.User.ThirdPartyIntegrations.Add(thirdPartyIntegration);
+                        user.ThirdPartyIntegrations.Add(thirdPartyIntegration);
                     }
 
-                    await _usersService.UpdateUser(userResponse.User);
+                    await _usersService.UpdateUser(user);
 
-                    var session = await _sessionService.GetSessionByUserIdentifier(userResponse.User.Identifier);
+                    var session = await _sessionService.GetSessionByUserIdentifier(user.Identifier);
 
                     if (session == null)
                     {
-                        session = await _sessionService.CreateSession(userResponse.User.Identifier, request.Remember);
+                        session = await _sessionService.CreateSession(user.Identifier, request.Remember);
                         _sessionFactory.AddSession(session.Reference(), session);
                     }
 
                     return new SignInResponse
                     {
                         SessionId = session.Reference(),
-                    };
-
-                    return new SignInResponse
-                    {
                     };
                 }
             }
@@ -158,7 +190,7 @@ public class TraktAuthProvider : IAuthProvider
         throw new NotImplementedException();
     }
 
-    public async Task<TraktProfileResponse?> GetProfile(string username)
+    public async Task<TraktProfileResponse?> GetProfile(string username, string accessToken)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
 
@@ -166,12 +198,33 @@ public class TraktAuthProvider : IAuthProvider
         {
             httpClient.DefaultRequestHeaders.Add("trakt-api-version", "2");
             httpClient.DefaultRequestHeaders.Add("trakt-api-key", _clientId);
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
             httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
 
             using (var response = await httpClient.GetAsync($"users/{username}"))
             {
                 string responseData = await response.Content.ReadAsStringAsync();
                 var parsedData = JsonConvert.DeserializeObject<TraktProfileResponse>(responseData);
+                return parsedData;
+            }
+        }
+    }
+
+    public async Task<TraktSettingsResponse?> GetSettings(string accessToken)
+    {
+        var baseAddress = new Uri("https://api.trakt.tv/");
+
+        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
+        {
+            httpClient.DefaultRequestHeaders.Add("trakt-api-version", "2");
+            httpClient.DefaultRequestHeaders.Add("trakt-api-key", _clientId);
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
+
+            using (var response = await httpClient.GetAsync($"users/settings"))
+            {
+                string responseData = await response.Content.ReadAsStringAsync();
+                var parsedData = JsonConvert.DeserializeObject<TraktSettingsResponse>(responseData);
                 return parsedData;
             }
         }

@@ -9,7 +9,7 @@ public interface IUsersRepository
     Task<UserRecord?> GetUserByUsername(string username);
     Task<UserRecord?> GetUserByEmail(string email);
     Task<UserRecord?> GetUserByReference(Guid reference);
-    Task<UserRecord> CreateUser(UserRecord user);
+    Task<UserRecord?> CreateUser(UserRecord user);
     Task<UserRecord> UpdateUser(UserRecord user);
 }
 
@@ -93,7 +93,7 @@ public class UsersRepository : IUsersRepository
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
 
-                return user;
+                return null;
             }
         }
     }
@@ -127,7 +127,6 @@ public class UsersRepository : IUsersRepository
 
                 foreach (var integration in user.ThirdPartyIntegrations)
                 {
-                    existingUser.ThirdPartyIntegrations.Add(integration);
                     context.ThirdPartyIntegrations.Add(integration);
                 }
                 

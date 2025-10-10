@@ -32,7 +32,9 @@ export class AuthorizeTraktComponent implements OnInit, OnDestroy {
                 })
                     .pipe(takeUntil(this._destroy))
                     .subscribe((response) => {
-                        console.log(response);
+                        if (response.hasError == false) {
+                            window.location.href = "/";
+                        }
                     })
             });
     }

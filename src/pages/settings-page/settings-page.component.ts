@@ -133,7 +133,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public authWithTrakt(): void {
 
         const clientId = this._settings?.traktClientId;
-        const redirectUri = `${window.location.origin}/app/authorize/trakt`;
+        const redirectUri = `${window.location.origin}/authorize/trakt`;
         const state = encodeURIComponent(JSON.stringify({ userIdentifier: this.user?.identifier }));
 
         window.location.href = `https://api.trakt.tv/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;

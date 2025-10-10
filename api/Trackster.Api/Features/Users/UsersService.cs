@@ -1,6 +1,5 @@
 using Trackster.Api.Core.Types;
 using Trackster.Api.Data.Records;
-using Trackster.Api.Features.Auth.Types;
 using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Users.Types;
 
@@ -9,7 +8,11 @@ namespace Trackster.Api.Features.Users;
 public interface IUsersService
 {
     Task<UserRecord?> GetUserByUsername(string username);
-    Task<UserRecord> CreateUser(UserRecord user);
+    Task<UserRecord?> GetUserByEmail(string email);
+    Task<GetUserDetailsResponse> GetUserByReference(Guid reference);
+    Task<GetUserDetailsResponse> GetUserByReference(Guid sessionId, Guid reference);
+    Task<UserRecord?> CreateUser(UserRecord user);
+    Task<UserRecord> UpdateUser(User user);
 }
 
 public class UsersService : IUsersService
@@ -98,7 +101,7 @@ public class UsersService : IUsersService
         };
     }
 
-    public async Task<UserRecord> CreateUser(UserRecord user)
+    public async Task<UserRecord?> CreateUser(UserRecord user)
     {
         return await _repository.CreateUser(user);
     }

@@ -6,7 +6,8 @@ import { AuthenticationService } from "../../services/authentication-service/aut
 import { Provider } from "../../core/providers.enum";
 import { ISignInRequest } from "../../services/authentication-service/types/sign-in.request";
 import { ISignInResponse } from "../../services/authentication-service/types/sign-in.response";
-import { UserService } from '../../services/user-service/user.service';
+import { SettingsService } from '../../services/settings-service/settings.service';
+import { ISettings } from '../../services/settings-service/types/settings.type';
 
 @Component({
     selector: 'login-page',
@@ -28,10 +29,14 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
     private readonly _authService: AuthenticationService;
+    private readonly _settingsService: SettingsService;
 
-    constructor(mediaService: MediaService, authService: AuthenticationService) {
+    private _settings: ISettings | null = null;
+
+    constructor(mediaService: MediaService, authService: AuthenticationService, settingsService: SettingsService) {
         this._mediaService = mediaService;
         this._authService = authService;
+        this._settingsService = settingsService;
     }
 
     public ngOnInit(): void {
@@ -39,6 +44,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((posters: Array<string>) => {
                 this.activePoster = posters[this.randomIntFromInterval(0, posters.length - 1)]
+            });
+
+        this._settingsService
+            .getSettings()
+            .subscribe((settings) => {
+                this._settings = settings;
             });
 
         if (this._authService.isLoggedIn()) {
@@ -70,6 +81,17 @@ export class LoginPageComponent implements OnInit, OnDestroy {
                     window.location.href = "/";
                 }
             });
+    }
+
+    public authWithTrakt(): void {
+
+        const clientId = this._settings?.traktClientId;
+        const redirectUri = `${window.location.origin}/authorize/trakt`;
+        const state = encodeURIComponent(JSON.stringify({}));
+
+        console.log(redirectUri);
+
+        window.location.href = `https://api.trakt.tv/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
     }
 
     private randomIntFromInterval(min: number, max: number): number {

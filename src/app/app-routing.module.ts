@@ -18,6 +18,10 @@ const routes: Routes = [
         component: LoginPageComponent
     },
     {
+        path: 'authorize/trakt',
+        component: AuthorizeTraktComponent
+    },
+    {
         path: 'register',
         component: RegisterPageComponent
     },
@@ -44,10 +48,6 @@ const routes: Routes = [
             {
                 path: 'settings',
                 component: SettingsPageComponent
-            },
-            {
-                path: 'authorize/trakt',
-                component: AuthorizeTraktComponent
             },
             {
                 path: 'movies/:slug',

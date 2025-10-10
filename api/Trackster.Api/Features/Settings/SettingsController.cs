@@ -5,7 +5,6 @@ using Trackster.Api.Features.Users;
 
 namespace Trackster.Api.Features.Settings;
 
-[AuthRequired]
 [ApiController]
 [Route("api/[controller]")]
 public class SettingsController : ControllerBase
