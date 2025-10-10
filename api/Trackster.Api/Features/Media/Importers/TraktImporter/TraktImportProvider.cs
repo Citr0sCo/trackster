@@ -9,7 +9,7 @@ public class TraktImportProvider
 
     public TraktImportProvider()    
     {
-        _apiKey = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_API_KEY")!;
+        _apiKey = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_ID")!;
     }
 
     public async Task<List<TraktMovieResponse>> GetMovies(string username, bool requestDebug)

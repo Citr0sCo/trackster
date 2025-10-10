@@ -4,6 +4,11 @@ namespace Trackster.Api.Data.Records;
 
 public class UserRecord
 {
+    public UserRecord()
+    {
+        ThirdPartyIntegrations = new List<ThirdPartyIntegrationRecord>();
+    }
+    
     [Key]
     public Guid Identifier { get; set; }
     public string Username { get; set; }
@@ -11,4 +16,5 @@ public class UserRecord
     public string Password { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public List<ThirdPartyIntegrationRecord> ThirdPartyIntegrations { get; set; }
 }

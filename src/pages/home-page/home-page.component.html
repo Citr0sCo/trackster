@@ -1,8 +1,9 @@
 <div class="home-page-component">
     <div class="container">
-        <div class="o-grid o-grid--static">
+
+        <div class="o-grid">
             <div class="o-grid__col">
-                <h3>Movies</h3>
+                <h3><i class="fa fa-home"></i> Home</h3>
             </div>
             <div class="o-grid__col o-grid__col--fixed">
                 <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
@@ -12,6 +13,10 @@
                 </div>
             </div>
         </div>
+
+        <hr>
+
+        <h4>Movies</h4>
         <div class="media-container">
             @if (movies.length > 0) {
                 <div class="o-grid o-grid--static o-grid--space-between">
@@ -30,7 +35,7 @@
 
         <hr>
 
-        <h3>TV Shows</h3>
+        <h4>TV Shows</h4>
         <div class="media-container">
             @if (shows.length > 0) {
                 <div class="o-grid o-grid--static o-grid--space-between">

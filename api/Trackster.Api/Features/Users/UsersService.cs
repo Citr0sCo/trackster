@@ -1,5 +1,6 @@
 using Trackster.Api.Core.Types;
 using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Auth.Types;
 using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Users.Types;
 
@@ -50,12 +51,7 @@ public class UsersService : IUsersService
 
         return new GetUserDetailsResponse
         {
-            User = new User
-            {
-                Identifier = user.Identifier,
-                Username = user.Username,
-                CreatedAt = user.CreatedAt,
-            }
+            User = UserMapper.Map(user)
         };
     }
 
@@ -105,5 +101,10 @@ public class UsersService : IUsersService
     public async Task<UserRecord> CreateUser(UserRecord user)
     {
         return await _repository.CreateUser(user);
+    }
+
+    public async Task<UserRecord> UpdateUser(User user)
+    {
+        return await _repository.UpdateUser(UserMapper.MapRecord(user));
     }
 }

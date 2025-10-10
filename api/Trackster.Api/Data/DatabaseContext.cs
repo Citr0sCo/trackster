@@ -15,6 +15,7 @@ public class DatabaseContext : DbContext
 
     public DbSet<SessionRecord> Sessions { get; set; }
     public DbSet<UserRecord> Users { get; set; }
+    public DbSet<ThirdPartyIntegrationRecord> ThirdPartyIntegrations { get; set; }
     public DbSet<MovieUserRecord> MovieUserLinks { get; set; }
     public DbSet<EpisodeUserRecord> EpisodeUserLinks { get; set; }
     public DbSet<MovieRecord> Movies { get; set; }

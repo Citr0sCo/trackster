@@ -42,7 +42,7 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
             });
 
         if (this._authService.isLoggedIn()) {
-            window.location.href = "/#/app/home";
+            window.location.href = "/app/home";
         }
     }
 

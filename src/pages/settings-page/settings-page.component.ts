@@ -1,12 +1,14 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
-import {StreamService} from "../../core/event-service.service";
-import {environment} from "../../environments/environment";
-import {round} from "@popperjs/core/lib/utils/math";
-import {UserService} from '../../services/user-service/user.service';
-import {IUser} from '../../services/user-service/types/user.type';
-import {WebhookService} from "../../services/webhook-service/webhook.service";
-import {IWebhook, WebhookProvider} from "../../services/webhook-service/types/webhook.type";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { StreamService } from "../../core/event-service.service";
+import { environment } from "../../environments/environment";
+import { round } from "@popperjs/core/lib/utils/math";
+import { UserService } from '../../services/user-service/user.service';
+import { IUser } from '../../services/user-service/types/user.type';
+import { WebhookService } from "../../services/webhook-service/webhook.service";
+import { IWebhook, WebhookProvider } from "../../services/webhook-service/types/webhook.type";
+import { SettingsService } from '../../services/settings-service/settings.service';
+import { ISettings } from '../../services/settings-service/types/settings.type';
 
 @Component({
     selector: 'settings-page',
@@ -31,11 +33,15 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     private readonly _streamService: StreamService;
     private readonly _userService: UserService;
     private readonly _webhookService: WebhookService;
+    private readonly _settingsService: SettingsService;
 
-    constructor(streamService: StreamService, userService: UserService, webhookService: WebhookService) {
+    private _settings: ISettings | null = null;
+
+    constructor(streamService: StreamService, userService: UserService, webhookService: WebhookService, settingsService: SettingsService,) {
         this._streamService = streamService;
         this._userService = userService;
         this._webhookService = webhookService;
+        this._settingsService = settingsService;
     }
 
     public ngOnInit(): void {
@@ -50,6 +56,12 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
                     .subscribe((webhook) => {
                         this.webhook = webhook;
                     });
+            });
+
+        this._settingsService
+            .getSettings()
+            .subscribe((settings) => {
+                this._settings = settings;
             });
     }
 
@@ -116,6 +128,15 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
                 this.webhook = webhook;
                 this.isCreatingWebhook = false;
             });
+    }
+
+    public authWithTrakt(): void {
+
+        const clientId = this._settings?.traktClientId;
+        const redirectUri = `${window.location.origin}/app/authorize/trakt`;
+        const state = encodeURIComponent(JSON.stringify({ userIdentifier: this.user?.identifier }));
+
+        window.location.href = `https://api.trakt.tv/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
     }
 
     public ngOnDestroy(): void {

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
 
@@ -9,6 +10,7 @@ public interface IUsersRepository
     Task<UserRecord?> GetUserByEmail(string email);
     Task<UserRecord?> GetUserByReference(Guid reference);
     Task<UserRecord> CreateUser(UserRecord user);
+    Task<UserRecord> UpdateUser(UserRecord user);
 }
 
 public class UsersRepository : IUsersRepository
@@ -19,7 +21,9 @@ public class UsersRepository : IUsersRepository
         {
             try
             {
-                return context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+                return context.Users
+                    .Include(x => x.ThirdPartyIntegrations)
+                    .FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
             }
             catch (Exception exception)
             {
@@ -35,7 +39,9 @@ public class UsersRepository : IUsersRepository
         {
             try
             {
-                return context.Users.FirstOrDefault(x => x.Email.ToUpper() == email.Trim().ToUpper());
+                return context.Users
+                    .Include(x => x.ThirdPartyIntegrations)
+                    .FirstOrDefault(x => x.Email.ToUpper() == email.Trim().ToUpper());
             }
             catch (Exception exception)
             {
@@ -51,7 +57,9 @@ public class UsersRepository : IUsersRepository
         {
             try
             {
-                return context.Users.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == reference.ToString().ToUpper());
+                return context.Users
+                    .Include(x => x.ThirdPartyIntegrations)
+                    .FirstOrDefault(x => x.Identifier.ToString().ToUpper() == reference.ToString().ToUpper());
             }
             catch (Exception exception)
             {
@@ -63,7 +71,6 @@ public class UsersRepository : IUsersRepository
 
     public async Task<UserRecord> CreateUser(UserRecord user)
     {
-        
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
         {
@@ -80,6 +87,54 @@ public class UsersRepository : IUsersRepository
                 await transaction.CommitAsync();
 
                 return user;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+
+                return user;
+            }
+        }
+    }
+
+    public async Task<UserRecord> UpdateUser(UserRecord user)
+    {
+        using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var existingUser = context.Users
+                    .Include(x => x.ThirdPartyIntegrations)
+                    .FirstOrDefault(x => x.Identifier.ToString().ToUpper() == user.Identifier.ToString().ToUpper());
+
+                if (existingUser == null)
+                    return user;
+                
+                if(!string.IsNullOrEmpty(user.Email) && existingUser.Email != user.Email)
+                    existingUser.Email = user.Email;
+                
+                if(!string.IsNullOrEmpty(user.Username) && existingUser.Username != user.Username)
+                    existingUser.Username = user.Username;
+
+                context.Users.Update(existingUser);
+
+                foreach (var integration in existingUser.ThirdPartyIntegrations)
+                {
+                    context.ThirdPartyIntegrations.Remove(integration);
+                }
+
+                foreach (var integration in user.ThirdPartyIntegrations)
+                {
+                    existingUser.ThirdPartyIntegrations.Add(integration);
+                    context.ThirdPartyIntegrations.Add(integration);
+                }
+                
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return existingUser;
             }
             catch (Exception exception)
             {

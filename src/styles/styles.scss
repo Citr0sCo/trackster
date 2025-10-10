@@ -206,8 +206,20 @@ body {
 }
 
 .btn-primary {
-    background-color: $brand-primary !important;
-    border-color: darken($brand-primary, 5%) !important;
+    background: linear-gradient(45deg, $brand-primary, $brand-primary-alt);
+    border-color: transparent !important;
+
+    &:hover {
+        background: linear-gradient(45deg, $brand-primary, $brand-primary);
+    }
+}
+
+.btn-trakt {
+    background: linear-gradient(45deg, #e41239, #a042c5);
+
+    &:hover {
+        background: linear-gradient(45deg, #e41239, #e41239);
+    }
 }
 
 .o-btn {
@@ -219,7 +231,6 @@ body {
     padding: 10px 15px;
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: $border-radius;
-    margin-bottom: 5px;
     cursor: pointer;
 
     &--active {
@@ -261,5 +272,29 @@ body {
     }
 
     &__label {
+    }
+}
+
+.u-ml-0-mobile {
+    @media(max-width: $mobile-width) {
+        margin-left: 0 !important;
+    }
+}
+
+.u-mr-0-mobile {
+    @media(max-width: $mobile-width) {
+        margin-right: 0 !important;
+    }
+}
+
+.u-pl-0-mobile {
+    @media(max-width: $mobile-width) {
+        padding-left: 0 !important;
+    }
+}
+
+.u-pr-0-mobile {
+    @media(max-width: $mobile-width) {
+        padding-right: 0 !important;
     }
 }

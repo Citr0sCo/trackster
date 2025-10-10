@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
-using Trackster.Api.Features.Auth.Types;
 using Trackster.Api.Features.Sessions.Types;
 
 namespace Trackster.Api.Features.Sessions;
@@ -9,6 +8,7 @@ namespace Trackster.Api.Features.Sessions;
 public interface ISessionRepository
 {
     Task<SessionRecord?> GetSession(Guid reference);
+    Task<SessionRecord?> GetSessionByUserIdentifier(Guid userIdentifier);
     Task<SessionRecord> CreateSession(Session session);
     Task<SessionRecord> ExtendSession(Session session);
     Task RemoveSession(Guid reference);
@@ -29,6 +29,24 @@ public class SessionRepository : ISessionRepository
         catch (Exception exception)
         {
             Console.WriteLine($"[FATAL] - Failed to get session.");
+            Console.WriteLine(exception);
+            return null;
+        }
+    }
+    
+    public async Task<SessionRecord?> GetSessionByUserIdentifier(Guid userIdentifier)
+    {
+        await using var context = new DatabaseContext();
+        
+        try
+        {
+            return context.Sessions
+                .Include((x) => x.User)
+                .FirstOrDefault(x => x.User.Identifier.ToString().ToUpper() == userIdentifier.ToString().ToUpper());
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"[FATAL] - Failed to get session by user identifier.");
             Console.WriteLine(exception);
             return null;
         }

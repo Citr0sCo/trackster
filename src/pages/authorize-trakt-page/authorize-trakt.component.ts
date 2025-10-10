@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthenticationService} from "../../services/authentication-service/authentication.service";
-import {Provider} from "../../core/providers.enum";
+import { ActivatedRoute, Router } from "@angular/router";
+import { AuthenticationService } from "../../services/authentication-service/authentication.service";
+import { Provider } from "../../core/providers.enum";
 
 @Component({
     selector: 'authorize-trakt',
@@ -14,7 +14,7 @@ import {Provider} from "../../core/providers.enum";
 export class AuthorizeTraktComponent implements OnInit, OnDestroy {
 
     private readonly _destroy: Subject<void> = new Subject();
-    private _router: ActivatedRoute;
+    private readonly _router: ActivatedRoute;
     private readonly _authenticationService: AuthenticationService;
 
     constructor(router: ActivatedRoute, authenticationService: AuthenticationService) {
@@ -26,14 +26,14 @@ export class AuthorizeTraktComponent implements OnInit, OnDestroy {
         this._router.queryParams
             .pipe(takeUntil(this._destroy))
             .subscribe((params: any) => {
-
                 this._authenticationService.signIn(Provider.Trakt, {
-                    code: params.code
+                    code: params.code,
+                    userIdentifier: JSON.parse(params.state).userIdentifier
                 })
-                .pipe(takeUntil(this._destroy))
-                .subscribe((response) => {
-                    console.log(response);
-                })
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((response) => {
+                        console.log(response);
+                    })
             });
     }
 

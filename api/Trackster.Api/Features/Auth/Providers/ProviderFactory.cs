@@ -14,7 +14,7 @@ public class ProviderFactory
             return new EmailAuthProvider(new UsersService(new UsersRepository()), new SessionService(new SessionRepository()));
         
         if (provider == Provider.Trakt)
-            return new TraktAuthProvider();
+            return new TraktAuthProvider(new UsersService(new UsersRepository()), new SessionService(new SessionRepository()));
         
         return new NullAuthProvider();;
     }
