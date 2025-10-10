@@ -56,4 +56,6 @@ app.UseCors(setup => setup
     .AllowAnyMethod()
     .AllowAnyHeader());
 
+app.MapFallbackToFile("index.html");
+
 app.Run();
