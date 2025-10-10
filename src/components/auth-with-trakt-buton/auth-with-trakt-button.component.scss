@@ -1,0 +1,11 @@
+@import "../../styles/utility/variables";
+
+.auth-with-trakt-button {
+    .btn-trakt {
+        background: linear-gradient(45deg, #e41239, #a042c5) !important;
+
+        &:hover {
+            background: linear-gradient(45deg, #e41239, #e41239) !important;
+        }
+    }
+}

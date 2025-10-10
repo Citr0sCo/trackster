@@ -221,14 +221,6 @@ body {
             background: linear-gradient(45deg, $brand-primary, $brand-primary) !important;
         }
     }
-
-    &.btn-trakt {
-        background: linear-gradient(45deg, #e41239, #a042c5) !important;
-
-        &:hover {
-            background: linear-gradient(45deg, #e41239, #e41239) !important;
-        }
-    }
 }
 
 .o-btn {

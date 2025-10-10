@@ -39,6 +39,7 @@ import { ShowService } from "../services/show-service/show.service";
 import { ShowRepository } from "../services/show-service/show.repository";
 import { SettingsService } from '../services/settings-service/settings.service';
 import { SettingsRepository } from '../services/settings-service/settings.repository';
+import { AuthWithTraktButtonComponent } from '../components/auth-with-trakt-buton/auth-with-trakt-button.component';
 
 @NgModule({
     declarations: [
@@ -57,7 +58,8 @@ import { SettingsRepository } from '../services/settings-service/settings.reposi
         DashboardPageComponent,
         LoginPageComponent,
         RegisterPageComponent,
-        LogoutPageComponent
+        LogoutPageComponent,
+        AuthWithTraktButtonComponent
     ],
     bootstrap: [AppComponent],
     imports: [

@@ -6,8 +6,6 @@ import { AuthenticationService } from "../../services/authentication-service/aut
 import { Provider } from "../../core/providers.enum";
 import { IRegisterRequest } from "../../services/authentication-service/types/register.request";
 import { IRegisterResponse } from "../../services/authentication-service/types/register.response";
-import { SettingsService } from '../../services/settings-service/settings.service';
-import { ISettings } from '../../services/settings-service/types/settings.type';
 
 @Component({
     selector: 'register-page',
@@ -30,14 +28,10 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _mediaService: MediaService;
     private readonly _authService: AuthenticationService;
-    private readonly _settingsService: SettingsService;
 
-    private _settings: ISettings | null = null;
-
-    constructor(mediaService: MediaService, authService: AuthenticationService, settingsService: SettingsService) {
+    constructor(mediaService: MediaService, authService: AuthenticationService) {
         this._mediaService = mediaService;
         this._authService = authService;
-        this._settingsService = settingsService;
     }
 
     public ngOnInit(): void {
@@ -45,12 +39,6 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._destroy))
             .subscribe((posters: Array<string>) => {
                 this.activePoster = posters[this.randomIntFromInterval(0, posters.length - 1)]
-            });
-
-        this._settingsService
-            .getSettings()
-            .subscribe((settings) => {
-                this._settings = settings;
             });
 
         if (this._authService.isLoggedIn()) {
@@ -87,15 +75,6 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
 
     private randomIntFromInterval(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1) + min);
-    }
-
-    public authWithTrakt(): void {
-
-        const clientId = this._settings?.traktClientId;
-        const redirectUri = `${window.location.origin}/authorize/trakt`;
-        const state = encodeURIComponent(JSON.stringify({}));
-
-        window.location.href = `https://api.trakt.tv/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
     }
 
     public ngOnDestroy(): void {
