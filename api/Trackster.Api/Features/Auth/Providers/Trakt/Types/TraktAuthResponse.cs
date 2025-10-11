@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Trackster.Api.Features.Auth.Providers.Trakt;
+namespace Trackster.Api.Features.Auth.Providers.Trakt.Types;
 
 public class TraktAuthResponse
 {
