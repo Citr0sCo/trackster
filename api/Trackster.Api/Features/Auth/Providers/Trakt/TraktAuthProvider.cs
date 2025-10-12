@@ -119,7 +119,8 @@ public class TraktAuthProvider : IAuthProvider
             Provider = Provider.Trakt,
             Token = authorizeResponse.AccessToken,
             RefreshToken = authorizeResponse.RefreshToken,
-            ExpiresAt = DateTime.Now.AddSeconds(authorizeResponse.ExpiresInSeconds)
+            ExpiresAt = DateTime.Now.AddSeconds(authorizeResponse.ExpiresInSeconds),
+            UserReference = user.Identifier,
         };
 
         if (user.ThirdPartyIntegrations.Any(x => x.Provider == Provider.Trakt))
@@ -156,6 +157,43 @@ public class TraktAuthProvider : IAuthProvider
         };
     }
 
+    public Task<RegisterResponse> Register(RegisterRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<string> GetTokenByUsername(string username)
+    {
+        var user = await _usersService.GetUserByUsername(username);
+        var thirdPartyIntegrationRecord = user?.ThirdPartyIntegrations.FirstOrDefault(x => x.Provider == Provider.Trakt);
+
+        if (thirdPartyIntegrationRecord == null)
+            return null;
+        
+        if(thirdPartyIntegrationRecord.ExpiresAt > DateTime.Now)
+            return thirdPartyIntegrationRecord.Token;
+
+        var refreshTokenResponse = await RefreshToken(new RefreshTokenRequest
+        {
+            Token = thirdPartyIntegrationRecord.RefreshToken 
+        });
+        
+        foreach (var userThirdPartyIntegration in user.ThirdPartyIntegrations)
+        {
+            if (userThirdPartyIntegration.Provider == Provider.Trakt)
+            {
+                userThirdPartyIntegration.Identifier = Guid.NewGuid();
+                userThirdPartyIntegration.Token = refreshTokenResponse.AccessToken;
+                userThirdPartyIntegration.RefreshToken = refreshTokenResponse.RefreshToken;
+                userThirdPartyIntegration.ExpiresAt = DateTime.Now.AddSeconds(refreshTokenResponse.ExpiresIn);
+            }
+        }
+
+        await _usersService.UpdateUser(UserMapper.Map(user));
+
+        return refreshTokenResponse.AccessToken;
+    }
+
     public async Task<TraktAuthResponse?> GetToken(string code)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
@@ -188,11 +226,6 @@ public class TraktAuthProvider : IAuthProvider
                 }
             }
         }
-    }
-
-    public Task<RegisterResponse> Register(RegisterRequest request)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<TraktProfileResponse?> GetProfile(string username, string accessToken)
