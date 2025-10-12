@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Auth.Providers.Trakt;
 using Trackster.Api.Features.Media.Importers.OverseerrImporter;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
@@ -10,6 +11,7 @@ using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
 using Trackster.Api.Features.Notifications;
+using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
 using Trackster.Api.Features.Webhooks.Types;
@@ -30,12 +32,12 @@ public class MediaService
     private const string MOVIE_MEDIA_TYPE = "movie";
     private string EPISODE_MEDIA_TYPE = "episode";
 
-    public MediaService(IMoviesService moviesService, IShowsService showsService, IUsersService usersService)
+    public MediaService(IMoviesService moviesService, IShowsService showsService, IUsersService usersService, ISessionService sessionService)
     {
         _moviesService = moviesService;
         _showsService = showsService;
         _usersService = usersService;
-        _traktProvider = new TraktImportProvider();
+        _traktProvider = new TraktImportProvider(usersService, sessionService);
         _watchingNowService = WatchingNowService.Instance();
         _detailsProvider = new TmdbImportProvider();
         _notificationsService = new NotificationsService();

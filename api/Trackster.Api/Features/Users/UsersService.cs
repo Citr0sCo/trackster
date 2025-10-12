@@ -92,12 +92,7 @@ public class UsersService : IUsersService
 
         return new GetUserDetailsResponse
         {
-            User = new User
-            {
-               Identifier = user.Identifier,
-               Username = user.Username,
-               CreatedAt = user.CreatedAt,
-            }
+            User = UserMapper.Map(user)
         };
     }
 

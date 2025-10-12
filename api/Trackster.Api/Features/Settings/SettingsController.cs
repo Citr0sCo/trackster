@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Trackster.Api.Attributes;
 using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Users;
 

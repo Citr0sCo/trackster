@@ -7,6 +7,7 @@ import { UserService } from '../../services/user-service/user.service';
 import { IUser } from '../../services/user-service/types/user.type';
 import { WebhookService } from "../../services/webhook-service/webhook.service";
 import { IWebhook, WebhookProvider } from "../../services/webhook-service/types/webhook.type";
+import { Provider } from '../../core/providers.enum';
 
 @Component({
     selector: 'settings-page',
@@ -26,6 +27,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public readonly round = round;
     public user: IUser | null = null;
     public webhook: IWebhook | null = null;
+    public readonly Provider = Provider;
 
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _streamService: StreamService;
@@ -116,6 +118,10 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
                 this.webhook = webhook;
                 this.isCreatingWebhook = false;
             });
+    }
+
+    public hasThirdPartyIntegration(provider: Provider): boolean {
+        return !!this.user?.thirdPartyIntegrations.find(x => x.provider === provider);
     }
 
     public ngOnDestroy(): void {

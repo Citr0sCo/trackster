@@ -65,7 +65,11 @@
                 <hr>
 
                 <div class="c-label">Third Party Integrations</div>
-                <auth-with-trakt-button></auth-with-trakt-button>
+                @if (!user || hasThirdPartyIntegration(Provider.Trakt)) {
+                    <p>Already authenticated with Trakt!</p>
+                } @else {
+                    <auth-with-trakt-button></auth-with-trakt-button>
+                }
             </div>
         </div>
     </div>

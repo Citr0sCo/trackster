@@ -10,22 +10,23 @@ namespace Trackster.Api.Features.Auth.Providers.Trakt;
 
 public class TraktAuthProvider : IAuthProvider
 {
-    private readonly UsersService _usersService;
-    private readonly SessionService _sessionService;
-    private readonly SessionFactory _sessionFactory;
-
-    private readonly string? _clientId;
+    private readonly string _clientId;
     private readonly string? _clientSecret;
     private readonly string? _baseUri;
+    
+    private readonly IUsersService _usersService;
+    private readonly ISessionService _sessionService;
+    private readonly SessionFactory _sessionFactory;
+
     public bool IsActive { get; } = true;
 
-    public TraktAuthProvider(UsersService usersService, SessionService sessionService)
+    public TraktAuthProvider(IUsersService usersService, ISessionService sessionService)
     {
         _usersService = usersService;
         _sessionService = sessionService;
         _sessionFactory = SessionFactory.Instance();
-
-        _clientId = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_ID");
+        
+        _clientId = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_ID")!;
         _clientSecret = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_SECRET");
         _baseUri = Environment.GetEnvironmentVariable("ASPNETCORE_BASE_URL");
     }
@@ -118,7 +119,8 @@ public class TraktAuthProvider : IAuthProvider
             Provider = Provider.Trakt,
             Token = authorizeResponse.AccessToken,
             RefreshToken = authorizeResponse.RefreshToken,
-            ExpiresAt = DateTime.Now.AddSeconds(authorizeResponse.ExpiresInSeconds)
+            ExpiresAt = DateTime.Now.AddSeconds(authorizeResponse.ExpiresInSeconds),
+            UserReference = user.Identifier,
         };
 
         if (user.ThirdPartyIntegrations.Any(x => x.Provider == Provider.Trakt))
@@ -155,6 +157,43 @@ public class TraktAuthProvider : IAuthProvider
         };
     }
 
+    public Task<RegisterResponse> Register(RegisterRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<string> GetTokenByUsername(string username)
+    {
+        var user = await _usersService.GetUserByUsername(username);
+        var thirdPartyIntegrationRecord = user?.ThirdPartyIntegrations.FirstOrDefault(x => x.Provider == Provider.Trakt);
+
+        if (thirdPartyIntegrationRecord == null)
+            return null;
+        
+        if(thirdPartyIntegrationRecord.ExpiresAt > DateTime.Now)
+            return thirdPartyIntegrationRecord.Token;
+
+        var refreshTokenResponse = await RefreshToken(new RefreshTokenRequest
+        {
+            Token = thirdPartyIntegrationRecord.RefreshToken 
+        });
+        
+        foreach (var userThirdPartyIntegration in user.ThirdPartyIntegrations)
+        {
+            if (userThirdPartyIntegration.Provider == Provider.Trakt)
+            {
+                userThirdPartyIntegration.Identifier = Guid.NewGuid();
+                userThirdPartyIntegration.Token = refreshTokenResponse.AccessToken;
+                userThirdPartyIntegration.RefreshToken = refreshTokenResponse.RefreshToken;
+                userThirdPartyIntegration.ExpiresAt = DateTime.Now.AddSeconds(refreshTokenResponse.ExpiresIn);
+            }
+        }
+
+        await _usersService.UpdateUser(UserMapper.Map(user));
+
+        return refreshTokenResponse.AccessToken;
+    }
+
     public async Task<TraktAuthResponse?> GetToken(string code)
     {
         var baseAddress = new Uri("https://api.trakt.tv/");
@@ -187,11 +226,6 @@ public class TraktAuthProvider : IAuthProvider
                 }
             }
         }
-    }
-
-    public Task<RegisterResponse> Register(RegisterRequest request)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<TraktProfileResponse?> GetProfile(string username, string accessToken)
