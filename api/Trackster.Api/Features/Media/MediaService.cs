@@ -425,7 +425,7 @@ public class MediaService
             {
                 yield return new ImportMediaResponse
                 {
-                    Data = $"[ERROR] - Failed to find show details ({show.Show.Ids.TMDB}).",
+                    Data = $"[ERROR] - Failed to process show '{show.Show.Title} ({show.Show.Year})'.",
                     Total = shows.Count,
                     Processed = processedShows,
                     Type = MediaType.Episode.ToString()
