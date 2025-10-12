@@ -395,28 +395,8 @@ public class MediaService
         {
             var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB, requestDebug);
 
-            if (details.IsSuccess == false)
-            {
-                yield return new ImportMediaResponse
-                {
-                    Data = $"[ERROR] - Unsuccessful response from TMDB: ({details.StatusCode}) {details.StatusMessage}.",
-                    Total = shows.Count,
-                    Processed = processedShows,
-                    Type = MediaType.Episode.ToString()
-                };
-                Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({details.StatusCode}) {details.StatusMessage}.");
-                continue;
-            }
-
             if (details.Identifier == 0)
             {
-                yield return new ImportMediaResponse
-                {
-                    Data = $"[ERROR] - Failed to find show details ({show.Show.Ids.TMDB}).",
-                    Total = shows.Count,
-                    Processed = processedShows,
-                    Type = MediaType.Episode.ToString()
-                };
                 Console.WriteLine($"[ERROR] - Failed to find show details ({show.Show.Ids.TMDB}).");
                 continue;
             }
@@ -509,7 +489,7 @@ public class MediaService
         }
     }
 
-    private async Task<MovieRecord?> GetMovieRecordByTmdbId(string tmdbId, bool requestDebug)
+    private async Task<MovieRecord> GetMovieRecordByTmdbId(string tmdbId, bool requestDebug)
     {
         var movieRecord = _moviesService.GetMovieByTmdbId(tmdbId);
 
@@ -517,12 +497,6 @@ public class MediaService
             return movieRecord;
         
         var details = await _detailsProvider.GetDetailsForMovie(tmdbId, requestDebug);
-
-        if (details.IsSuccess == false)
-        {
-            Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({details.StatusCode}) {details.StatusMessage}.");
-            return null;
-        }
 
         movieRecord = new MovieRecord
         {
@@ -595,12 +569,6 @@ public class MediaService
                 Title = episodeDetails.Title ?? show.Title,
                 Season = season
             };
-
-            if (episodeDetails.IsSuccess == false)
-            {
-                Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({episodeDetails.StatusCode}) {episodeDetails.StatusMessage}.");
-                return episodeRecord;
-            }
 
             return episodeRecord;
         }
