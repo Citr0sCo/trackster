@@ -324,7 +324,19 @@ public class MediaService
         var processedMovies = 0;
         foreach (var movie in movies)
         {
-           ProcessMovie(movie, userRecord, requestDebug).Wait();
+           var movieRecord = await ProcessMovie(movie, userRecord, requestDebug);
+
+           if (movieRecord == null)
+           {
+               yield return new ImportMediaResponse
+               {
+                   Data = $"[Error] - Failed to process movie '{movie.Movie.Title} ({movie.Movie.Year})'.",
+                   Total = movies.Count,
+                   Processed = processedMovies,
+                   Type = MediaType.Movie.ToString()
+               };
+               continue;
+           }
 
            var lastWatchedAt = _moviesService.GetWatchedMovieByLastWatchedAt(userRecord.Username, movie.Movie.Ids.TMDB, movie.LastWatchedAt);
 
@@ -334,7 +346,6 @@ public class MediaService
 
                foreach (var watchHistory in watchingHistory)
                {
-                   var movieRecord = await GetMovieRecordByTmdbId(movie.Movie.Ids.TMDB, requestDebug);
                    await _moviesService.MarkMovieAsWatched(userRecord, movieRecord, watchHistory.WatchedAt);
                }   
            }
@@ -351,35 +362,37 @@ public class MediaService
         }
     }
 
-    private async Task ProcessMovie(TraktMovieResponse movie, UserRecord userRecord, bool requestDebug)
+    private async Task<MovieRecord?> ProcessMovie(TraktMovieResponse movie, UserRecord userRecord, bool requestDebug)
     {
         var existingMovie = _moviesService.GetMovieByTmdbId(movie.Movie.Ids.TMDB);
 
-        if (existingMovie == null)
-        {
-            var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB, requestDebug);
-
-            if (details.IsSuccess == false)
-            {
-                Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({details.StatusCode}) {details.StatusMessage}.");
-                return;
-            }
-
-            var movieRecord = new MovieRecord
-            {
-                Identifier = Guid.NewGuid(),
-                Title = movie.Movie.Title,
-                Slug = SlugHelper.GenerateSlugFor(movie.Movie.Title),
-                Year = movie.Movie.Year,
-                TMDB = movie.Movie.Ids.TMDB,
-                Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
-                Overview = details?.Overview,
-            };
+        if (existingMovie != null)
+            return existingMovie;
             
-            var genres = await _moviesService.FindOrCreateGenres(details?.Genres.ConvertAll((genre) => genre.Name) ?? []);
+        var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB, requestDebug);
 
-            await _moviesService.ImportMovie(userRecord, movieRecord, genres);
+        if (details.IsSuccess == false)
+        {
+            Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({details.StatusCode}) {details.StatusMessage}.");
+            return null;
         }
+
+        var movieRecord = new MovieRecord
+        {
+            Identifier = Guid.NewGuid(),
+            Title = movie.Movie.Title,
+            Slug = SlugHelper.GenerateSlugFor(movie.Movie.Title),
+            Year = movie.Movie.Year,
+            TMDB = movie.Movie.Ids.TMDB,
+            Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
+            Overview = details?.Overview,
+        };
+        
+        var genres = await _moviesService.FindOrCreateGenres(details?.Genres.ConvertAll((genre) => genre.Name) ?? []);
+
+        await _moviesService.ImportMovie(userRecord, movieRecord, genres);
+
+        return movieRecord;
     }
 
     private async IAsyncEnumerable<ImportMediaResponse> ProcessShows(ImportMediaRequest request, List<TraktShowResponse> shows, UserRecord user, bool requestDebug)
@@ -487,29 +500,6 @@ public class MediaService
                 _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord).Wait();
             }
         }
-    }
-
-    private async Task<MovieRecord> GetMovieRecordByTmdbId(string tmdbId, bool requestDebug)
-    {
-        var movieRecord = _moviesService.GetMovieByTmdbId(tmdbId);
-
-        if (movieRecord != null)
-            return movieRecord;
-        
-        var details = await _detailsProvider.GetDetailsForMovie(tmdbId, requestDebug);
-
-        movieRecord = new MovieRecord
-        {
-            Identifier = Guid.NewGuid(),
-            Title = details.Title,
-            Slug = SlugHelper.GenerateSlugFor(details.Title),
-            Year = details.ReleaseDate.Year,
-            TMDB = tmdbId,
-            Poster = $"https://image.tmdb.org/t/p/w300{details?.PosterUrl}",
-            Overview = details?.Overview,
-        };
-
-        return movieRecord;
     }
 
     private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId, TmdbShowDetails details, bool requestDebug)
