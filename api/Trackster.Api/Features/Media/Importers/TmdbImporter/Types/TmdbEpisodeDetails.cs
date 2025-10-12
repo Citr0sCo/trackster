@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 
-public class TmdbEpisodeDetails
+public class TmdbEpisodeDetails : TmdbCommonResponse
 {
     
     [JsonProperty("air_date")]

@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 
-public class TmdbShowDetails
+public class TmdbShowDetails : TmdbCommonResponse
 {
     public TmdbShowDetails()
     {
