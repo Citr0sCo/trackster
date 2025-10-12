@@ -412,7 +412,7 @@ public class MediaService
             {
                 yield return new ImportMediaResponse
                 {
-                    Data = $"[Error] - Failed to process show '{show.Show.Title} ({show.Show.Year})'.",
+                    Data = $"[ERROR] - Failed to process show '{show.Show.Title} ({show.Show.Year})'.",
                     Total = shows.Count,
                     Processed = processedShows,
                     Type = MediaType.Episode.ToString()
