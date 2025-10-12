@@ -37,16 +37,19 @@ public class PlexWebhookService
 
         if (eventType == "media.scrobble")
         {
-            await _mediaService.MarkMediaAsWatched(new MarkMediaAsWatchedRequest
+            if (parsedJson.Metadata.Year > 0)
             {
-                Username = user.Username,
-                MediaType = mediaType,
-                Year = parsedJson.Metadata.Year,
-                Title = parsedJson.Metadata.Title,
-                ParentTitle = parsedJson.Metadata.ParentTitle,
-                GrandParentTitle = parsedJson.Metadata.GrandparentTitle,
-                SeasonNumber = parsedJson.Metadata.ParentIndex,
-            });
+                await _mediaService.MarkMediaAsWatched(new MarkMediaAsWatchedRequest
+                {
+                    Username = user.Username,
+                    MediaType = mediaType,
+                    Year = parsedJson.Metadata.Year,
+                    Title = parsedJson.Metadata.Title,
+                    ParentTitle = parsedJson.Metadata.ParentTitle,
+                    GrandParentTitle = parsedJson.Metadata.GrandparentTitle,
+                    SeasonNumber = parsedJson.Metadata.ParentIndex,
+                });
+            }
         }
 
         if (eventType == "media.play" || eventType == "media.resume")
