@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 
-public class TmdbMovieDetails
+public class TmdbMovieDetails : TmdbCommonResponse
 {
     [JsonProperty("adult")]
     public bool Adult { get; set; }
