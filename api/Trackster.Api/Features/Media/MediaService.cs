@@ -412,7 +412,7 @@ public class MediaService
             {
                 yield return new ImportMediaResponse
                 {
-                    Data = $"[ERROR] - Unsuccessful response from TMDB: ({details.StatusCode}) {details.StatusMessage}.",
+                    Data = $"[ERROR] - Failed to process show '{show.Show.Title} ({show.Show.Year})'.",
                     Total = shows.Count,
                     Processed = processedShows,
                     Type = MediaType.Episode.ToString()
@@ -425,7 +425,7 @@ public class MediaService
             {
                 yield return new ImportMediaResponse
                 {
-                    Data = $"[ERROR] - Failed to find show details ({show.Show.Ids.TMDB}).",
+                    Data = $"[ERROR] - Failed to process show '{show.Show.Title} ({show.Show.Year})'.",
                     Total = shows.Count,
                     Processed = processedShows,
                     Type = MediaType.Episode.ToString()
@@ -572,6 +572,12 @@ public class MediaService
 
             var episodeDetails = await _detailsProvider.GetEpisodeDetails(show.TMDB, season.Number, episodeNumber, requestDebug);
 
+            if (episodeDetails.IsSuccess == false)
+            {
+                Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({episodeDetails.StatusCode}) {episodeDetails.StatusMessage}.");
+                return episodeRecord;
+            }
+
             episodeRecord = new EpisodeRecord
             {
                 Identifier = Guid.NewGuid(),
@@ -579,12 +585,6 @@ public class MediaService
                 Title = episodeDetails.Title ?? show.Title,
                 Season = season
             };
-
-            if (episodeDetails.IsSuccess == false)
-            {
-                Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({episodeDetails.StatusCode}) {episodeDetails.StatusMessage}.");
-                return episodeRecord;
-            }
 
             return episodeRecord;
         }
