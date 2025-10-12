@@ -2,7 +2,16 @@
 
 namespace Trackster.Api.Features.Sessions;
 
-public class SessionService
+public interface ISessionService
+{
+    Task<Session?> GetSession(Guid reference);
+    Task<Session?> GetSessionByUserIdentifier(Guid userIdentifier);
+    Task<Session> CreateSession(Guid userReference, bool remember = false);
+    Task RemoveSession(Guid reference);
+    Task ExtendSession(Session session);
+}
+
+public class SessionService : ISessionService
 {
     private readonly ISessionRepository _sessionRepository;
 

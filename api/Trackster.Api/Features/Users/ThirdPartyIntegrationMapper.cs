@@ -13,7 +13,8 @@ public class ThirdPartyIntegrationMapper
             Provider = record.Provider,
             Token = record.Token,
             RefreshToken = record.RefreshToken,
-            ExpiresAt = record.ExpiresAt
+            ExpiresAt = record.ExpiresAt,
+            UserReference = record.UserRecordIdentifier
         };
     }
     
@@ -25,7 +26,8 @@ public class ThirdPartyIntegrationMapper
             Provider = record.Provider,
             Token = record.Token,
             RefreshToken = record.RefreshToken,
-            ExpiresAt = record.ExpiresAt
+            ExpiresAt = record.ExpiresAt,
+            UserRecordIdentifier = record.UserReference
         };
     }
 }

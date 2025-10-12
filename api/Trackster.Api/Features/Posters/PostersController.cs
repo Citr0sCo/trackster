@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Trackster.Api.Features.Media;
 using Trackster.Api.Features.Movies;
+using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
 
@@ -14,7 +15,7 @@ public class PostersController : ControllerBase
 
     public PostersController()
     {
-        _service = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()));
+        _service = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()), new SessionService(new SessionRepository()));
     }
     
     [HttpGet("")]

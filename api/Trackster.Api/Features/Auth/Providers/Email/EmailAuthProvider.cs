@@ -9,12 +9,12 @@ namespace Trackster.Api.Features.Auth.Providers.Email;
 
 public class EmailAuthProvider : IAuthProvider
 {
-    private readonly UsersService _usersService;
+    private readonly IUsersService _usersService;
     private readonly SessionService _sessionService;
     private readonly SessionFactory _sessionFactory;
     public bool IsActive { get; } = true;
 
-    public EmailAuthProvider(UsersService usersService, SessionService sessionService)
+    public EmailAuthProvider(IUsersService usersService, SessionService sessionService)
     {
         _usersService = usersService;
         _sessionService = sessionService;

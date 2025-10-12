@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { IUser } from './types/user.type';
+import { UserMapper } from './user.mapper';
 
 @Injectable()
 export class UserRepository {
@@ -17,12 +18,7 @@ export class UserRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/sessions`)
             .pipe(
                 map((response: any) => {
-                    return {
-                        identifier: response.User.Identifier,
-                        username: response.User.Username,
-                        email: response.User.Email,
-                        createdAt: response.User.CreatedAt
-                    };
+                    return UserMapper.map(response.User);
                 })
             );
     }
@@ -31,12 +27,7 @@ export class UserRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/users/${userReference}`)
             .pipe(
                 map((response: any) => {
-                    return {
-                        identifier: response.User.Identifier,
-                        username: response.User.Username,
-                        email: response.User.Email,
-                        createdAt: response.User.CreatedAt
-                    };
+                    return UserMapper.map(response.User);
                 })
             );
     }

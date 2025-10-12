@@ -19,7 +19,7 @@ public class MediaController : ControllerBase
     {
         var usersService = new UsersService(new UsersRepository());
         
-        _service = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), usersService);
+        _service = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), usersService, new SessionService(new SessionRepository()));
         _sessionHelper = new SessionHelper(new SessionService(new SessionRepository()), usersService);
     }
     

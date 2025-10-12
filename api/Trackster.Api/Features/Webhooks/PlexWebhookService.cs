@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using Trackster.Api.Features.Media;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies;
+using Trackster.Api.Features.Sessions;
 using Trackster.Api.Features.Shows;
 using Trackster.Api.Features.Users;
 using Trackster.Api.Features.Users.Types;
@@ -15,7 +16,7 @@ public class PlexWebhookService
 
     public PlexWebhookService()
     {
-        _mediaService = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()));
+        _mediaService = new MediaService(new MoviesService(new MoviesRepository()), new ShowsService(new ShowsRepository()), new UsersService(new UsersRepository()), new SessionService(new SessionRepository()));
     }
 
     public async Task HandlePlexWebhook(PlexWebhookRequest? parsedJson, User user)

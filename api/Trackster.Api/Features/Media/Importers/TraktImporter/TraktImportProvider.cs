@@ -1,25 +1,34 @@
 using Newtonsoft.Json;
+using Trackster.Api.Features.Auth.Providers.Trakt;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
+using Trackster.Api.Features.Sessions;
+using Trackster.Api.Features.Users;
 
 namespace Trackster.Api.Features.Media.Importers.TraktImporter;
 
 public class TraktImportProvider
 {
-    private readonly string _apiKey;
+    private readonly string _clientId;
+    private readonly TraktAuthProvider _traktAuthProvider;
 
-    public TraktImportProvider()    
+    public TraktImportProvider(IUsersService usersService, ISessionService sessionService)
     {
-        _apiKey = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_ID")!;
+        _clientId = Environment.GetEnvironmentVariable("ASPNETCORE_TRAKT_CLIENT_ID")!;
+        _traktAuthProvider = new TraktAuthProvider(usersService, sessionService);
     }
 
     public async Task<List<TraktMovieResponse>> GetMovies(string username, bool requestDebug)
     {
+        var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
+        
         var baseAddress = new Uri("https://api.trakt.tv/");
 
         using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
 
             using (var response = await httpClient.GetAsync($"users/{username}/watched/movies"))
             {
@@ -36,12 +45,16 @@ public class TraktImportProvider
 
     public async Task<List<TraktShowResponse>> GetShows(string username, bool requestDebug)
     {
+        var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
+        
         var baseAddress = new Uri("https://api.trakt.tv/");
 
         using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
 
             using (var response = await httpClient.GetAsync($"users/{username}/watched/shows"))
             {
@@ -58,12 +71,16 @@ public class TraktImportProvider
 
     public async Task<List<TraktMovieHistoryResponse>> GetWatchedMovieHistory(string username, string itemId)
     {
+        var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
+        
         var baseAddress = new Uri("https://api.trakt.tv/");
 
         using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
 
             using (var response = await httpClient.GetAsync($"users/{username}/history/movies/{itemId}"))
             {
@@ -94,12 +111,16 @@ public class TraktImportProvider
 
     public async Task<List<TraktShowHistoryResponse>> GetWatchedShowHistory(string username, string itemId)
     {
+        var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
+        
         var baseAddress = new Uri("https://api.trakt.tv/");
 
         using (var httpClient = new HttpClient { BaseAddress = baseAddress })
         {
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _apiKey);
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
 
             using (var response = await httpClient.GetAsync($"users/{username}/history/shows/{itemId}"))
             {
