@@ -1,14 +1,25 @@
 <div class="settings-page-component">
     <div class="container">
 
-        <h3><i class="fa fa-cog"></i> Settings</h3>
+        <div class="o-grid u-mb-2 o-grid--static">
+            <div class="o-grid__col" style="display: flex; align-items: center;">
+                <h3 class="u-mb-0"><i class="fa fa-cog"></i> Settings</h3>
+            </div>
+            <div class="o-grid__col o-grid__col--fixed">
+
+            </div>
+        </div>
 
         <hr>
 
         <div class="o-grid">
-            <div class="o-grid__col o-grid__col--equal u-mr-3 u-mr-0-mobile">
+            <div class="o-grid__col o-grid__col--equal u-mt-2 u-mr-3 u-mr-0-mobile">
 
                 <h4>Profile</h4>
+
+                <input type="text" placeholder="Username" class="c-field" [value]="user?.username">
+
+                <hr>
 
                 <div class="c-input-group">
                     <div class="c-label">Plex Webhook</div>
@@ -22,13 +33,12 @@
                     </div>
                 </div>
 
-                <hr>
-
-                <input type="text" placeholder="Username" class="c-field" [value]="user?.username">
-
                 <button class="btn btn-primary w-100 mt-3" (click)="saveSettings()">Save</button>
             </div>
-            <div class="o-grid__col o-grid__col--equal">
+
+            <hr class="only-display-on-mobile">
+
+            <div class="o-grid__col o-grid__col--equal u-mt-2">
 
                 <h4>Integrations</h4>
 
@@ -57,7 +67,9 @@
                 }
 
                 @if (progress.length > 0) {
-                    <pre class="log-window">@for (key of progress; track key) { {{ key }} }</pre>
+                    <pre class="log-window">@for (key of progress; track key) {
+                        {{ key }}
+                    }</pre>
                 }
 
                 <hr>
