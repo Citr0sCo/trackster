@@ -299,3 +299,11 @@ body {
         padding-right: 0 !important;
     }
 }
+
+.only-display-on-mobile {
+    display: none;
+
+    @media(max-width: $mobile-width) {
+        display: block;
+    }
+}
