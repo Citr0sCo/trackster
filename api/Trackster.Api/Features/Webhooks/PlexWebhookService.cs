@@ -37,7 +37,7 @@ public class PlexWebhookService
 
         if (eventType == "media.scrobble")
         {
-            if (parsedJson.Metadata.Year > 0)
+            if (parsedJson.Metadata is { Year: > 0, LibrarySectionTitle: "Movies" or "TV Shows" })
             {
                 await _mediaService.MarkMediaAsWatched(new MarkMediaAsWatchedRequest
                 {
