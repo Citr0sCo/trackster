@@ -34,7 +34,7 @@ public class PlexWebhookService
         if (parsedJson.Account.Title.ToLower() != user.Username.ToLower())
             return;
 
-        if (parsedJson.Metadata.Year == 0 || (parsedJson.Metadata.LibrarySectionTitle != "Movies" && parsedJson.Metadata.LibrarySectionTitle != "TV Shows"))
+        if (parsedJson.Metadata.Year == 0 || (parsedJson.Metadata.LibrarySectionTitle != "Films" && parsedJson.Metadata.LibrarySectionTitle != "TV Shows"))
             return;
 
         var mediaType = parsedJson.Metadata.Type.ToLower();
