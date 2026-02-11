@@ -35,7 +35,7 @@ jobs:
 
             -   uses: actions/setup-dotnet@v4
                 with:
-                    dotnet-version: '9.0.x'
+                    dotnet-version: '10.0.x'
 
             -   name: Building BE
                 run: dotnet build api/Trackster.sln
@@ -64,7 +64,7 @@ jobs:
 
             -   uses: actions/setup-dotnet@v4
                 with:
-                    dotnet-version: '9.0.x'
+                    dotnet-version: '10.0.x'
 
             -   name: Testing BE
                 run: dotnet test api/Trackster.sln
