@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {EventService} from "../../services/event-service/event.service";
 import {WebSocketService} from "../../services/websocket-service/web-socket.service";
 import {WebSocketKey} from "../../services/websocket-service/types/web-socket.key";
@@ -9,6 +9,7 @@ import {Subject, takeUntil} from "rxjs";
     selector: 'login-page',
     templateUrl: './dashboard-page.component.html',
     styleUrls: ['./dashboard-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DashboardPageComponent implements AfterViewInit, OnInit, OnDestroy {

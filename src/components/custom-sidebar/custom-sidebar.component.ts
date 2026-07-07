@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user-service/user.service';
@@ -9,6 +9,7 @@ import { IUser } from '../../services/user-service/types/user.type';
     templateUrl: './custom-sidebar.component.html',
     styleUrls: ['./custom-sidebar.component.scss'],
     standalone: false,
+    changeDetection: ChangeDetectionStrategy.Eager,
     animations: [
         trigger('slideInFromLeft', [
             state('hidden', style({

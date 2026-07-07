@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import {IMedia, MediaType} from "../../services/media-service/types/media.type";
 
 @Component({
     selector: 'media-poster',
     templateUrl: './media-poster.component.html',
     styleUrls: ['./media-poster.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MediaPosterComponent {

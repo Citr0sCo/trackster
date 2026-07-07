@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from "../../services/media-service/media.service";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
@@ -11,6 +11,7 @@ import { ISignInResponse } from "../../services/authentication-service/types/sig
     selector: 'login-page',
     templateUrl: './login-page.component.html',
     styleUrls: ['./login-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class LoginPageComponent implements OnInit, OnDestroy {

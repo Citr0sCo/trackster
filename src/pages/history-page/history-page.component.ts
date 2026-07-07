@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { IMedia } from "../../services/media-service/types/media.type";
@@ -9,6 +9,7 @@ import { UserService } from '../../services/user-service/user.service';
     selector: 'history-page',
     templateUrl: './history-page.component.html',
     styleUrls: ['./history-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class HistoryPageComponent implements OnInit, OnDestroy {
