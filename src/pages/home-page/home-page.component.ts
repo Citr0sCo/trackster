@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { IMedia } from "../../services/media-service/types/media.type";
 import { MediaMapper } from "../../services/media-service/media.mapper";
@@ -12,6 +12,7 @@ import {IWatchedEpisode} from "../../services/show-service/types/watched-episode
     selector: 'home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class HomePageComponent implements OnInit, OnDestroy {

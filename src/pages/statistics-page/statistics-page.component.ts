@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { IMedia, MediaType } from '../../services/media-service/types/media.type';
@@ -8,6 +8,7 @@ import { UserService } from '../../services/user-service/user.service';
     selector: 'statistics-page',
     templateUrl: './statistics-page.component.html',
     styleUrls: ['./statistics-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class StatisticsPageComponent implements OnInit, OnDestroy {

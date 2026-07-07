@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaService } from '../../services/media-service/media.service';
 import { ActivatedRoute, Router } from "@angular/router";
@@ -9,6 +9,7 @@ import { Provider } from "../../core/providers.enum";
     selector: 'authorize-trakt',
     templateUrl: './authorize-trakt.component.html',
     styleUrls: ['./authorize-trakt.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AuthorizeTraktComponent implements OnInit, OnDestroy {
