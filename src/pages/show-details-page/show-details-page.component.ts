@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {Subject, takeUntil, zip} from "rxjs";
 import {ShowService} from "../../services/show-service/show.service";
@@ -13,6 +13,7 @@ import {IUser} from "../../services/user-service/types/user.type";
     selector: 'show-details-page',
     templateUrl: './show-details-page.component.html',
     styleUrls: ['./show-details-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ShowDetailsPageComponent implements OnInit, OnDestroy {

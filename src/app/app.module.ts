@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomePageComponent } from '../pages/home-page/home-page.component';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { MediaService } from '../services/media-service/media.service';
 import { MediaRepository } from '../services/media-service/media.repository';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -90,7 +90,7 @@ import { AuthWithTraktButtonComponent } from '../components/auth-with-trakt-buto
         ShowRepository,
         SettingsService,
         SettingsRepository,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         {
             provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true
         }

@@ -17,7 +17,7 @@
 
                 <h4>Profile</h4>
 
-                <input type="text" placeholder="Username" class="c-field" [value]="user?.username">
+                <input type="text" placeholder="Username" class="c-field" [value]="$safeNavigationMigration(user?.username)">
 
                 <hr>
 
@@ -25,7 +25,7 @@
                     <div class="c-label">Plex Webhook</div>
                     <div class="o-grid o-grid--static">
                         <div class="o-grid__col">
-                            <input type="text" placeholder="Webhook URL" class="c-field c-field--icon-post" [value]="webhook?.url" disabled="disabled">
+                            <input type="text" placeholder="Webhook URL" class="c-field c-field--icon-post" [value]="$safeNavigationMigration(webhook?.url)" disabled="disabled">
                         </div>
                         <div class="o-grid__col o-grid__col--fixed">
                             <div class="c-icon c-icon--post" style="cursor:pointer;" (click)="generateWebhookUrl()"><i class="fa fa-sync" [ngClass]="{'fa-spin': isCreatingWebhook}"></i></div>

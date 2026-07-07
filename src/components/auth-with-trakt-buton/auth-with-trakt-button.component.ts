@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SettingsService } from '../../services/settings-service/settings.service';
 import { ISettings } from '../../services/settings-service/types/settings.type';
 import { Subject } from 'rxjs';
@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
     selector: 'auth-with-trakt-button',
     templateUrl: './auth-with-trakt-button.component.html',
     styleUrls: ['./auth-with-trakt-button.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AuthWithTraktButtonComponent implements OnInit, OnDestroy {

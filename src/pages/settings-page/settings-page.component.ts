@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { StreamService } from "../../core/event-service.service";
 import { environment } from "../../environments/environment";
@@ -13,6 +13,7 @@ import { Provider } from '../../core/providers.enum';
     selector: 'settings-page',
     templateUrl: './settings-page.component.html',
     styleUrls: ['./settings-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SettingsPageComponent implements OnInit, OnDestroy {
