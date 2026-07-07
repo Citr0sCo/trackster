@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WebSocketKey } from '../../services/websocket-service/types/web-socket.key';
 import { WebSocketService } from '../../services/websocket-service/web-socket.service';
 
@@ -6,6 +6,7 @@ import { WebSocketService } from '../../services/websocket-service/web-socket.se
     selector: 'watching-now',
     templateUrl: './watching-now.component.html',
     styleUrls: ['./watching-now.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WatchingNowComponent implements OnInit {

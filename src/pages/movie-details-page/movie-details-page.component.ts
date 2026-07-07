@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {Subject, takeUntil, zip} from "rxjs";
 import {MovieService} from "../../services/movie-service/movie.service";
@@ -10,6 +10,7 @@ import {UserService} from "../../services/user-service/user.service";
     selector: 'movie-details-page',
     templateUrl: './movie-details-page.component.html',
     styleUrls: ['./movie-details-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MovieDetailsPageComponent implements OnInit, OnDestroy {
