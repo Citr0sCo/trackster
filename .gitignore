@@ -1,5 +1,7 @@
 .DS_Store
 .idea/
+.openhands/memories/
+
 .angular/
 node_modules/
 dist/

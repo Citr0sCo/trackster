@@ -1,4 +1,4 @@
-import { ILink } from './types/movie.type';
+import { ILink } from './types/link.type';
 
 export class LinkMapper {
 
