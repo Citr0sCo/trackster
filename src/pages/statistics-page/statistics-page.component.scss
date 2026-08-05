@@ -123,10 +123,13 @@
             border-radius: 2.5px;
             border: 1px solid transparent;
             cursor: pointer;
+            outline: none;
+            transition: border-color var(--transition-speed) ease, filter var(--transition-speed) ease;
 
-            &:hover {
+            &:hover, &:focus, &.is-hovered {
                 background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.25);
+                border: 1px solid rgba(255, 255, 255, 0.35);
+                filter: brightness(1.2) drop-shadow(0 0 4px rgba(255, 255, 255, .24));
             }
         }
 

@@ -641,6 +641,18 @@ hr {
             text-align: right;
         }
 
+        &__detail {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-height: 34px;
+            margin-top: 12px;
+            color: var(--text-color-alt);
+            font-size: .7rem;
+
+            strong { color: var(--text-color); font-size: .76rem; }
+        }
+
         &__legend {
             display: flex;
             align-items: center;
@@ -665,6 +677,7 @@ hr {
         width: 100%;
         min-width: 0;
         overflow-x: auto;
+        overflow-y: hidden;
         overscroll-behavior-inline: contain;
         scrollbar-color: rgba(151, 116, 245, .5) transparent;
 

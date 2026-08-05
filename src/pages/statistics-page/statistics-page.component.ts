@@ -57,6 +57,7 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
     public startDate: Date = new Date();
     public endDate: Date = new Date();
     public calendarMaxValue: number = 0;
+    public hoveredCalendarItem: { key: string; value: number } | null = null;
     public genreSlices: IGenreSlice[] = [];
     public hoveredGenre: IGenreSlice | null = null;
     public timeOfDayChart: ILineChart = this.emptyLineChart();
@@ -139,8 +140,13 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
 
             if (event.watchedAt >= yearAgo && event.watchedAt <= now) {
                 timeCounts[event.watchedAt.getHours()]++;
-                weekdayCounts[(event.watchedAt.getDay() + 6) % 7]++;
             }
+        }
+
+        for (const item of this.calendarItems) {
+            const [year, month, day] = item.key.split('-').map(Number);
+            const calendarDate = new Date(year, month - 1, day);
+            weekdayCounts[(calendarDate.getDay() + 6) % 7] += item.value;
         }
 
         this.genreSlices = this.createGenreSlices(genreCounts);
@@ -207,6 +213,14 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
 
     public clearChartPoint(): void {
         this.hoveredChartPoint = null;
+    }
+
+    public selectCalendarItem(item: { key: string; value: number }): void {
+        this.hoveredCalendarItem = item;
+    }
+
+    public clearCalendarItem(): void {
+        this.hoveredCalendarItem = null;
     }
 
     private polarPoint(centerX: number, centerY: number, radius: number, angle: number): { x: number; y: number } {
