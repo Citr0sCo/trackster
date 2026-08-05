@@ -1,4 +1,7 @@
 <div class="custom-sidebar" [ngClass]="{'custom-sidebar--hidden': !showMenu}" [@slideInFromLeft]="showMenu ? 'visible' : 'hidden'">
+    <div class="custom-sidebar__brand">
+        <img src="assets/brand/trackster-logo.svg" alt="Trackster logo">
+    </div>
 
     @if (user) {
         <div class="o-grid o-grid--static">

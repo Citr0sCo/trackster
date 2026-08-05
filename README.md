@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/apps/default.png" width="100" alt="Logo" >
+  <img src="src/assets/brand/trackster-logo.svg" width="100" alt="Trackster logo" >
 </p>
 
 <h1 align="center">Trackster</h1>
