@@ -80,7 +80,10 @@
                             "src/styles/styles.scss"
                           ],
                           "scripts": [],
-                          "polyfills": "src/polyfills.ts"
+                          "polyfills": [
+                            "src/polyfills.ts",
+                            "zone.js/testing"
+                          ]
                         }
                     },
                     "defaultConfiguration": "production"
@@ -112,10 +115,8 @@
                         ],
                         "coverageReporters": [
                           "html",
+                          "lcovonly",
                           "text-summary"
-                        ],
-                        "setupFiles": [
-                          "src/test.ts"
                         ],
                         "buildTarget": ":build:testing",
                         "runner": "vitest"
