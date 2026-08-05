@@ -23,7 +23,7 @@ public class TmdbImportProvider
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
 
-                using (var response = await httpClient.GetAsync($"3/movie/{reference}"))
+                using (var response = await httpClient.GetAsync($"3/movie/{reference}?append_to_response=credits,external_ids"))
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     
@@ -57,7 +57,7 @@ public class TmdbImportProvider
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_authToken}");
       
-                using(var response = await httpClient.GetAsync($"3/tv/{reference}"))
+                using(var response = await httpClient.GetAsync($"3/tv/{reference}?append_to_response=credits,external_ids"))
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     

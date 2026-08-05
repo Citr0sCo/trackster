@@ -1,5 +1,6 @@
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
+using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
 using Trackster.Api.Features.Movies.Types;
 
@@ -9,6 +10,7 @@ public interface IMoviesService
 {
     GetAllMoviesResponse GetAllWatchedMovies(string username, int results, int page);
     GetMovieResponse GetMovieBySlug(string slug);
+    Task<GetMediaDetailsResponse> GetDetailsBySlug(string slug);
     Task<MovieRecord> SearchForMovieBy(string title, int year, bool requestDebug);
     Task ImportMovie(UserRecord user, MovieRecord movie, List<GenreRecord> genres);
 
@@ -53,6 +55,62 @@ public class MoviesService : IMoviesService
         }
         
         return new GetMovieResponse();
+    }
+
+    public async Task<GetMediaDetailsResponse> GetDetailsBySlug(string slug)
+    {
+        var movie = _repository.GetMovieBySlug(slug);
+
+        if (movie == null || string.IsNullOrWhiteSpace(movie.TMDB))
+            return new GetMediaDetailsResponse();
+
+        var details = await _detailsProvider.GetDetailsForMovie(movie.TMDB);
+
+        return new GetMediaDetailsResponse
+        {
+            Details = new MediaDetails
+            {
+                Tagline = details.Tagline ?? string.Empty,
+                Backdrop = BuildImageUrl(details.BackdropPath, "w1280"),
+                ImdbUrl = BuildImdbUrl(details.ExternalIds?.ImdbId),
+                TraktUrl = BuildTraktUrl(movie.TMDB, "movie"),
+                ReleaseDate = details.ReleaseDate == default ? null : details.ReleaseDate,
+                Runtime = details.Runtime,
+                Rating = details.VoteAverage,
+                RatingCount = details.VoteCount,
+                Status = details.Status ?? string.Empty,
+                Cast = (details.Credits?.Cast ?? new List<Trackster.Api.Features.Media.Importers.TmdbImporter.Types.TmdbCastMember>())
+                    .OrderBy(cast => cast.Order)
+                    .Take(12)
+                    .Select(MapCastMember)
+                    .ToList()
+            }
+        };
+    }
+
+    private static CastMember MapCastMember(Trackster.Api.Features.Media.Importers.TmdbImporter.Types.TmdbCastMember cast)
+    {
+        return new CastMember
+        {
+            Name = cast.Name,
+            Character = cast.Character,
+            Profile = BuildImageUrl(cast.ProfilePath, "w185")
+        };
+    }
+
+    private static string BuildImageUrl(string? path, string size)
+    {
+        return string.IsNullOrWhiteSpace(path) ? string.Empty : $"https://image.tmdb.org/t/p/{size}{path}";
+    }
+
+    private static string BuildImdbUrl(string? imdbId)
+    {
+        return string.IsNullOrWhiteSpace(imdbId) ? string.Empty : $"https://www.imdb.com/title/{imdbId}/";
+    }
+
+    private static string BuildTraktUrl(string tmdbId, string mediaType)
+    {
+        return $"https://trakt.tv/search/tmdb/{tmdbId}?id_type={mediaType}";
     }
 
     public async Task<MovieRecord> SearchForMovieBy(string title, int year, bool requestDebug)

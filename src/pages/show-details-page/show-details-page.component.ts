@@ -8,6 +8,7 @@ import {IEpisode} from "../../services/show-service/types/episode.type";
 import {IWatchedEpisode} from "../../services/show-service/types/watched-episode.type";
 import {UserService} from "../../services/user-service/user.service";
 import {IUser} from "../../services/user-service/types/user.type";
+import {IMediaDetails} from "../../services/media-service/types/media-details.type";
 
 @Component({
     selector: 'show-details-page',
@@ -22,6 +23,7 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
     public season: ISeason | null = null;
     public episode: IEpisode | null = null;
     public watchHistory: Array<IWatchedEpisode> = [];
+    public details: IMediaDetails | null = null;
 
     public isLoading: boolean = false;
     public isUpdating: boolean = false;
@@ -52,19 +54,21 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
                     .pipe(takeUntil(this._destroy))
                     .subscribe((user: IUser) => {
                         const episode = this._showService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
+                        const details = this._showService.getShowDetailsBySlug(params['slug']);
                         const watchHistory = this._showService.getEpisodeWatchHistory(user.username, params['slug'], params['seasonId'], params['episodeId']);
 
                         this.slug = params['slug'];
                         this.seasonId = params['seasonId'];
                         this.episodeId = params['episodeId'];
 
-                        zip(episode, watchHistory)
+                        zip(episode, details, watchHistory)
                             .pipe(takeUntil(this._destroy))
-                            .subscribe(([episode, watchHistory]) => {
+                            .subscribe(([episode, details, watchHistory]) => {
                                 this.isLoading = false;
                                 this.episode = episode;
                                 this.season = episode.season;
                                 this.show = episode.season.show;
+                                this.details = details;
                                 this.watchHistory = watchHistory;
                             });
                     });
@@ -86,7 +90,20 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
                 this.episode = episode;
                 this.season = episode.season;
                 this.show = episode.season.show;
+                this._showService.getShowDetailsBySlug(this.slug)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((details) => this.details = details);
             });
+    }
+
+    public formatRuntime(minutes: number): string {
+        if (!minutes) {
+            return '';
+        }
+
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return hours ? `${hours}h ${remainingMinutes}m` : `${remainingMinutes}m`;
     }
 
     public ngOnDestroy(): void {

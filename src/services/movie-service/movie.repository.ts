@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import {catchError, map, Observable, of} from 'rxjs';
 import { environment } from '../../environments/environment';
 import { IMovie } from "./types/movie.type";
 import { IWatchedMovie } from "./types/watched-movie.type";
 import {MovieMapper} from "./movie.mapper";
+import {MediaDetailsMapper} from "../media-service/media-details.mapper";
+import {IMediaDetails} from "../media-service/types/media-details.type";
 
 @Injectable()
 export class MovieRepository {
@@ -35,6 +37,14 @@ export class MovieRepository {
                 map((response: any) => {
                     return MovieMapper.map(response.Movie);
                 })
+            );
+    }
+
+    public getMovieDetailsBySlug(slug: string): Observable<IMediaDetails | null> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/movies/${slug}/details`)
+            .pipe(
+                map((response: any) => MediaDetailsMapper.map(response.Details)),
+                catchError(() => of(null))
             );
     }
 

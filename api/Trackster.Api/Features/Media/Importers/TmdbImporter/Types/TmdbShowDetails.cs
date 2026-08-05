@@ -18,6 +18,15 @@ public class TmdbShowDetails : TmdbCommonResponse
     
     [JsonProperty("poster_path")] 
     public string PosterUrl { get; set; }
+
+    [JsonProperty("backdrop_path")]
+    public string? BackdropPath { get; set; }
+
+    [JsonProperty("credits")]
+    public TmdbCredits Credits { get; set; } = new();
+
+    [JsonProperty("external_ids")]
+    public TmdbExternalIds ExternalIds { get; set; } = new();
     
     [JsonProperty("overview")] 
     public string Overview { get; set; }
@@ -30,6 +39,27 @@ public class TmdbShowDetails : TmdbCommonResponse
     
     [JsonProperty("genres")]
     public List<Genre> Genres { get; set; }
+
+    [JsonProperty("status")]
+    public string Status { get; set; } = string.Empty;
+
+    [JsonProperty("tagline")]
+    public string Tagline { get; set; } = string.Empty;
+
+    [JsonProperty("vote_average")]
+    public double VoteAverage { get; set; }
+
+    [JsonProperty("vote_count")]
+    public int VoteCount { get; set; }
+
+    [JsonProperty("number_of_seasons")]
+    public int NumberOfSeasons { get; set; }
+
+    [JsonProperty("number_of_episodes")]
+    public int NumberOfEpisodes { get; set; }
+
+    [JsonProperty("episode_run_time")]
+    public List<int> EpisodeRunTime { get; set; } = new();
     
     //public bool adult { get; set; }
     //public string backdrop_path { get; set; }

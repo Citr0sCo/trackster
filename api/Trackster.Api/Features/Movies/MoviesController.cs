@@ -33,6 +33,17 @@ public class MoviesController : ControllerBase
         return Ok(response);
     }
     
+    [HttpGet("{slug}/details")]
+    public async Task<IActionResult> GetDetails([FromRoute]string slug)
+    {
+        var response = await _service.GetDetailsBySlug(slug);
+
+        if (response.Details == null)
+            return NotFound();
+
+        return Ok(response);
+    }
+
     [HttpPatch("{slug}")]
     public async Task<IActionResult> UpdateMetadata([FromRoute]string slug)
     {

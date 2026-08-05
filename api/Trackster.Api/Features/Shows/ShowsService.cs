@@ -2,6 +2,8 @@ using Newtonsoft.Json;
 using Trackster.Api.Core.Helpers;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Importers.TmdbImporter;
+using Trackster.Api.Features.Media.Types;
+using Trackster.Api.Features.Media.Importers.TmdbImporter.Types;
 using Trackster.Api.Features.Shows.Types;
 
 namespace Trackster.Api.Features.Shows;
@@ -11,6 +13,7 @@ public interface IShowsService
     GetAllWatchedEpisodesResponse GetAllWatchedEpisodes(string username, int results, int page);
     Task<EpisodeRecord> SearchForEpisode(string showTitle, string seasonTitle, string episodeTitle, int year, int seasonNumber, bool requestDebug);
     GetShowResponse GetShowBySlug(string slug);
+    Task<GetMediaDetailsResponse> GetDetailsBySlug(string slug);
     Task<ShowRecord?> GetShowByTmdbId(string tmdbId);
     Task<SeasonRecord?> GetSeasonBy(int seasonNumber, Guid showIdentifier);
     Task<EpisodeRecord?> GetEpisodeBy(int episodeNumber, Guid seasonIdentifier);
@@ -142,6 +145,64 @@ public class ShowsService : IShowsService
         }
         
         return new GetShowResponse();
+    }
+
+    public async Task<GetMediaDetailsResponse> GetDetailsBySlug(string slug)
+    {
+        var show = _repository.GetShowBySlug(slug);
+
+        if (show == null || string.IsNullOrWhiteSpace(show.TMDB))
+            return new GetMediaDetailsResponse();
+
+        var details = await _detailsProvider.GetDetailsForShow(show.TMDB, false);
+
+        return new GetMediaDetailsResponse
+        {
+            Details = new MediaDetails
+            {
+                Tagline = details.Tagline ?? string.Empty,
+                Backdrop = BuildImageUrl(details.BackdropPath, "w1280"),
+                ImdbUrl = BuildImdbUrl(details.ExternalIds?.ImdbId),
+                TraktUrl = BuildTraktUrl(show.TMDB, "show"),
+                ReleaseDate = details.FirstAirDate == default ? null : details.FirstAirDate,
+                Runtime = (details.EpisodeRunTime ?? new List<int>()).FirstOrDefault(),
+                Rating = details.VoteAverage,
+                RatingCount = details.VoteCount,
+                Status = details.Status ?? string.Empty,
+                SeasonCount = details.NumberOfSeasons,
+                EpisodeCount = details.NumberOfEpisodes,
+                Cast = (details.Credits?.Cast ?? new List<TmdbCastMember>())
+                    .OrderBy(cast => cast.Order)
+                    .Take(12)
+                    .Select(MapCastMember)
+                    .ToList()
+            }
+        };
+    }
+
+    private static CastMember MapCastMember(TmdbCastMember cast)
+    {
+        return new CastMember
+        {
+            Name = cast.Name,
+            Character = cast.Character,
+            Profile = BuildImageUrl(cast.ProfilePath, "w185")
+        };
+    }
+
+    private static string BuildImageUrl(string? path, string size)
+    {
+        return string.IsNullOrWhiteSpace(path) ? string.Empty : $"https://image.tmdb.org/t/p/{size}{path}";
+    }
+
+    private static string BuildImdbUrl(string? imdbId)
+    {
+        return string.IsNullOrWhiteSpace(imdbId) ? string.Empty : $"https://www.imdb.com/title/{imdbId}/";
+    }
+
+    private static string BuildTraktUrl(string tmdbId, string mediaType)
+    {
+        return $"https://trakt.tv/search/tmdb/{tmdbId}?id_type={mediaType}";
     }
 
     public async Task<ShowRecord?> GetShowByTmdbId(string tmdbId)
