@@ -341,8 +341,19 @@ hr {
     }
 }
 
+.page-header {
+    align-items: center;
+
+    & > .o-grid__col--fixed {
+        display: flex;
+        flex: 0 0 36px;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}
+
 .page-refresh {
-    display: grid !important;
+    display: inline-grid !important;
     width: 36px;
     height: 36px;
     min-height: 36px !important;
@@ -531,9 +542,34 @@ hr {
             border: 8px solid rgba(11, 13, 19, .55);
             border-radius: 50%;
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
+            overflow: visible;
         }
 
+        &__slice {
+            cursor: pointer;
+            outline: none;
+            transition: opacity var(--transition-speed) ease, filter var(--transition-speed) ease;
+
+            &:hover, &:focus, &.is-hovered {
+                filter: brightness(1.18) drop-shadow(0 0 4px rgba(255, 255, 255, .24));
+            }
+        }
+
+        &__pie-empty { fill: rgba(255, 255, 255, .08); }
+
         &__legend { flex: 1; width: 100%; }
+
+        &__detail {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-height: 34px;
+            margin-top: 12px;
+            color: var(--text-color-alt);
+            font-size: .7rem;
+
+            strong { color: var(--text-color); font-size: .76rem; }
+        }
     }
 
     .genre-legend-item {
@@ -559,7 +595,29 @@ hr {
 
         &__area { fill: rgba(151, 116, 245, .14); }
         &__line { fill: none; stroke: $brand-primary; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
-        &__point { fill: $brand-primary; stroke: #171923; stroke-width: 2; }
+        &__point {
+            fill: $brand-primary;
+            stroke: #171923;
+            stroke-width: 2;
+            cursor: pointer;
+            outline: none;
+            vector-effect: non-scaling-stroke;
+            transition: filter var(--transition-speed) ease;
+
+            &:hover, &:focus { filter: drop-shadow(0 0 4px rgba(255, 255, 255, .48)); }
+        }
+
+        &__tooltip {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-height: 34px;
+            margin: 7px 18px 0 38px;
+            color: var(--text-color-alt);
+            font-size: .7rem;
+
+            strong { color: var(--text-color); font-size: .76rem; }
+        }
 
         &__labels {
             display: flex;

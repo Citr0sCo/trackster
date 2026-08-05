@@ -9,9 +9,17 @@ import { UserService } from '../../services/user-service/user.service';
 
 interface IChartPoint {
     label: string;
+    detailLabel: string;
     value: number;
     x: number;
     y: number;
+}
+
+interface IChartTooltip {
+    chart: 'time' | 'weekday';
+    label: string;
+    value: number;
+    description: string;
 }
 
 interface ILineChart {
@@ -26,6 +34,8 @@ interface IGenreSlice {
     value: number;
     percentage: number;
     color: string;
+    startAngle: number;
+    endAngle: number;
 }
 
 @Component({
@@ -48,8 +58,10 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
     public endDate: Date = new Date();
     public calendarMaxValue: number = 0;
     public genreSlices: IGenreSlice[] = [];
+    public hoveredGenre: IGenreSlice | null = null;
     public timeOfDayChart: ILineChart = this.emptyLineChart();
     public weekdayChart: ILineChart = this.emptyLineChart();
+    public hoveredChartPoint: IChartTooltip | null = null;
     public readonly timeOfDayLabels: string[] = ['12a', '3a', '6a', '9a', '12p', '3p', '6p', '9p'];
     public readonly weekdayLabels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -146,20 +158,66 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
         }
 
         const total = visibleEntries.reduce((sum, [, value]) => sum + value, 0);
+        let startAngle = 0;
         return visibleEntries.map(([name, value], index) => {
             const percentage = total ? (value / total) * 100 : 0;
-            return { name, value, percentage, color: colors[index % colors.length] };
+            const slice = {
+                name,
+                value,
+                percentage,
+                color: colors[index % colors.length],
+                startAngle,
+                endAngle: startAngle + (percentage / 100) * 360,
+            };
+            startAngle = slice.endAngle;
+            return slice;
         });
     }
 
-    public get genrePieStyle(): string {
-        let offset = 0;
-        const stops = this.genreSlices.map((slice) => {
-            const start = offset;
-            offset += slice.percentage;
-            return `${slice.color} ${start}% ${offset}%`;
-        });
-        return `conic-gradient(${stops.join(', ') || 'rgba(255,255,255,.08) 0 100%'})`;
+    public genreSlicePath(slice: IGenreSlice): string {
+        const center = 77;
+        const radius = 69;
+        const startAngle = slice.startAngle - 90;
+        const endAngle = slice.endAngle - 90;
+        const start = this.polarPoint(center, center, radius, startAngle);
+        const end = this.polarPoint(center, center, radius, endAngle);
+        const span = slice.endAngle - slice.startAngle;
+        if (span >= 359.99) {
+            return `M ${center} ${center - radius} A ${radius} ${radius} 0 1 1 ${center} ${center + radius} A ${radius} ${radius} 0 1 1 ${center} ${center - radius} Z`;
+        }
+        return `M ${center} ${center} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${span > 180 ? 1 : 0} 1 ${end.x} ${end.y} Z`;
+    }
+
+    public selectGenre(slice: IGenreSlice): void {
+        this.hoveredGenre = slice;
+    }
+
+    public clearGenreSelection(): void {
+        this.hoveredGenre = null;
+    }
+
+    public selectChartPoint(chart: 'time' | 'weekday', point: IChartPoint): void {
+        this.hoveredChartPoint = {
+            chart,
+            label: point.detailLabel,
+            value: point.value,
+            description: chart === 'time' ? 'Watches started during this time of day.' : 'Watches recorded on this day of the week.',
+        };
+    }
+
+    public clearChartPoint(): void {
+        this.hoveredChartPoint = null;
+    }
+
+    private polarPoint(centerX: number, centerY: number, radius: number, angle: number): { x: number; y: number } {
+        const radians = angle * Math.PI / 180;
+        return { x: centerX + radius * Math.cos(radians), y: centerY + radius * Math.sin(radians) };
+    }
+
+    private formatHourLabel(hour: number): string {
+        const suffix = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:00 ${suffix}`;
     }
 
     private createLineChart(values: number[], labels: string[], labelStep: number): ILineChart {
@@ -170,6 +228,7 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
         const maxValue = Math.max(...values, 1);
         const points = values.map((value, index) => ({
             label: index % labelStep === 0 ? labels[index / labelStep] || '' : '',
+            detailLabel: values.length === 24 ? this.formatHourLabel(index) : labels[index] || `Day ${index + 1}`,
             value,
             x: left + (index / Math.max(values.length - 1, 1)) * (right - left),
             y: bottom - (value / maxValue) * (bottom - top),
@@ -181,10 +240,6 @@ export class StatisticsPageComponent implements OnInit, OnDestroy {
 
     private emptyLineChart(): ILineChart {
         return this.createLineChart([0, 0], ['', ''], 1);
-    }
-
-    public formatChartValue(value: number): string {
-        return value.toString();
     }
 
     private generateCalendarMatrix(): void {
