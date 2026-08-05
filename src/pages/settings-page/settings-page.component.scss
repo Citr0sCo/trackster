@@ -3,6 +3,12 @@
 .settings-page-component {
     padding: 34px 0 84px;
 
+    .page-header {
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 24px;
+    }
+
     h3 {
         display: flex;
         align-items: center;
