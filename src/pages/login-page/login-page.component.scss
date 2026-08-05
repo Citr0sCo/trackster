@@ -1,23 +1,29 @@
 @import "../../styles/utility/variables";
 
 .login-page-component {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+
+    &::after {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(11, 13, 19, .95) 0%, rgba(11, 13, 19, .74) 42%, rgba(11, 13, 19, .34) 100%);
+        content: '';
+        pointer-events: none;
+        z-index: 2;
+    }
 
     .login-poster-wrapper {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        inset: 0;
         height: 100vh;
         width: 100vw;
     }
 
     .login-poster {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        inset: 0;
         background-position: center;
         background-size: cover;
         background-repeat: no-repeat;
@@ -25,12 +31,9 @@
 
         &__backdrop {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             z-index: 5;
-            background: rgba(0, 0, 0, 0.75);
+            background: linear-gradient(120deg, rgba(11, 13, 19, .94), rgba(11, 13, 19, .58));
         }
     }
 
@@ -40,40 +43,80 @@
         flex-wrap: nowrap;
         justify-content: center;
         height: 100vh;
-        align-items: center;
+        align-items: flex-end;
+        padding: 32px clamp(24px, 9vw, 150px);
+        box-sizing: border-box;
     }
 
     .login-form {
-        background: var(--card-bg-alt);
-        border: 1px solid var(--border-color);
-        border-radius: $border-radius;
-        padding: 35px 25px;
-        width: calc(100% - 30px);
-        max-width: 400px;
+        background: rgba(22, 25, 35, .88);
+        border: 1px solid rgba(255, 255, 255, .13);
+        border-radius: 18px;
+        padding: 42px 36px 34px;
+        width: min(100%, 390px);
+        max-width: none;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, .42);
+        backdrop-filter: blur(22px);
         z-index: 10;
+        animation: auth-card-in 600ms cubic-bezier(.2, .8, .2, 1) both;
+
+        @media(max-width: $mobile-width) {
+            padding: 32px 24px 26px;
+        }
 
         &__intro {
-            text-align: center;
-            margin-bottom: 15px;
+            text-align: left;
+            margin-bottom: 26px;
+
+            img {
+                width: 54px;
+                height: 54px;
+                margin-bottom: 20px !important;
+                border-radius: 15px;
+                box-shadow: 0 12px 24px rgba(151, 116, 245, .22);
+            }
+
+            h2 {
+                margin-bottom: 0;
+                font-size: clamp(2rem, 4vw, 2.65rem);
+                line-height: 1;
+            }
         }
     }
 
     .sign-in-spacer {
         border-top: 1px solid #616366;
-        margin: 2rem 0;
+        margin: 1.8rem 0;
         line-height: 0;
         text-align: center;
+
+        .text {
+            position: relative;
+            top: -2px;
+            padding: 0 10px;
+            background-color: #161923;
+        }
     }
 
-    .sign-in-spacer .text {
-        padding: 0 10px;
-        background-color: var(--card-bg-alt);
-        top: -2px;
-        position: relative;
-    }
+    @media(max-width: $mobile-width) {
+        .login-form-wrapper {
+            align-items: center;
+            padding: 18px;
+        }
 
-    .theme--dark .sign-in-spacer .text {
-        background-color: #141414;
-        color: #fff;
+        .login-poster {
+            background-position: 68% center;
+        }
+    }
+}
+
+@keyframes auth-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

@@ -7,12 +7,13 @@ a {
 
 .movie-poster-wrapper {
     position: relative;
-    transition: transform 100ms ease-in;
-    margin: 5px;
-    width: 200px;
+    transition: transform 180ms ease, filter 180ms ease;
+    margin: 8px;
+    width: 188px;
 
     &:hover {
-        transform:scale(1.02);
+        transform: translateY(-6px);
+        filter: brightness(1.08);
     }
 
     .movie-poster {
@@ -20,28 +21,34 @@ a {
         background-position: center;
         background-size: cover;
         background-repeat: no-repeat;
+        border: 1px solid rgba(255, 255, 255, .1);
         border-radius: $border-radius $border-radius 0 0;
         overflow: hidden;
         position: relative;
         aspect-ratio: 2 / 3;
         background-color: rgba(0, 0, 0, 0.5);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, .22);
 
         &__watched_at {
             position: absolute;
             top: 5px;
             left: 5px;
-            background-color: rgba(137, 87, 229, 0.75);
-            padding: 5px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            background: rgba(11, 13, 19, .78);
+            border: 1px solid rgba(151, 116, 245, .52);
+            padding: 6px 8px;
+            border-radius: 7px;
+            font-size: 0.68rem;
+            letter-spacing: .02em;
         }
 
         &__title {
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 5px;
+            background: var(--card-bg-alt);
+            padding: 9px 10px 11px;
             border-radius: 0 0 $border-radius $border-radius;
-            text-align:center;
-            font-size:1rem;
+            text-align: left;
+            font-size: .85rem;
+            line-height: 1.35;
+            color: var(--text-color);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

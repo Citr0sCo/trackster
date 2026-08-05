@@ -1,7 +1,18 @@
 @import "../../styles/utility/variables";
 
 .statistics-page-component {
-    padding: 10px 0;
+    padding: 34px 0 84px;
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        i {
+            color: $brand-primary;
+            font-size: 1.2rem;
+        }
+    }
 
     .stats-highlights {
         display: flex;
@@ -16,23 +27,27 @@
 
     .stats-highlight-container {
         text-align: center;
-        border-radius: $border-radius;
+        border: 1px solid rgba(151, 116, 245, .28);
+        border-radius: 14px;
         width: 100%;
-        padding: 15px;
+        padding: 22px 15px;
         margin: 0 15px;
+        background: linear-gradient(145deg, rgba(151, 116, 245, .22), rgba(105, 70, 217, .56));
+        box-shadow: 0 16px 32px rgba(44, 27, 108, .18);
         display: flex;
         flex-direction: column;
         flex-wrap: nowrap;
         justify-content: center;
         align-items: center;
-        background: linear-gradient(45deg, $brand-primary, $brand-primary-alt);
 
         @media(max-width: $mobile-width) {
             margin: 15px 0;
         }
 
         &__value {
-            font-size: 2rem;
+            font-size: clamp(2.1rem, 4vw, 3rem);
+            font-family: 'digital-clock-font', monospace;
+            letter-spacing: .04em;
         }
 
         &__label {

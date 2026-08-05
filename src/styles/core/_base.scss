@@ -1,36 +1,41 @@
 :root {
-    --box-shadow: 0 2px 10px 0 rgba(0, 0, 0, .4);
-    --transition-speed: 200ms;
+    --box-shadow: 0 18px 50px rgba(0, 0, 0, .28);
+    --transition-speed: 220ms;
+    --animation-speed: 220ms;
 
     .theme--light {
-        --body-background-color: #efefef;
-        --text-color: #000;
-        --text-color-alt: #333;
-        --card-bg-color: rgba(0, 0, 0, 0.05);
-        --card-bg-color-alt: #e3e3e3;
-        --card-bg-alt: #e6e6e6;
-        --theme-rgba-contrast: 0, 0, 0;
-        --transparent-hover-bg: rgba(0, 0, 0, 0.05);
-        --transparent-active-bg: rgba(0, 0, 0, 0.15);
-        --border-color: #ababab;
-        --border-color-alt: #919191;
-        --btn-bg-color: rgba(0, 0, 0, 0.15);
-        --btn-bg-color-hover: rgba(0, 0, 0, 0.20);
+        --body-background-color: #f3f1ee;
+        --text-color: #17151d;
+        --text-color-alt: #686372;
+        --card-bg-color: rgba(23, 21, 29, 0.05);
+        --card-bg-color-alt: #fffdfa;
+        --card-bg-alt: #fffdfa;
+        --theme-rgba-contrast: 23, 21, 29;
+        --transparent-hover-bg: rgba(23, 21, 29, 0.06);
+        --transparent-active-bg: rgba(23, 21, 29, 0.12);
+        --border-color: #ddd8e1;
+        --border-color-alt: #c8c1d0;
+        --btn-bg-color: rgba(23, 21, 29, 0.08);
+        --btn-bg-color-hover: rgba(23, 21, 29, 0.14);
+        --input-background: rgba(23, 21, 29, 0.035);
+        --autofill-color: #fffdfa;
     }
 
     .theme--dark {
-        --body-background-color: #333;
-        --text-color: #fff;
-        --text-color-alt: #c1c1c1;
-        --card-bg-color: rgba(255, 255, 255, 0.05);
-        --card-bg-color-alt: #212428;
-        --card-bg-alt: #212428;
+        --body-background-color: #0b0d13;
+        --text-color: #f7f4ef;
+        --text-color-alt: #aaa7b6;
+        --card-bg-color: rgba(255, 255, 255, 0.055);
+        --card-bg-color-alt: #161923;
+        --card-bg-alt: #161923;
         --theme-rgba-contrast: 255, 255, 255;
-        --transparent-hover-bg: rgba(255, 255, 255, 0.05);
-        --transparent-active-bg: rgba(255, 255, 255, 0.15);
-        --border-color: #4b4b4b;
-        --border-color-alt: #919191;
-        --btn-bg-color: rgba(255, 255, 255, 0.15);
-        --btn-bg-color-hover: rgba(255, 255, 255, 0.20);
+        --transparent-hover-bg: rgba(255, 255, 255, 0.07);
+        --transparent-active-bg: rgba(255, 255, 255, 0.12);
+        --border-color: #2b3040;
+        --border-color-alt: #454b60;
+        --btn-bg-color: rgba(255, 255, 255, 0.085);
+        --btn-bg-color-hover: rgba(255, 255, 255, 0.14);
+        --input-background: rgba(7, 9, 14, 0.42);
+        --autofill-color: #161923;
     }
 }
