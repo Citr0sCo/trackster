@@ -1,15 +1,13 @@
 <div class="statistics-page-component">
     <div class="container">
-        <div class="o-grid u-mb-2 o-grid--static">
+        <div class="o-grid u-mb-2 o-grid--static page-header">
             <div class="o-grid__col" style="display: flex; align-items: center;">
-                <h3 class="u-mb-0"><i class="fa fa-chart-line"></i> Statistics</h3>
+                <h3 class="u-mb-0"><i class="fa fa-chart-line" aria-hidden="true"></i> Statistics</h3>
             </div>
             <div class="o-grid__col o-grid__col--fixed">
-                <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
-                    <div class="custom-sidebar__button__icon">
-                        <i class="fa fa-sync" [ngClass]="{'fa-spin': statsLoading || calendarStatsLoading}"></i>
-                    </div>
-                </div>
+                <button class="o-btn page-refresh" type="button" aria-label="Refresh statistics" (click)="bustCache()">
+                    <i class="fa fa-sync" [ngClass]="{'fa-spin': statsLoading || calendarStatsLoading}" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 
@@ -47,13 +45,96 @@
                 </div>
             </div>
         }
+
+        @if (!statsLoading) {
+            <div class="analytics-grid u-mt-3">
+                <section class="analytics-card genre-card">
+                    <div class="analytics-card__header">
+                        <div>
+                            <span class="analytics-card__eyebrow">Your watch profile</span>
+                            <h4>Genres watched</h4>
+                        </div>
+                        <i class="fa fa-pie-chart" aria-hidden="true"></i>
+                    </div>
+                    <div class="genre-chart">
+                        <div class="genre-chart__pie" [style.background]="genrePieStyle" role="img" aria-label="Genres watched pie chart"></div>
+                        <div class="genre-chart__legend">
+                            @for (slice of genreSlices; track slice.name) {
+                                <div class="genre-legend-item">
+                                    <span class="genre-legend-item__swatch" [style.background]="slice.color"></span>
+                                    <span>{{ slice.name }}</span>
+                                    <strong>{{ slice.percentage | number:'1.0-0' }}%</strong>
+                                </div>
+                            }
+                            @if (!genreSlices.length) {
+                                <span class="analytics-empty">No genre data yet.</span>
+                            }
+                        </div>
+                    </div>
+                </section>
+
+                <section class="analytics-card">
+                    <div class="analytics-card__header">
+                        <div>
+                            <span class="analytics-card__eyebrow">Past 12 months</span>
+                            <h4>Preferred watch time</h4>
+                        </div>
+                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                    </div>
+                    <div class="line-chart" role="img" aria-label="Line graph showing watches by time of day">
+                        <svg viewBox="0 0 720 220" preserveAspectRatio="none" aria-hidden="true">
+                            <path class="line-chart__area" [attr.d]="timeOfDayChart.areaPath"></path>
+                            <path class="line-chart__line" [attr.d]="timeOfDayChart.linePath"></path>
+                            @for (point of timeOfDayChart.points; track point.x) {
+                                <circle class="line-chart__point" [attr.cx]="point.x" [attr.cy]="point.y" r="4">
+                                    <title>{{ point.label || 'Hour' }}: {{ formatChartValue(point.value) }} watches</title>
+                                </circle>
+                            }
+                        </svg>
+                        <div class="line-chart__labels">
+                            @for (point of timeOfDayChart.points; track point.x) {
+                                @if (point.label) {
+                                    <span>{{ point.label }}</span>
+                                }
+                            }
+                        </div>
+                    </div>
+                </section>
+
+                <section class="analytics-card analytics-card--wide">
+                    <div class="analytics-card__header">
+                        <div>
+                            <span class="analytics-card__eyebrow">Past 12 months</span>
+                            <h4>Most watched days</h4>
+                        </div>
+                        <i class="fa fa-calendar-o" aria-hidden="true"></i>
+                    </div>
+                    <div class="line-chart" role="img" aria-label="Line graph showing watches by day of the week">
+                        <svg viewBox="0 0 720 220" preserveAspectRatio="none" aria-hidden="true">
+                            <path class="line-chart__area" [attr.d]="weekdayChart.areaPath"></path>
+                            <path class="line-chart__line" [attr.d]="weekdayChart.linePath"></path>
+                            @for (point of weekdayChart.points; track point.x) {
+                                <circle class="line-chart__point" [attr.cx]="point.x" [attr.cy]="point.y" r="4">
+                                    <title>{{ point.label }}: {{ formatChartValue(point.value) }} watches</title>
+                                </circle>
+                            }
+                        </svg>
+                        <div class="line-chart__labels">
+                            @for (point of weekdayChart.points; track point.x) {
+                                <span>{{ point.label }}</span>
+                            }
+                        </div>
+                    </div>
+                </section>
+            </div>
+        }
         @if (!calendarStatsLoading) {
             <div class="o-grid">
                 <div class="o-grid__col">
                     <div style="text-align:center;" class="u-mt-3">
                         {{ startDate | date:'MMM' }} {{ startDate.getFullYear() }} - {{ endDate | date:'MMM' }} {{ endDate.getFullYear() }}
                     </div>
-                    <div class="o-grid u-mt-2" style="overflow-x: auto;">
+                    <div class="o-grid u-mt-2 calendar-scroll">
                         <div class="o-grid__col">
                             <div class="calendar-stats__days">
                                 <div class="calendar-stats__day">

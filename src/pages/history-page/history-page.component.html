@@ -5,11 +5,9 @@
                 <h3 class="u-mb-0"><i class="fa fa-history"></i> History</h3>
             </div>
             <div class="o-grid__col o-grid__col--fixed">
-                <div class="o-btn" (click)="bustCache()" style="padding-bottom: 0.5rem;">
-                    <div class="custom-sidebar__button__icon">
-                        <i class="fa fa-sync" [ngClass]="{'fa-spin': mediaLoading}"></i>
-                    </div>
-                </div>
+                <button class="o-btn page-refresh" type="button" aria-label="Refresh history" (click)="bustCache()">
+                    <i class="fa fa-sync" [ngClass]="{'fa-spin': mediaLoading}" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 
