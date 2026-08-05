@@ -57,10 +57,23 @@
                         <i class="fa fa-pie-chart" aria-hidden="true"></i>
                     </div>
                     <div class="genre-chart">
-                        <div class="genre-chart__pie" [style.background]="genrePieStyle" role="img" aria-label="Genres watched pie chart"></div>
+                        <svg class="genre-chart__pie" viewBox="0 0 154 154" role="img" aria-label="Genres watched pie chart">
+                            @if (!genreSlices.length) {
+                                <circle cx="77" cy="77" r="69" class="genre-chart__pie-empty"></circle>
+                            }
+                            @for (slice of genreSlices; track slice.name) {
+                                <path class="genre-chart__slice" [class.is-hovered]="hoveredGenre?.name === slice.name"
+                                      [attr.d]="genreSlicePath(slice)" [attr.fill]="slice.color"
+                                      [attr.opacity]="hoveredGenre && hoveredGenre.name !== slice.name ? 0.42 : 1"
+                                      [attr.aria-label]="slice.name + ': ' + slice.value + ' watches, ' + (slice.percentage | number:'1.0-0') + '%'"
+                                      tabindex="0" role="button"
+                                      (mouseenter)="selectGenre(slice)" (mouseleave)="clearGenreSelection()"
+                                      (focus)="selectGenre(slice)" (blur)="clearGenreSelection()"></path>
+                            }
+                        </svg>
                         <div class="genre-chart__legend">
                             @for (slice of genreSlices; track slice.name) {
-                                <div class="genre-legend-item">
+                                <div class="genre-legend-item" (mouseenter)="selectGenre(slice)" (mouseleave)="clearGenreSelection()">
                                     <span class="genre-legend-item__swatch" [style.background]="slice.color"></span>
                                     <span>{{ slice.name }}</span>
                                     <strong>{{ slice.percentage | number:'1.0-0' }}%</strong>
@@ -69,6 +82,14 @@
                             @if (!genreSlices.length) {
                                 <span class="analytics-empty">No genre data yet.</span>
                             }
+                            <div class="genre-chart__detail" aria-live="polite">
+                                @if (hoveredGenre) {
+                                    <strong>{{ hoveredGenre.name }} · {{ hoveredGenre.value }} watches</strong>
+                                    <span>{{ hoveredGenre.percentage | number:'1.0-0' }}% of your watched titles</span>
+                                } @else if (genreSlices.length) {
+                                    <span>Hover a slice to explore its watch total.</span>
+                                }
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -81,16 +102,24 @@
                         </div>
                         <i class="fa fa-clock-o" aria-hidden="true"></i>
                     </div>
-                    <div class="line-chart" role="img" aria-label="Line graph showing watches by time of day">
-                        <svg viewBox="0 0 720 220" preserveAspectRatio="none" aria-hidden="true">
+                    <div class="line-chart" role="group" aria-label="Line graph showing watches by time of day">
+                        <svg viewBox="0 0 720 220" aria-label="Watches by time of day">
                             <path class="line-chart__area" [attr.d]="timeOfDayChart.areaPath"></path>
                             <path class="line-chart__line" [attr.d]="timeOfDayChart.linePath"></path>
                             @for (point of timeOfDayChart.points; track point.x) {
-                                <circle class="line-chart__point" [attr.cx]="point.x" [attr.cy]="point.y" r="4">
-                                    <title>{{ point.label || 'Hour' }}: {{ formatChartValue(point.value) }} watches</title>
-                                </circle>
+                                <circle class="line-chart__point" [attr.cx]="point.x" [attr.cy]="point.y" r="4"
+                                        [attr.aria-label]="point.detailLabel + ': ' + point.value + ' watches'"
+                                        tabindex="0" role="img"
+                                        (mouseenter)="selectChartPoint('time', point)" (mouseleave)="clearChartPoint()"
+                                        (focus)="selectChartPoint('time', point)" (blur)="clearChartPoint()"></circle>
                             }
                         </svg>
+                        @if (hoveredChartPoint?.chart === 'time') {
+                            <div class="line-chart__tooltip" aria-live="polite">
+                                <strong>{{ hoveredChartPoint?.label }} · {{ hoveredChartPoint?.value }} watches</strong>
+                                <span>{{ hoveredChartPoint?.description }}</span>
+                            </div>
+                        }
                         <div class="line-chart__labels">
                             @for (point of timeOfDayChart.points; track point.x) {
                                 @if (point.label) {
@@ -109,16 +138,24 @@
                         </div>
                         <i class="fa fa-calendar-o" aria-hidden="true"></i>
                     </div>
-                    <div class="line-chart" role="img" aria-label="Line graph showing watches by day of the week">
-                        <svg viewBox="0 0 720 220" preserveAspectRatio="none" aria-hidden="true">
+                    <div class="line-chart" role="group" aria-label="Line graph showing watches by day of the week">
+                        <svg viewBox="0 0 720 220" aria-label="Watches by day of the week">
                             <path class="line-chart__area" [attr.d]="weekdayChart.areaPath"></path>
                             <path class="line-chart__line" [attr.d]="weekdayChart.linePath"></path>
                             @for (point of weekdayChart.points; track point.x) {
-                                <circle class="line-chart__point" [attr.cx]="point.x" [attr.cy]="point.y" r="4">
-                                    <title>{{ point.label }}: {{ formatChartValue(point.value) }} watches</title>
-                                </circle>
+                                <circle class="line-chart__point" [attr.cx]="point.x" [attr.cy]="point.y" r="4"
+                                        [attr.aria-label]="point.detailLabel + ': ' + point.value + ' watches'"
+                                        tabindex="0" role="img"
+                                        (mouseenter)="selectChartPoint('weekday', point)" (mouseleave)="clearChartPoint()"
+                                        (focus)="selectChartPoint('weekday', point)" (blur)="clearChartPoint()"></circle>
                             }
                         </svg>
+                        @if (hoveredChartPoint?.chart === 'weekday') {
+                            <div class="line-chart__tooltip" aria-live="polite">
+                                <strong>{{ hoveredChartPoint?.label }} · {{ hoveredChartPoint?.value }} watches</strong>
+                                <span>{{ hoveredChartPoint?.description }}</span>
+                            </div>
+                        }
                         <div class="line-chart__labels">
                             @for (point of weekdayChart.points; track point.x) {
                                 <span>{{ point.label }}</span>
