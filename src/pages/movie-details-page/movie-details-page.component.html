@@ -1,48 +1,93 @@
 <div class="media-details-component">
     <div class="container">
-
-        <div class="o-grid">
-            <div class="o-grid__col">
-                <button (click)="redirectBack()" class="btn btn-primary btn-sm mb-3">&#8592; Back</button>
-            </div>
-            <div class="o-grid__col text-right">
-                <button (click)="updateMovie()" class="btn btn-primary btn-sm mb-3"><i class="fa fa-sync" [ngClass]="{'fa-spin': isUpdating}"></i> Refresh Metdata</button>
-            </div>
+        <div class="details-toolbar">
+            <button (click)="redirectBack()" class="btn btn-quiet btn-sm"><span aria-hidden="true">&#8592;</span> Back</button>
+            <button (click)="updateMovie()" class="btn btn-primary btn-sm" [disabled]="isUpdating">
+                <i class="fa fa-sync" [ngClass]="{'fa-spin': isUpdating}"></i> Refresh metadata
+            </button>
         </div>
 
         @if (movie) {
-            <div class="media-overview o-grid">
-                <div class="o-grid__col o-grid__col--fixed">
+            <section class="media-overview">
+                <div class="media-hero">
                     <div class="media-poster">
-                        <img [src]="movie.posterUrl" alt="poster card">
+                        <img [src]="movie.posterUrl" [alt]="movie.title + ' poster'">
                     </div>
-                </div>
-                <div class="o-grid__col">
                     <div class="media-details">
-                        <h1>{{ movie.title }} <small style="font-size: 1.25rem;">{{ movie.year }}</small></h1>
-                        <p class="u-mb-0">{{ movie.overview }}</p>
+                        <div class="media-kicker">Feature film <span>&bull;</span> {{ movie.year }}</div>
+                        <h1>{{ movie.title }}</h1>
+                        @if (details?.tagline) {
+                            <p class="media-tagline">“{{ details?.tagline }}”</p>
+                        }
+                        <p class="media-overview-copy">{{ movie.overview || 'No overview is available yet.' }}</p>
 
-                        <div class="c-badge-wrapper u-mb-2">
-                            @for (genre of movie.genres; track genre) {
+                        @if (details; as mediaDetails) {
+                            <div class="media-facts" aria-label="Movie facts">
+                                @if (mediaDetails.rating) {
+                                    <span><i class="fa fa-star" aria-hidden="true"></i> {{ mediaDetails.rating | number:'1.1-1' }} <small>{{ mediaDetails.ratingCount | number }} votes</small></span>
+                                }
+                                @if (mediaDetails.runtime) {
+                                    <span><i class="fa fa-clock-o" aria-hidden="true"></i> {{ formatRuntime(mediaDetails.runtime) }}</span>
+                                }
+                                @if (mediaDetails.releaseDate) {
+                                    <span><i class="fa fa-calendar-o" aria-hidden="true"></i> {{ mediaDetails.releaseDate | date:'MMM d, y' }}</span>
+                                }
+                                @if (mediaDetails.status) {
+                                    <span class="fact-status">{{ mediaDetails.status }}</span>
+                                }
+                            </div>
+                        }
+
+                        <div class="c-badge-wrapper">
+                            @for (genre of movie.genres; track genre.identifier) {
                                 <div class="c-badge">{{ genre.name }}</div>
                             }
                         </div>
 
-                        @for (episode of watchHistory; track episode) {
-                            <h6>Last Watched &#64; {{ episode.watchedAt | date:'HH:mm dd-MM-y' }} ({{ episode.watchedAt | timeago }})</h6>
+                        @if (details; as mediaDetails) {
+                            <div class="media-links" aria-label="External links">
+                                @if (mediaDetails.imdbUrl) {
+                                    <a [href]="mediaDetails.imdbUrl" target="_blank" rel="noopener noreferrer" class="external-link external-link--imdb">IMDb <span aria-hidden="true">&#8599;</span></a>
+                                }
+                                @if (mediaDetails.traktUrl) {
+                                    <a [href]="mediaDetails.traktUrl" target="_blank" rel="noopener noreferrer" class="external-link external-link--trakt">Trakt <span aria-hidden="true">&#8599;</span></a>
+                                }
+                            </div>
+                        }
+
+                        @for (entry of watchHistory; track entry.watchedAt) {
+                            <div class="last-watched"><i class="fa fa-history" aria-hidden="true"></i> Last watched {{ entry.watchedAt | timeago }} <span>{{ entry.watchedAt | date:'MMM d, y · HH:mm' }}</span></div>
                         }
                     </div>
                 </div>
-            </div>
-            <div class="media-background" style="background-image:url({{ movie.posterUrl }});"></div>
+            </section>
+
+            @if (details?.cast?.length) {
+                <section class="cast-section">
+                    <div class="section-heading">
+                        <div><span class="section-eyebrow">On screen</span><h2>Cast & characters</h2></div>
+                        <span class="section-count">{{ details?.cast?.length }} billed</span>
+                    </div>
+                    <div class="cast-grid">
+                        @for (cast of details?.cast; track cast.name) {
+                            <article class="cast-card">
+                                @if (cast.profileUrl) {
+                                    <img [src]="cast.profileUrl" [alt]="cast.name" loading="lazy">
+                                } @else {
+                                    <div class="cast-placeholder"><i class="fa fa-user" aria-hidden="true"></i></div>
+                                }
+                                <div class="cast-card__info"><strong>{{ cast.name }}</strong><span>{{ cast.character || 'Cast' }}</span></div>
+                            </article>
+                        }
+                    </div>
+                </section>
+            }
+
+            <div class="media-background" [style.backgroundImage]="details?.backdropUrl ? 'url(' + details?.backdropUrl + ')' : 'url(' + movie.posterUrl + ')'" aria-hidden="true"></div>
         } @else if (isLoading) {
-            <div class="media-overview">
-                Media loading...
-            </div>
+            <div class="media-overview media-state"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Loading title details…</div>
         } @else {
-            <div class="media-overview">
-                Media not found...
-            </div>
+            <div class="media-overview media-state">Media not found.</div>
         }
     </div>
 </div>

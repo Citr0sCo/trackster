@@ -6,6 +6,7 @@ import { ISeason } from "./types/season.type";
 import { IEpisode } from "./types/episode.type";
 import { IWatchedEpisode } from "./types/watched-episode.type";
 
+import {IMediaDetails} from "../media-service/types/media-details.type";
 @Injectable()
 export class ShowService {
 
@@ -33,6 +34,11 @@ export class ShowService {
 
     public getShowBySlug(slug: string): Observable<IShow> {
         return this._repository.getShowBySlug(slug);
+    }
+
+
+    public getShowDetailsBySlug(slug: string): Observable<IMediaDetails | null> {
+        return this._repository.getShowDetailsBySlug(slug);
     }
 
     public getSeasonByNumber(identifier: string, seasonNumber: number): Observable<ISeason> {

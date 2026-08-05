@@ -8,7 +8,13 @@ public class TmdbMovieDetails : TmdbCommonResponse
     public bool Adult { get; set; }
 
     [JsonProperty("backdrop_path")]
-    public string BackdropPath { get; set; }
+    public string? BackdropPath { get; set; }
+
+    [JsonProperty("credits")]
+    public TmdbCredits Credits { get; set; } = new();
+
+    [JsonProperty("external_ids")]
+    public TmdbExternalIds ExternalIds { get; set; } = new();
 
     [JsonProperty("belongs_to_collection")]
     public BelongsToCollection BelongsToCollection { get; set; }

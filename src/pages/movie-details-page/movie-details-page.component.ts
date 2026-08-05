@@ -5,6 +5,7 @@ import {MovieService} from "../../services/movie-service/movie.service";
 import {IMovie} from "../../services/movie-service/types/movie.type";
 import {IWatchedMovie} from "../../services/movie-service/types/watched-movie.type";
 import {UserService} from "../../services/user-service/user.service";
+import {IMediaDetails} from "../../services/media-service/types/media-details.type";
 
 @Component({
     selector: 'movie-details-page',
@@ -17,6 +18,7 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
 
     public movie: IMovie | null = null;
     public watchHistory: Array<IWatchedMovie> = [];
+    public details: IMediaDetails | null = null;
 
     public isLoading: boolean = false;
     public isUpdating: boolean = false;
@@ -43,13 +45,15 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
                     .pipe(takeUntil(this._destroy))
                     .subscribe((user) => {
                         const movie = this._movieService.getMovieBySlug(params['slug']);
+                        const details = this._movieService.getMovieDetailsBySlug(params['slug']);
                         const watchHistory = this._movieService.getMovieWatchHistoryById(user.username, params['slug']);
 
-                        zip(movie, watchHistory)
+                        zip(movie, details, watchHistory)
                             .pipe(takeUntil(this._destroy))
-                            .subscribe(([movie, watchHistory]) => {
+                            .subscribe(([movie, details, watchHistory]) => {
                                 this.isLoading = false;
                                 this.movie = movie;
+                                this.details = details;
                                 this.watchHistory = watchHistory;
                             });
                     });
@@ -69,7 +73,20 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
             .subscribe((movie) => {
                 this.isUpdating = false;
                 this.movie = movie;
+                this._movieService.getMovieDetailsBySlug(movie.slug)
+                    .pipe(takeUntil(this._destroy))
+                    .subscribe((details) => this.details = details);
             });
+    }
+
+    public formatRuntime(minutes: number): string {
+        if (!minutes) {
+            return '';
+        }
+
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return hours ? `${hours}h ${remainingMinutes}m` : `${remainingMinutes}m`;
     }
 
     public ngOnDestroy(): void {

@@ -3,6 +3,7 @@ import { IMovie } from './types/movie.type';
 import { Observable, of, tap, } from 'rxjs';
 import { MovieRepository } from './movie.repository';
 import { IWatchedMovie } from "./types/watched-movie.type";
+import {IMediaDetails} from "../media-service/types/media-details.type";
 
 @Injectable()
 export class MovieService {
@@ -31,6 +32,11 @@ export class MovieService {
 
     public getMovieBySlug(slug: string): Observable<IMovie> {
         return this._repository.getMovieBySlug(slug);
+    }
+
+
+    public getMovieDetailsBySlug(slug: string): Observable<IMediaDetails | null> {
+        return this._repository.getMovieDetailsBySlug(slug);
     }
 
     public getMovieWatchHistoryById(username: string, identifier: any): Observable<Array<IWatchedMovie>> {

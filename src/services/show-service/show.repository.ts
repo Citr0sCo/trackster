@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import {catchError, map, Observable, of} from 'rxjs';
 import { environment } from '../../environments/environment';
 import { IShow } from "./types/show.type";
 import { IEpisode } from "./types/episode.type";
 import { ISeason } from "./types/season.type";
 import { IWatchedEpisode } from "./types/watched-episode.type";
 import {ShowMapper} from "./show.mapper";
+import {MediaDetailsMapper} from "../media-service/media-details.mapper";
+import {IMediaDetails} from "../media-service/types/media-details.type";
 
 @Injectable()
 export class ShowRepository {
@@ -37,6 +39,14 @@ export class ShowRepository {
                 map((response: any) => {
                     return ShowMapper.map(response.Show);
                 })
+            );
+    }
+
+    public getShowDetailsBySlug(slug: string): Observable<IMediaDetails | null> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/shows/${slug}/details`)
+            .pipe(
+                map((response: any) => MediaDetailsMapper.map(response.Details)),
+                catchError(() => of(null))
             );
     }
 
