@@ -353,7 +353,6 @@ hr {
 }
 
 .page-refresh {
-    display: inline-grid !important;
     width: 36px;
     height: 36px;
     min-height: 36px !important;
@@ -368,6 +367,8 @@ hr {
     cursor: pointer;
     line-height: 1;
     transform: none !important;
+    display: flex !important;
+    justify-content: center;
 
     i {
         display: block;
