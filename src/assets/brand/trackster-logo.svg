@@ -1,27 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
   <title id="title">Trackster logo</title>
-  <desc id="desc">A violet film frame with a play mark and tracking orbit.</desc>
-  <defs>
-    <linearGradient id="frame" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#c1a8ff"/>
-      <stop offset=".48" stop-color="#9774f5"/>
-      <stop offset="1" stop-color="#6946d9"/>
-    </linearGradient>
-    <linearGradient id="orbit" x1="15" y1="98" x2="110" y2="28" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6ed5e3"/>
-      <stop offset="1" stop-color="#c1a8ff"/>
-    </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-  <rect x="10" y="10" width="108" height="108" rx="30" fill="#11141d" stroke="url(#frame)" stroke-width="5"/>
-  <path d="M28 10v14M50 10v14M72 10v14M94 10v14M28 104v14M50 104v14M72 104v14M94 104v14" stroke="url(#frame)" stroke-width="7" stroke-linecap="round"/>
-  <path d="M58 43.5 86 64 58 84.5V43.5Z" fill="#f7f4ef"/>
-  <path d="M20 87c18 18 51 18 75-2 12-10 17-24 14-38" fill="none" stroke="url(#orbit)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
-  <circle cx="108" cy="44" r="6" fill="#6ed5e3" stroke="#11141d" stroke-width="3"/>
+  <desc id="desc">A violet film tile with dark perforations and a play mark.</desc>
+  <rect x="1" y="1" width="126" height="126" rx="23" fill="#9774f5"/>
+  <g fill="#171923">
+    <circle cx="14" cy="10" r="4"/>
+    <circle cx="31" cy="10" r="4"/>
+    <circle cx="48" cy="10" r="4"/>
+    <circle cx="65" cy="10" r="4"/>
+    <circle cx="82" cy="10" r="4"/>
+    <circle cx="99" cy="10" r="4"/>
+    <circle cx="114" cy="10" r="4"/>
+    <circle cx="14" cy="118" r="4"/>
+    <circle cx="31" cy="118" r="4"/>
+    <circle cx="48" cy="118" r="4"/>
+    <circle cx="65" cy="118" r="4"/>
+    <circle cx="82" cy="118" r="4"/>
+    <circle cx="99" cy="118" r="4"/>
+    <circle cx="114" cy="118" r="4"/>
+    <path d="M48 39 86 64 48 89V39Z"/>
+  </g>
 </svg>
