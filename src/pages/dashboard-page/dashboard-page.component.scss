@@ -1,9 +1,16 @@
 @import "../../styles/utility/variables";
 
+.app-wrapper {
+    min-height: 100vh;
+    background: transparent;
+}
+
 .main-content {
     margin: 0;
     height: 100vh;
     overflow: auto;
+    scrollbar-gutter: stable;
+    background: linear-gradient(120deg, rgba(255, 255, 255, .012), transparent 34%);
 
     @media(max-width: $mobile-width) {
         padding-bottom: 75px;
