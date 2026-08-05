@@ -13,6 +13,8 @@
         height: 36px;
         color: var(--text-color-alt);
         transition: color var(--transition-speed) ease, background var(--transition-speed) ease, transform var(--transition-speed) ease;
+        display: flex !important;
+        justify-content: center;
     }
 
     h3 {
