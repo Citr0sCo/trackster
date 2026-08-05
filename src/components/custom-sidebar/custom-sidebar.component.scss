@@ -1,17 +1,29 @@
 @import "../../styles/utility/variables";
 
 .custom-sidebar {
-    width: 300px;
+    width: 278px;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.25);
-    border-right: 1px solid #1e293c;
-    padding: 15px;
+    background: linear-gradient(180deg, rgba(22, 25, 35, .94), rgba(11, 13, 19, .9));
+    border-right: 1px solid var(--border-color);
+    padding: 24px 18px;
+    box-shadow: 18px 0 50px rgba(0, 0, 0, .12);
+
+    &::before {
+        display: block;
+        margin: 2px 10px 32px;
+        color: var(--text-color);
+        content: 'TRACKSTER';
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .32em;
+    }
 
     @media(max-width: $mobile-width) {
-        width: 100%;
-        position: absolute;
+        width: min(88vw, 320px);
+        position: fixed;
         z-index: 990;
-        background-color: #151e2c;
+        background: #11141d;
+        box-shadow: 18px 0 40px rgba(0, 0, 0, .3);
     }
 
     &--hidden {
@@ -24,18 +36,27 @@
         align-items: center;
         justify-content: flex-start;
         align-content: center;
-        padding: 10px 15px;
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: $border-radius;
-        margin-bottom: 5px;
+        padding: 13px 14px;
+        background-color: transparent;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        color: var(--text-color-alt);
+        transition: color var(--transition-speed) ease, background var(--transition-speed) ease, border-color var(--transition-speed) ease, transform var(--transition-speed) ease;
 
         &:hover {
             cursor: pointer;
-            background-color: $brand-primary;
+            color: var(--text-color);
+            background-color: var(--transparent-hover-bg);
+            border-color: var(--border-color);
+            transform: translateX(3px);
         }
 
         &--active {
-            background: linear-gradient(45deg, $brand-primary, $brand-primary-alt);
+            background: linear-gradient(100deg, rgba(151, 116, 245, .2), rgba(105, 70, 217, .08));
+            border-color: rgba(151, 116, 245, .32);
+            color: var(--text-color);
+            box-shadow: inset 3px 0 $brand-primary;
 
             &:hover {
                 background: linear-gradient(45deg, $brand-primary, $brand-primary);
@@ -44,7 +65,10 @@
 
 
         &__icon {
-            margin-right: 5px;
+            width: 28px;
+            margin-right: 8px;
+            color: $brand-primary;
+            text-align: center;
         }
 
         &__label {

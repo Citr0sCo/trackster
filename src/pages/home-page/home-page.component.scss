@@ -1,11 +1,59 @@
 @import "../../styles/utility/variables";
 
 .home-page-component {
-    padding:10px 0;
+    padding: 34px 0 84px;
 
-    .media-container{
-        max-width:100%;
-        overflow-y:hidden;
-        overflow-x:scroll;
+    .o-grid.o-grid--static:first-child {
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .o-btn {
+        width: 42px;
+        height: 42px;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: var(--text-color-alt);
+        transition: color var(--transition-speed) ease, background var(--transition-speed) ease, transform var(--transition-speed) ease;
+
+        &:hover {
+            color: var(--text-color);
+            background: rgba(151, 116, 245, .14);
+            transform: rotate(15deg);
+        }
+    }
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        i {
+            color: $brand-primary;
+            font-size: 1.2rem;
+        }
+    }
+
+    h4 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        &::after {
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+            content: '';
+        }
+    }
+
+    .media-container {
+        max-width: 100%;
+        padding: 4px 0 18px;
+        overflow-y: hidden;
+        overflow-x: auto;
+        scrollbar-color: rgba(151, 116, 245, .5) transparent;
     }
 }

@@ -1,9 +1,36 @@
 @import "../../styles/utility/variables";
 
 .history-page-component {
-    padding:10px 0;
+    padding: 34px 0 84px;
+
+    .o-grid.o-grid--static:first-child {
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        i {
+            color: $brand-primary;
+            font-size: 1.2rem;
+        }
+    }
 
     .movie-poster-wrapper {
+        padding: 4px 0 18px;
         overflow: auto;
+        scrollbar-color: rgba(151, 116, 245, .5) transparent;
+    }
+
+    .o-grid--row > div:first-child {
+        margin-top: 28px !important;
+        color: var(--text-color-alt);
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
     }
 }
