@@ -6,9 +6,6 @@ on:
     types:
       - checks_requested
 
-env:
-  CHROME_BIN: /usr/bin/chromium-browser
-
 concurrency:
   group: build-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
