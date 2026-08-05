@@ -12,6 +12,10 @@
 <a href="https://hub.docker.com/r/citr0s/trackster"><img src="https://img.shields.io/docker/v/citr0s/trackster?sort=semver" alt="Docker version"></a>
 </p>
 
+<p align="center">
+  <a href="https://codecov.io/gh/Citr0sCo/trackster"><img src="https://codecov.io/gh/Citr0sCo/trackster/branch/main/graph/badge.svg" alt="Code Coverage"></a>
+</p>
+
 ---
 
 <h4 align="center">Trackster is a simple app that allows you to track your Plex watching habits.</h4>

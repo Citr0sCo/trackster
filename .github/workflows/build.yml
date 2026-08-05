@@ -6,9 +6,6 @@ on:
     types:
       - checks_requested
 
-env:
-  CHROME_BIN: /usr/bin/chromium-browser
-
 concurrency:
   group: build-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -47,8 +44,26 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile --prefer-offline
 
-      # - name: Test FE
-      #   run: npm run test-ci
+      - name: Run tests with coverage
+        run: npm run test-ci
+
+      - name: Check coverage files exist
+        run: |
+          test -f coverage/trackster/lcov.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/trackster/lcov.info
+          flags: unittests
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Store coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
 
 
   lint-fe:
