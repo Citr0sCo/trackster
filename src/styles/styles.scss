@@ -347,16 +347,31 @@ hr {
     height: 36px;
     min-height: 36px !important;
     padding: 0 !important;
+    box-sizing: border-box;
     place-items: center;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--border-color) !important;
     border-radius: 10px;
     color: var(--text-color-alt) !important;
     cursor: pointer;
+    line-height: 1;
+    transform: none !important;
 
-    &:hover:not(:disabled) {
-        color: var(--text-color) !important;
-        transform: rotate(10deg);
+    i {
+        display: block;
+        margin: 0;
+        line-height: 1;
+        transform-origin: center;
+        transition: transform var(--transition-speed) ease, color var(--transition-speed) ease;
     }
+
+    &:hover:not(:disabled), &:active:not(:disabled) {
+        color: var(--text-color) !important;
+        transform: none !important;
+    }
+
+    &:hover:not(:disabled) i:not(.fa-spin) { transform: rotate(10deg); }
 }
 
 .details-toolbar .btn {
@@ -555,13 +570,58 @@ hr {
         }
     }
 
+    .calendar-card {
+        width: 100%;
+
+        &__period {
+            align-self: center;
+            color: var(--text-color-alt);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-align: right;
+        }
+
+        &__legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 16px;
+            color: var(--text-color-alt);
+            font-size: .7rem;
+
+            & > div {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .calendar-stats__cell { flex: 0 0 auto; }
+        }
+    }
+
     .calendar-scroll {
-        max-width: 100%;
+        display: flex;
+        width: 100%;
+        min-width: 0;
         overflow-x: auto;
         overscroll-behavior-inline: contain;
+        scrollbar-color: rgba(151, 116, 245, .5) transparent;
 
-        & > .o-grid__col:last-child {
+        &__labels {
+            flex: 0 0 44px;
+            min-width: 44px;
+        }
+
+        &__content {
+            flex: 0 0 auto;
+            width: max-content;
             min-width: max-content;
+        }
+
+        @media(max-width: $mobile-width) {
+            &__labels { display: none; }
         }
     }
 
