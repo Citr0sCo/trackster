@@ -1,8 +1,8 @@
 {
   "name": "trackster",
   "short_name": "trackster",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "theme_color": "#0b0d13",
+  "background_color": "#0b0d13",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

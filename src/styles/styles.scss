@@ -38,8 +38,6 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--text-color);
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    letter-spacing: -.025em;
 }
 
 h3 {
@@ -50,7 +48,6 @@ h4 {
     margin-top: 1.75rem;
     margin-bottom: 1rem;
     color: var(--text-color-alt);
-    font-family: "Avenir Next", "Segoe UI", sans-serif;
     font-size: .78rem;
     font-weight: 700;
     letter-spacing: .14em;
