@@ -3,6 +3,12 @@
 .statistics-page-component {
     padding: 34px 0 84px;
 
+    .page-header {
+        align-items: center;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
     h3 {
         display: flex;
         align-items: center;
@@ -46,7 +52,8 @@
 
         &__value {
             font-size: clamp(2.1rem, 4vw, 3rem);
-            font-family: 'digital-clock-font', monospace;
+            font-family: inherit;
+            font-weight: 700;
             letter-spacing: .04em;
         }
 
