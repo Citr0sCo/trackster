@@ -6,7 +6,8 @@ export const environment = {
     production: false,
     apiBaseUrl: 'https://localhost:7058',
     webSocketUrl: 'ws://localhost:7058',
-    secureWebSocketUrl: 'wss://localhost:7058'
+    secureWebSocketUrl: 'wss://localhost:7058',
+    analytics: undefined
 };
 
 /*
