@@ -680,6 +680,7 @@ hr {
         overflow-y: hidden;
         overscroll-behavior-inline: contain;
         scrollbar-color: rgba(151, 116, 245, .5) transparent;
+        justify-content: center;
 
         &__labels {
             flex: 0 0 44px;
