@@ -4066,10 +4066,10 @@ karma-firefox-launcher@^2.1.3:
     is-wsl "^2.2.0"
     which "^3.0.0"
 
-karma-jasmine-html-reporter@~2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/karma-jasmine-html-reporter/-/karma-jasmine-html-reporter-2.2.0.tgz#b3a9f2aee9b37910b7c84b874a932b508bf636da"
-  integrity sha512-J0laEC43Oy2RdR5V5R3bqmdo7yRIYySq6XHKbA+e5iSAgLjhR1oICLGeSREPlJXpeyNcdJf3J17YcdhD0mRssQ==
+karma-jasmine-html-reporter@~2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/karma-jasmine-html-reporter/-/karma-jasmine-html-reporter-2.3.0.tgz#c3408c5b8127be74de1c16714b30ece8ac16ed5f"
+  integrity sha512-iFDjVpcWHnupRoJfnjuAeNF68sAGk+7RfceCzm33HHYNV6OgBa6EC1nPgJUFM+tVDHLlQ5NhgcTKz7AbdrV3AQ==
 
 karma-jasmine@~5.1.0:
   version "5.1.0"
@@ -5520,10 +5520,10 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-swetrix@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/swetrix/-/swetrix-4.5.0.tgz#bcb3ec791dde6a6229bc3771b73d10d713a1d00c"
-  integrity sha512-kzFmwEE7LeGtvWCkDcF2UZ/yeG1ScRn+BHBcT0SOWcNKVBZSqIkarY8kuHniW9f7QYiUXwHIAjQ3vQ0EwYpQoA==
+swetrix@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/swetrix/-/swetrix-4.6.0.tgz#e624a8dbdebf9eecdc05bf13ed118350226d1172"
+  integrity sha512-5NNq0JHN3H0I7XZ1hvWZvM83Ks7lcZnJNZ6+p7oERpR42+VtTjhJ3aThi5jr1lzB3LeUEyhAzgDYuYURHeWInw==
   dependencies:
     "@rrweb/record" "2.1.1"
 
