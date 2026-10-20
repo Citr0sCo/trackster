@@ -48,6 +48,8 @@ describe('ConfirmDialogComponent', () => {
 
         (fixture.nativeElement.querySelector('.btn-danger') as HTMLButtonElement).click();
         (fixture.nativeElement.querySelector('.btn-quiet') as HTMLButtonElement).click();
+        fixture.componentInstance.confirm();
+        fixture.componentInstance.cancel();
 
         expect(events).toEqual([]);
     });
