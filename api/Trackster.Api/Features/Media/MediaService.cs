@@ -56,8 +56,34 @@ public class MediaService
                 Data = "[INFO] - Starting Trakt import..."
             };
             
-            var movies = await _traktProvider.GetMovies(request.Username, request.Debug);
-            var shows = await _traktProvider.GetShows(request.Username, request.Debug);
+            var (movies, moviesError) = await TryFetchTraktHistory(
+                () => _traktProvider.GetMovies(request.Username, request.Debug),
+                "watched movies");
+
+            if (moviesError != null)
+            {
+                yield return new ImportMediaResponse
+                {
+                    Data = $"[Error] - Failed to read watched movies from Trakt: {moviesError}"
+                };
+                yield break;
+            }
+
+            var (shows, showsError) = await TryFetchTraktHistory(
+                () => _traktProvider.GetShows(request.Username, request.Debug),
+                "watched shows");
+
+            if (showsError != null)
+            {
+                Console.WriteLine($"[ERROR] - Failed to read watched shows from Trakt: {showsError}");
+
+                yield return new ImportMediaResponse
+                {
+                    Data = $"[Error] - Failed to read watched shows from Trakt: {showsError}"
+                };
+
+                shows = [];
+            }
 
             var value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (value == "Development")
@@ -96,47 +122,15 @@ public class MediaService
         var movies = _moviesService.GetAllWatchedMovies(username, results, page);
         var shows = _showsService.GetAllWatchedEpisodes(username, results, page);
 
-        var media = new List<Types.Media>();
-
-        foreach (var movie in movies.WatchedMovies)
-        {
-            media.Add(new Types.Media
-            {
-                Identifier = movie.Movie.Identifier,
-                Title = movie.Movie.Title,
-                Slug = movie.Movie.Slug,
-                Year = movie.Movie.Year,
-                Overview = movie.Movie.Overview,
-                Poster = movie.Movie.Poster,
-                TMDB = movie.Movie.TMDB,
-                Type = MediaType.Movie.ToString(),
-                WatchedAt = movie.WatchedAt,
-            });
-        }
-
-        foreach (var show in shows.WatchedEpisodes)
-        {
-            media.Add(new Types.Media
-            {
-                Identifier = show.Episode.Season.Show.Identifier,
-                Title = show.Episode.Title,
-                ParentTitle = show.Episode.Season.Title,
-                GrandParentTitle = show.Episode.Season.Show.Title,
-                Slug = show.Episode.Season.Show.Slug,
-                Year = show.Episode.Season.Show.Year,
-                Overview = show.Episode.Season.Show.Overview,
-                Poster = show.Episode.Season.Show.Poster,
-                TMDB = show.Episode.Season.Show.TMDB,
-                Type = MediaType.Episode.ToString(),
-                SeasonNumber = show.Episode.Season.Number,
-                EpisodeNumber = show.Episode.Number,
-                WatchedAt = show.WatchedAt,
-            });
-        }
+        var media = movies.WatchedMovies
+            .Select(MediaMapper.FromMovie)
+            .Concat(shows.WatchedEpisodes.Select(MediaMapper.FromEpisode))
+            .OrderByDescending(x => x.WatchedAt)
+            .ToList();
 
         return new GetHistoryForUserResponse
         {
-            Media = media.OrderByDescending(x => x.WatchedAt).ToList()
+            Media = media
         };
     }
 
@@ -301,6 +295,20 @@ public class MediaService
         }
     }
 
+    private static async Task<(List<T> Items, string? Error)> TryFetchTraktHistory<T>(Func<Task<List<T>>> fetch, string label)
+    {
+        try
+        {
+            return (await fetch(), null);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"[ERROR] - Failed to read Trakt {label}. Exception: {exception.Message}.");
+
+            return ([], exception.Message);
+        }
+    }
+
     private async Task<UserRecord> ProcessUser(ImportMediaRequest request)
     {
         var userRecord = await _usersService.GetUserByUsername(request.Username);
@@ -324,52 +332,76 @@ public class MediaService
         var processedMovies = 0;
         foreach (var movie in movies)
         {
-           var movieRecord = await ProcessMovie(movie, userRecord, requestDebug);
+            var movieRecord = await ProcessMovie(movie, userRecord, requestDebug);
 
-           if (movieRecord == null)
-           {
-               yield return new ImportMediaResponse
-               {
-                   Data = $"[Error] - Failed to process movie '{movie.Movie.Title} ({movie.Movie.Year})'.",
-                   Total = movies.Count,
-                   Processed = processedMovies,
-                   Type = MediaType.Movie.ToString()
-               };
-               continue;
-           }
+            if (movieRecord == null)
+            {
+                yield return new ImportMediaResponse
+                {
+                    Data = $"[Error] - Failed to process movie '{movie.Movie?.Title} ({movie.Movie?.Year})'.",
+                    Total = movies.Count,
+                    Processed = processedMovies,
+                    Type = MediaType.Movie.ToString()
+                };
+                continue;
+            }
 
-           var lastWatchedAt = _moviesService.GetWatchedMovieByLastWatchedAt(userRecord.Username, movie.Movie.Ids.TMDB, movie.LastWatchedAt);
+            // The full Trakt history is replayed on every import. Marking a watch is idempotent,
+            // so this fills in anything that was missed without duplicating existing records.
+            var (watchingHistory, historyError) = await TryFetchTraktHistory(
+                () => _traktProvider.GetWatchedMovieHistory(userRecord.Username, movie.Movie.Ids.Trakt),
+                $"history of movie '{movie.Movie?.Title}'");
 
-           if (lastWatchedAt == null)
-           {
-               var watchingHistory = await _traktProvider.GetWatchedMovieHistory(userRecord.Username, movie.Movie.Ids.Trakt);
+            if (historyError != null)
+            {
+                Console.WriteLine($"[ERROR] - Failed to read Trakt history for movie '{movie.Movie?.Title}': {historyError}");
 
-               foreach (var watchHistory in watchingHistory)
-               {
-                   await _moviesService.MarkMovieAsWatched(userRecord, movieRecord, watchHistory.WatchedAt);
-               }   
-           }
+                yield return new ImportMediaResponse
+                {
+                    Data = $"[Error] - Failed to read watch history for movie '{movie.Movie?.Title} ({movie.Movie?.Year})': {historyError}",
+                    Total = movies.Count,
+                    Processed = processedMovies,
+                    Type = MediaType.Movie.ToString()
+                };
+                continue;
+            }
 
-           processedMovies++;
-           Console.WriteLine($"[INFO] - Processed {processedMovies}/{movies.Count} movies.");
-           yield return new ImportMediaResponse
-           {
-               Data = $"[INFO] - Processed {processedMovies}/{movies.Count} movies.",
-               Total = movies.Count,
-               Processed = processedMovies,
-               Type = MediaType.Movie.ToString()
-           };
+            var importedWatches = 0;
+
+            foreach (var watchHistory in watchingHistory)
+            {
+                if (await _moviesService.MarkMovieAsWatched(userRecord, movieRecord, watchHistory.WatchedAt))
+                    importedWatches++;
+            }
+
+            processedMovies++;
+            Console.WriteLine($"[INFO] - Processed {processedMovies}/{movies.Count} movies ({importedWatches} new watch records).");
+            yield return new ImportMediaResponse
+            {
+                Data = $"[INFO] - Processed {processedMovies}/{movies.Count} movies ({importedWatches} new watch records).",
+                Total = movies.Count,
+                Processed = processedMovies,
+                Type = MediaType.Movie.ToString()
+            };
         }
     }
 
     private async Task<MovieRecord?> ProcessMovie(TraktMovieResponse movie, UserRecord userRecord, bool requestDebug)
     {
-        var existingMovie = _moviesService.GetMovieByTmdbId(movie.Movie.Ids.TMDB);
+        var tmdbId = movie.Movie?.Ids?.TMDB;
+
+        if (string.IsNullOrWhiteSpace(tmdbId))
+        {
+            Console.WriteLine($"[ERROR] - Movie '{movie.Movie?.Title}' does not have a TMDB identifier. Skipping.");
+            return null;
+        }
+
+        var existingMovie = _moviesService.GetMovieByTmdbId(tmdbId);
 
         if (existingMovie != null)
             return existingMovie;
-            
-        var details = await _detailsProvider.GetDetailsForMovie(movie.Movie.Ids.TMDB, requestDebug);
+
+        var details = await _detailsProvider.GetDetailsForMovie(tmdbId, requestDebug);
 
         if (details.IsSuccess == false)
         {
@@ -383,12 +415,12 @@ public class MediaService
             Title = movie.Movie.Title,
             Slug = SlugHelper.GenerateSlugFor(movie.Movie.Title),
             Year = movie.Movie.Year,
-            TMDB = movie.Movie.Ids.TMDB,
+            TMDB = tmdbId,
             Poster = $"https://image.tmdb.org/t/p/w300{details.PosterUrl}",
             Overview = details?.Overview,
         };
-        
-        var genres = await _moviesService.FindOrCreateGenres(details?.Genres.ConvertAll((genre) => genre.Name) ?? []);
+
+        var genres = await _moviesService.FindOrCreateGenres(details?.Genres?.ConvertAll((genre) => genre.Name) ?? []);
 
         await _moviesService.ImportMovie(userRecord, movieRecord, genres);
 
@@ -404,15 +436,31 @@ public class MediaService
         };
 
         var processedShows = 0;
+
         foreach (var show in shows)
         {
-            var details = await _detailsProvider.GetDetailsForShow(show.Show.Ids.TMDB, requestDebug);
+            var tmdbId = show.Show?.Ids?.TMDB;
 
-            if (details.IsSuccess == false)
+            if (string.IsNullOrWhiteSpace(tmdbId))
+            {
+                Console.WriteLine($"[ERROR] - Show '{show.Show?.Title}' does not have a TMDB identifier. Skipping.");
+                yield return new ImportMediaResponse
+                {
+                    Data = $"[ERROR] - Failed to process show '{show.Show?.Title} ({show.Show?.Year})'.",
+                    Total = shows.Count,
+                    Processed = processedShows,
+                    Type = MediaType.Episode.ToString()
+                };
+                continue;
+            }
+
+            var details = await _detailsProvider.GetDetailsForShow(tmdbId, requestDebug);
+
+            if (details.IsSuccess == false || details.Identifier == 0)
             {
                 yield return new ImportMediaResponse
                 {
-                    Data = $"[ERROR] - Failed to process show '{show.Show.Title} ({show.Show.Year})'.",
+                    Data = $"[ERROR] - Failed to process show '{show.Show?.Title} ({show.Show?.Year})'.",
                     Total = shows.Count,
                     Processed = processedShows,
                     Type = MediaType.Episode.ToString()
@@ -421,62 +469,78 @@ public class MediaService
                 continue;
             }
 
-            if (details.Identifier == 0)
+            var showRecord = await ProcessShow(show, details, user, requestDebug);
+
+            if (showRecord == null)
             {
                 yield return new ImportMediaResponse
                 {
-                    Data = $"[ERROR] - Failed to process show '{show.Show.Title} ({show.Show.Year})'.",
+                    Data = $"[ERROR] - Failed to process show '{show.Show?.Title} ({show.Show?.Year})'.",
                     Total = shows.Count,
                     Processed = processedShows,
                     Type = MediaType.Episode.ToString()
                 };
-                Console.WriteLine($"[ERROR] - Failed to find show details ({show.Show.Ids.TMDB}).");
                 continue;
             }
-            
-            await ProcessShow(show, details, user, requestDebug);
 
-            var lastWatchedAt = _showsService.GetWatchedShowByLastWatchedAt(user.Username, show.Show.Ids.TMDB, show.LastWatchedAt);
+            // Replay the full history for the show. Only watches that are missing from the
+            // database are inserted, so a re-run repairs gaps instead of duplicating them.
+            var (watchingHistory, historyError) = await TryFetchTraktHistory(
+                () => _traktProvider.GetWatchedShowHistory(user.Username, show.Show.Ids.Trakt),
+                $"history of show '{show.Show?.Title}'");
 
-            if (lastWatchedAt == null)
+            if (historyError != null)
             {
-                var watchingHistory = await _traktProvider.GetWatchedShowHistory(user.Username, show.Show.Ids.Trakt);
+                Console.WriteLine($"[ERROR] - Failed to read Trakt history for show '{show.Show?.Title}': {historyError}");
 
-                foreach (var watchHistory in watchingHistory)
+                yield return new ImportMediaResponse
                 {
-                    var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, details, requestDebug);
-                    
-                    if (showRecord.Identifier.ToString() == Guid.Empty.ToString())
-                    {  
-                        Console.WriteLine($"[WARN] - Failed to save watch history. Did not find Show by Show.TMDB: {show.Show.Ids.TMDB}.");
-                        continue;
-                    }
-                    
-                    var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord, watchHistory.Episode.Season);
-
-                    if (seasonRecord.Identifier.ToString() == Guid.Empty.ToString())
-                    {
-                        Console.WriteLine($"[WARN] - Failed to save watch history. Did not find Season by Show.TMDB: {show.Show.Ids.TMDB}, Season.Number: {watchHistory.Episode.Season}.");
-                        continue;
-                    }
-                    
-                    var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord, watchHistory.Episode.Number, requestDebug);
-
-                    if (episodeRecord.Identifier.ToString() == Guid.Empty.ToString())
-                    {
-                        Console.WriteLine($"[WARN] - Failed to save watch history. Did not find Episode by Show.TMDB: {show.Show.Ids.TMDB}, Season.Number: {watchHistory.Episode.Season}, Episode.Number: {watchHistory.Episode.Number}.");
-                        continue;
-                    }
-                    
-                    await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt);
-                }
+                    Data = $"[Error] - Failed to read watch history for show '{show.Show?.Title} ({show.Show?.Year})': {historyError}",
+                    Total = shows.Count,
+                    Processed = processedShows,
+                    Type = MediaType.Episode.ToString()
+                };
+                continue;
             }
-                
+
+            var importedWatches = 0;
+            var seasonRecords = new Dictionary<int, SeasonRecord>();
+            var episodeRecords = new Dictionary<(int Season, int Episode), EpisodeRecord>();
+
+            foreach (var watchHistory in watchingHistory)
+            {
+                var seasonNumber = watchHistory.Episode.Season;
+
+                if (!seasonRecords.TryGetValue(seasonNumber, out var seasonRecord))
+                {
+                    seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord, seasonNumber);
+                    seasonRecords[seasonNumber] = seasonRecord;
+                }
+
+                var key = (seasonNumber, watchHistory.Episode.Number);
+
+                if (!episodeRecords.TryGetValue(key, out var episodeRecord))
+                {
+                    episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord, watchHistory.Episode.Number, requestDebug);
+
+                    if (episodeRecord == null)
+                    {
+                        Console.WriteLine($"[WARN] - Failed to save watch history. Did not find Episode by Show.TMDB: {tmdbId}, Season.Number: {seasonNumber}, Episode.Number: {watchHistory.Episode.Number}.");
+                        continue;
+                    }
+
+                    episodeRecords[key] = episodeRecord;
+                }
+
+                if (await _showsService.MarkEpisodeAsWatched(user, showRecord, seasonRecord, episodeRecord, watchHistory.WatchedAt))
+                    importedWatches++;
+            }
+
             processedShows++;
-            Console.WriteLine($"[INFO] - Processed {processedShows}/{shows.Count} shows.");
+            Console.WriteLine($"[INFO] - Processed {processedShows}/{shows.Count} shows ({importedWatches} new watch records).");
             yield return new ImportMediaResponse
             {
-                Data = $"[INFO] - Processed {processedShows}/{shows.Count} shows.",
+                Data = $"[INFO] - Processed {processedShows}/{shows.Count} shows ({importedWatches} new watch records).",
                 Total = shows.Count,
                 Processed = processedShows,
                 Type = MediaType.Episode.ToString()
@@ -484,42 +548,47 @@ public class MediaService
         }
     }
 
-    private async Task ProcessShow(TraktShowResponse show, TmdbShowDetails details, UserRecord userRecord, bool requestDebug)
-    {   
+    private async Task<ShowRecord?> ProcessShow(TraktShowResponse show, TmdbShowDetails details, UserRecord userRecord, bool requestDebug)
+    {
         var showRecord = await GetShowRecordByTmdbId(show.Show.Ids.TMDB, details, requestDebug);
-        
-        if(showRecord.TMDB == null)
+
+        if (string.IsNullOrWhiteSpace(showRecord.TMDB))
         {
             Console.WriteLine($"[ERROR] - Show Tmdb not found: Show.Title: '{showRecord.Title}'. {JsonConvert.SerializeObject(show)}");
-            return;
+            return null;
         }
-        
+
         if(requestDebug)
             Console.WriteLine($"[DEBUG] - Got Show Record. ShowTmdbId: {show.Show.Ids.TMDB}. {JsonConvert.SerializeObject(show)}");
-        
-        var genres = await _moviesService.FindOrCreateGenres(details?.Genres.ConvertAll((genre) => genre.Name) ?? []);
-        
-        _showsService.ImportShow(userRecord, showRecord, genres).Wait();
-            
-        foreach (var season in show.Seasons)
+
+        var genres = await _moviesService.FindOrCreateGenres(details?.Genres?.ConvertAll((genre) => genre.Name) ?? []);
+
+        await _showsService.ImportShow(userRecord, showRecord, genres);
+
+        foreach (var season in show.Seasons ?? [])
         {
             var seasonRecord = await GetSeasonRecordByShowTmdbId(showRecord, season.Number);
-            
+
             if(requestDebug)
                 Console.WriteLine($"[DEBUG] - Got Season Record. ShowRecordId: {showRecord.Identifier}, SeasonNumber: {season.Number}. {JsonConvert.SerializeObject(season)}");
-            
-            _showsService.ImportSeason(userRecord, showRecord, seasonRecord).Wait();
-                    
-            foreach (var episode in season.Episodes)
+
+            await _showsService.ImportSeason(userRecord, showRecord, seasonRecord);
+
+            foreach (var episode in season.Episodes ?? [])
             {
                 var episodeRecord = await GetEpisodeRecordByShowTmdbId(showRecord, seasonRecord, episode.Number, requestDebug);
-                
+
+                if (episodeRecord == null)
+                    continue;
+
                 if(requestDebug)
                     Console.WriteLine($"[DEBUG] - Got Episode Record. ShowRecordId: {showRecord.Identifier}, SeasonIdentifier: {seasonRecord.Identifier}, EpisodeNumber: {episode.Number}. {JsonConvert.SerializeObject(episode)}");
-                
-                _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord).Wait();
+
+                await _showsService.ImportEpisode(userRecord, showRecord, seasonRecord, episodeRecord);
             }
         }
+
+        return showRecord;
     }
 
     private async Task<ShowRecord> GetShowRecordByTmdbId(string tmdbId, TmdbShowDetails details, bool requestDebug)
@@ -528,7 +597,7 @@ public class MediaService
 
         if (showRecord != null)
             return showRecord;
-        
+
         showRecord = new ShowRecord
         {
             Identifier = Guid.NewGuid(),
@@ -557,11 +626,11 @@ public class MediaService
             Title = $"Season {seasonNumber}",
             Show = showRecord
         };
-        
+
         return seasonRecord;
     }
 
-    private async Task<EpisodeRecord> GetEpisodeRecordByShowTmdbId(ShowRecord show, SeasonRecord season, int episodeNumber, bool requestDebug)
+    private async Task<EpisodeRecord?> GetEpisodeRecordByShowTmdbId(ShowRecord show, SeasonRecord season, int episodeNumber, bool requestDebug)
     {
         try
         {
@@ -575,7 +644,7 @@ public class MediaService
             if (episodeDetails.IsSuccess == false)
             {
                 Console.WriteLine($"[ERROR] - Unsuccessful response from TMDB: ({episodeDetails.StatusCode}) {episodeDetails.StatusMessage}.");
-                return episodeRecord;
+                return null;
             }
 
             episodeRecord = new EpisodeRecord
@@ -593,6 +662,41 @@ public class MediaService
             Console.WriteLine($"[ERROR] - Failed getting episode record by show tmdb id. ShowIdentifier: {show}, SeasonIdentifier: {season}, EpisodeNumer: {episodeNumber}");
             throw;
         }
+    }
+
+    public SearchMediaResponse SearchMedia(string username, string? query, int results = 20)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return new SearchMediaResponse();
+
+        var term = query.Trim();
+        var limit = Math.Clamp(results, 1, 100);
+
+        var movies = _moviesService.SearchWatchedMovies(username, term, limit);
+        var episodes = _showsService.SearchWatchedEpisodes(username, term, limit);
+
+        return new SearchMediaResponse
+        {
+            Media = MediaMapper.Aggregate(movies, episodes, limit)
+        };
+    }
+
+    public async Task<bool> RemoveMovieFromWatchHistory(string username, string slug)
+    {
+        var removed = await _moviesService.RemoveFromWatchHistory(username, slug);
+
+        Console.WriteLine($"[INFO] - Removed {removed} watch record(s) for movie '{slug}' and user '{username}'.");
+
+        return removed > 0;
+    }
+
+    public async Task<bool> RemoveEpisodeFromWatchHistory(string username, string slug, int seasonNumber, int episodeNumber)
+    {
+        var removed = await _showsService.RemoveFromWatchHistory(username, slug, seasonNumber, episodeNumber);
+
+        Console.WriteLine($"[INFO] - Removed {removed} watch record(s) for '{slug}' S{seasonNumber}E{episodeNumber} and user '{username}'.");
+
+        return removed > 0;
     }
 
     public async Task<List<string>> GetPosters()

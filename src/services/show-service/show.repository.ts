@@ -90,4 +90,11 @@ export class ShowRepository {
                 })
             );
     }
+
+    public removeFromHistory(identifier: string, seasonNumber: number, episodeNumber: number): Observable<void> {
+        return this._httpClient.delete(`${environment.apiBaseUrl}/api/media/history/shows/${identifier}/seasons/${seasonNumber}/episodes/${episodeNumber}`)
+            .pipe(
+                map(() => undefined)
+            );
+    }
 }

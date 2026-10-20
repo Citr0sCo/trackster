@@ -9,6 +9,7 @@ import {IWatchedEpisode} from "../../services/show-service/types/watched-episode
 import {UserService} from "../../services/user-service/user.service";
 import {IUser} from "../../services/user-service/types/user.type";
 import {IMediaDetails} from "../../services/media-service/types/media-details.type";
+import {MediaService} from "../../services/media-service/media.service";
 
 @Component({
     selector: 'show-details-page',
@@ -28,19 +29,26 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
     public isLoading: boolean = false;
     public isUpdating: boolean = false;
 
+    public isRemoveDialogOpen: boolean = false;
+    public isRemovingFromHistory: boolean = false;
+
+    private username: string = '';
+
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _activatedRoute: ActivatedRoute;
     private readonly _showService: ShowService;
     private readonly _userService: UserService;
+    private readonly _mediaService: MediaService;
 
     private slug: string = '';
     private seasonId: number = 0;
     private episodeId: number = 0;
 
-    constructor(activatedRoute: ActivatedRoute, showService: ShowService, userService: UserService) {
+    constructor(activatedRoute: ActivatedRoute, showService: ShowService, userService: UserService, mediaService: MediaService) {
         this._activatedRoute = activatedRoute;
         this._showService = showService;
         this._userService = userService;
+        this._mediaService = mediaService;
     }
 
     public ngOnInit(): void {
@@ -53,6 +61,8 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
                 this._userService.getUserBySession()
                     .pipe(takeUntil(this._destroy))
                     .subscribe((user: IUser) => {
+                        this.username = user.username;
+
                         const episode = this._showService.getEpisodeByNumber(params['slug'], params['seasonId'], params['episodeId']);
                         const details = this._showService.getShowDetailsBySlug(params['slug']);
                         const watchHistory = this._showService.getEpisodeWatchHistory(user.username, params['slug'], params['seasonId'], params['episodeId']);
@@ -96,6 +106,32 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
             });
     }
 
+    public requestRemoveFromHistory(): void {
+        this.isRemoveDialogOpen = true;
+    }
+
+    public cancelRemoveFromHistory(): void {
+        this.isRemoveDialogOpen = false;
+    }
+
+    public confirmRemoveFromHistory(): void {
+        this.isRemovingFromHistory = true;
+
+        this._showService.removeFromHistory(this.slug, this.seasonId, this.episodeId)
+            .pipe(takeUntil(this._destroy))
+            .subscribe({
+                next: () => this.finishRemoval(),
+                error: () => this.isRemovingFromHistory = false
+            });
+    }
+
+    private finishRemoval(): void {
+        this.isRemovingFromHistory = false;
+        this.isRemoveDialogOpen = false;
+        this._mediaService.bustCache();
+        this.refreshWatchHistory();
+    }
+
     public formatRuntime(minutes: number): string {
         if (!minutes) {
             return '';
@@ -104,6 +140,12 @@ export class ShowDetailsPageComponent implements OnInit, OnDestroy {
         const hours = Math.floor(minutes / 60);
         const remainingMinutes = minutes % 60;
         return hours ? `${hours}h ${remainingMinutes}m` : `${remainingMinutes}m`;
+    }
+
+    private refreshWatchHistory(): void {
+        this._showService.getEpisodeWatchHistory(this.username, this.slug, this.seasonId, this.episodeId)
+            .pipe(takeUntil(this._destroy))
+            .subscribe((watchHistory) => this.watchHistory = watchHistory);
     }
 
     public ngOnDestroy(): void {

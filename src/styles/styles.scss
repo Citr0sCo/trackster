@@ -96,6 +96,15 @@ hr {
             background: linear-gradient(135deg, lighten($brand-primary, 4%), $brand-primary-alt) !important;
         }
     }
+
+    &.btn-danger {
+        background: linear-gradient(135deg, #e05b66, #c3404c) !important;
+        box-shadow: 0 8px 22px rgba(195, 64, 76, .26);
+
+        &:hover:not(:disabled) {
+            background: linear-gradient(135deg, lighten(#e05b66, 4%), #c3404c) !important;
+        }
+    }
 }
 
 .c-field {

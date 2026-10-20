@@ -1,3 +1,4 @@
+using System.Net;
 using Newtonsoft.Json;
 using Trackster.Api.Features.Auth.Providers.Trakt;
 using Trackster.Api.Features.Media.Importers.TraktImporter.Types;
@@ -8,6 +9,9 @@ namespace Trackster.Api.Features.Media.Importers.TraktImporter;
 
 public class TraktImportProvider
 {
+    private const int PageLimit = 100;
+    private const int MaxRateLimitRetries = 5;
+
     private readonly string _clientId;
     private readonly TraktAuthProvider _traktAuthProvider;
 
@@ -17,135 +21,118 @@ public class TraktImportProvider
         _traktAuthProvider = new TraktAuthProvider(usersService, sessionService);
     }
 
-    public async Task<List<TraktMovieResponse>> GetMovies(string username, bool requestDebug)
+    public Task<List<TraktMovieResponse>> GetMovies(string username, bool requestDebug)
+    {
+        return GetAllPages<TraktMovieResponse>(username, $"users/{username}/watched/movies", "movies", requestDebug);
+    }
+
+    public Task<List<TraktShowResponse>> GetShows(string username, bool requestDebug)
+    {
+        return GetAllPages<TraktShowResponse>(username, $"users/{username}/watched/shows", "shows", requestDebug);
+    }
+
+    public Task<List<TraktMovieHistoryResponse>> GetWatchedMovieHistory(string username, string itemId)
+    {
+        return GetAllPages<TraktMovieHistoryResponse>(username, $"users/{username}/history/movies/{itemId}", "movie history", false);
+    }
+
+    public Task<List<TraktShowHistoryResponse>> GetWatchedShowHistory(string username, string itemId)
+    {
+        return GetAllPages<TraktShowHistoryResponse>(username, $"users/{username}/history/shows/{itemId}", "show history", false);
+    }
+
+    private async Task<List<T>> GetAllPages<T>(string username, string path, string label, bool requestDebug)
     {
         var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
-        
-        var baseAddress = new Uri("https://api.trakt.tv/");
 
-        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
+        using var httpClient = CreateClient(accessToken);
+
+        var results = new List<T>();
+        var page = 1;
+
+        while (true)
         {
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
+            using var response = await SendWithRateLimitRetry(
+                () => httpClient.GetAsync($"{path}?page={page}&limit={PageLimit}"),
+                label);
 
-            using (var response = await httpClient.GetAsync($"users/{username}/watched/movies"))
+            var responseData = await response.Content.ReadAsStringAsync();
+
+            if (requestDebug)
+                Console.WriteLine($"[DEBUG] - Received response from Trakt for {label} (page {page}) {responseData}.");
+
+            if (!response.IsSuccessStatusCode)
+                throw new InvalidOperationException($"Trakt returned {(int)response.StatusCode} ({response.StatusCode}) for {label} (page {page}). Body: {responseData}");
+
+            List<T>? parsedData;
+
+            try
             {
-                string responseData = await response.Content.ReadAsStringAsync();
-                
-                if(requestDebug)
-                    Console.WriteLine($"[DEBUG] - Received response from Trakt for movies {responseData}.");
-                
-                var parsedData = JsonConvert.DeserializeObject<List<TraktMovieResponse>>(responseData);
-                return parsedData ?? new List<TraktMovieResponse>();
+                parsedData = JsonConvert.DeserializeObject<List<T>>(responseData);
             }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to parse the Trakt response for {label} (page {page}).", ex);
+            }
+
+            if (parsedData == null || parsedData.Count == 0)
+                break;
+
+            results.AddRange(parsedData);
+
+            var pageCount = ReadPageCount(response);
+
+            if (pageCount.HasValue)
+            {
+                if (page >= pageCount.Value)
+                    break;
+            }
+            else if (parsedData.Count < PageLimit)
+            {
+                break;
+            }
+
+            page++;
+        }
+
+        return results;
+    }
+
+    private static async Task<HttpResponseMessage> SendWithRateLimitRetry(Func<Task<HttpResponseMessage>> sendRequest, string label)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            var response = await sendRequest();
+
+            if (response.StatusCode != HttpStatusCode.TooManyRequests || attempt >= MaxRateLimitRetries)
+                return response;
+
+            var retryAfter = response.Headers.RetryAfter?.Delta?.TotalSeconds ?? 60;
+
+            Console.WriteLine($"[WARN] - Hitting Trakt throttle limit while fetching {label}. Waiting {retryAfter} seconds before retrying...");
+            response.Dispose();
+
+            await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, retryAfter)));
         }
     }
 
-    public async Task<List<TraktShowResponse>> GetShows(string username, bool requestDebug)
+    private static int? ReadPageCount(HttpResponseMessage response)
     {
-        var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
-        
-        var baseAddress = new Uri("https://api.trakt.tv/");
+        if (!response.Headers.TryGetValues("X-Pagination-Page-Count", out var values))
+            return null;
 
-        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
-        {
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
-
-            using (var response = await httpClient.GetAsync($"users/{username}/watched/shows"))
-            {
-                string responseData = await response.Content.ReadAsStringAsync();
-                
-                if(requestDebug)
-                    Console.WriteLine($"[DEBUG] - Received response from Trakt for shows {responseData}.");
-                
-                var parsedData = JsonConvert.DeserializeObject<List<TraktShowResponse>>(responseData);
-                return parsedData ?? new List<TraktShowResponse>();
-            }
-        }
+        return int.TryParse(values.FirstOrDefault(), out var pageCount) ? pageCount : null;
     }
 
-    public async Task<List<TraktMovieHistoryResponse>> GetWatchedMovieHistory(string username, string itemId)
+    private HttpClient CreateClient(string accessToken)
     {
-        var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
-        
-        var baseAddress = new Uri("https://api.trakt.tv/");
+        var httpClient = new HttpClient { BaseAddress = new Uri("https://api.trakt.tv/") };
 
-        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
-        {
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
 
-            using (var response = await httpClient.GetAsync($"users/{username}/history/movies/{itemId}"))
-            {
-                string responseData = await response.Content.ReadAsStringAsync();
-
-                if (responseData.StartsWith("UNAUTHED_API_GET_LIMIT"))
-                {
-                    Console.WriteLine($"[WARN] - Hitting Trakt throttle limit. Waiting 60 seconds before continuing...");
-                    Thread.Sleep(1000 * 60);
-                    return new List<TraktMovieHistoryResponse>();
-                }
-                
-                try
-                {
-                    var parsedData = JsonConvert.DeserializeObject<List<TraktMovieHistoryResponse>>(responseData);
-                    return parsedData ?? new List<TraktMovieHistoryResponse>();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[FATAL] - Failed to get movie watch history. Error: {ex.Message} Response below:");
-                    Console.WriteLine(responseData);
-                }
-                
-                return new List<TraktMovieHistoryResponse>();
-            }
-        }
-    }
-
-    public async Task<List<TraktShowHistoryResponse>> GetWatchedShowHistory(string username, string itemId)
-    {
-        var accessToken = await _traktAuthProvider.GetTokenByUsername(username);
-        
-        var baseAddress = new Uri("https://api.trakt.tv/");
-
-        using (var httpClient = new HttpClient { BaseAddress = baseAddress })
-        {
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-version", "2");
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("trakt-api-key", _clientId);
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Trackster/1.0 (+https://trackster.miloszdura.com/)");
-
-            using (var response = await httpClient.GetAsync($"users/{username}/history/shows/{itemId}"))
-            {
-                string responseData = await response.Content.ReadAsStringAsync();
-
-                if (responseData.StartsWith("UNAUTHED_API_GET_LIMIT"))
-                {
-                    Console.WriteLine($"[WARN] - Hitting Trakt throttle limit. Waiting 60 seconds before continuing...");
-                    Thread.Sleep(1000 * 60);
-                    return new List<TraktShowHistoryResponse>();
-                }
-                
-                try
-                {
-                    var parsedData = JsonConvert.DeserializeObject<List<TraktShowHistoryResponse>>(responseData);
-                    return parsedData ?? new List<TraktShowHistoryResponse>();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[FATAL] - Failed to get show watch history. Error: {ex.Message} Response below:");
-                    Console.WriteLine(responseData);
-                }
-
-                return new List<TraktShowHistoryResponse>();
-            }
-        }
+        return httpClient;
     }
 }

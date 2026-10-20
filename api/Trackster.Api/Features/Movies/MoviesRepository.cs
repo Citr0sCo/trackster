@@ -5,6 +5,7 @@ using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Media.Types;
 using Trackster.Api.Features.Movies.Types;
 
+using Trackster.Api.Features.Media;
 namespace Trackster.Api.Features.Movies;
 
 public interface IMoviesRepository
@@ -15,8 +16,9 @@ public interface IMoviesRepository
     Movie? GetMovieBySlug(string slug);
     List<WatchedMovie> GetWatchedHistoryBySlug(string username, string slug);
     MovieRecord? GetMovieByTmdbId(string tmdbId);
-    Task MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt);
-    MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
+    Task<bool> MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt);
+    List<WatchedMovie> SearchWatchedMovies(string username, string query, int results);
+    Task<int> RemoveFromWatchHistory(string username, string slug);
     Task<MovieRecord> UpdateMovie(MovieRecord movieRecord, List<GenreRecord> genres);
     Task<List<GenreRecord>> FindOrCreateGenres(List<string> genres);
 }
@@ -55,9 +57,9 @@ public class MoviesRepository : IMoviesRepository
                 {
                     if (!string.IsNullOrEmpty(watchedMovie.Movie.Slug))
                         continue;
-                    
+
                     watchedMovie.Movie.Slug = SlugHelper.GenerateSlugFor(watchedMovie.Movie.Title);
-                    
+
                     var movie = context.Movies.FirstOrDefault(x => x.Identifier.ToString().ToUpper() == watchedMovie.Movie.Identifier.ToString().ToUpper());
                     movie.Slug = watchedMovie.Movie.Slug;
                     context.Update(movie);
@@ -65,7 +67,7 @@ public class MoviesRepository : IMoviesRepository
 
                 context.SaveChanges();
                 transaction.Commit();
-                
+
                 return watchedMovies;
             }
             catch (Exception exception)
@@ -77,7 +79,7 @@ public class MoviesRepository : IMoviesRepository
 
         return new List<WatchedMovie>();
     }
-    
+
     public Movie? GetMovieBySlug(string slug)
     {
         using (var context = new DatabaseContext())
@@ -164,7 +166,7 @@ public class MoviesRepository : IMoviesRepository
         }
     }
 
-    public async Task MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt)
+    public async Task<bool> MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt)
     {
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
@@ -176,7 +178,7 @@ public class MoviesRepository : IMoviesRepository
                 if (existingUser == null)
                 {
                     Console.WriteLine($"[ERROR] - User '{user.Username}' doesn't exist. Creating...");
-                    
+
                     existingUser = user;
                     context.Users.Add(existingUser);
                 }
@@ -186,82 +188,114 @@ public class MoviesRepository : IMoviesRepository
                 if (existingMovie == null)
                 {
                     Console.WriteLine($"[INFO] - Movie '{movie.Title}' doesn't exist. Creating...");
-                    
+
                     existingMovie = movie;
                     context.Movies.Add(existingMovie);
                 }
-                
-                var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
-                    x.User.Username.ToUpper() == user.Username.ToUpper() &&
-                    x.Movie.TMDB.ToUpper() == movie.TMDB.ToUpper() &&
-                    x.WatchedAt >= watchedAt.AddHours(-1) &&
-                    x.WatchedAt <= watchedAt.AddHours(1)
-                );
 
-                if (existingMovieUserRecord == null)
+                var existingWatches = context.MovieUserLinks
+                    .Where(x => x.User.Identifier == existingUser.Identifier && x.Movie.Identifier == existingMovie.Identifier)
+                    .Select(x => x.WatchedAt)
+                    .ToList();
+
+                if (WatchHistoryMatcher.Contains(existingWatches, watchedAt))
                 {
-                    var movieUserRecord = new MovieUserRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        User = existingUser,
-                        Movie = existingMovie,
-                        WatchedAt = watchedAt,
-                    };
-
-                    Console.WriteLine($"[INFO] - Movie-User Link '{user.Username}'-'{existingMovie.Title}' doesn't exist. Creating...");
-                    
-                    context.Add(movieUserRecord);
+                    await transaction.RollbackAsync();
+                    return false;
                 }
+
+                Console.WriteLine($"[INFO] - Movie-User Link '{user.Username}'-'{existingMovie.Title}' doesn't exist. Creating...");
+
+                context.MovieUserLinks.Add(new MovieUserRecord
+                {
+                    Identifier = Guid.NewGuid(),
+                    User = existingUser,
+                    Movie = existingMovie,
+                    WatchedAt = watchedAt,
+                });
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                return true;
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
+                throw;
             }
         }
     }
 
-    public MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt)
+    public List<WatchedMovie> SearchWatchedMovies(string username, string query, int results)
+    {
+        using var context = new DatabaseContext();
+
+        var term = query.Trim().ToUpper();
+
+        var matches = context.MovieUserLinks
+            .Include(x => x.Movie)
+            .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+            .Where(x => x.Movie.Title.ToUpper().Contains(term))
+            .OrderByDescending(x => x.WatchedAt)
+            .Take(Math.Max(results, 1) * 10)
+            .ToList();
+
+        return matches
+            .GroupBy(x => x.Movie.Identifier)
+            .Select(group => group.OrderByDescending(x => x.WatchedAt).First())
+            .OrderByDescending(x => x.WatchedAt)
+            .Take(results)
+            .Select(x => new WatchedMovie
+            {
+                Movie = new Movie
+                {
+                    Identifier = x.Movie.Identifier,
+                    Title = x.Movie.Title,
+                    Slug = string.IsNullOrEmpty(x.Movie.Slug) ? SlugHelper.GenerateSlugFor(x.Movie.Title) : x.Movie.Slug,
+                    Year = x.Movie.Year,
+                    TMDB = x.Movie.TMDB,
+                    Poster = x.Movie.Poster,
+                    Overview = x.Movie.Overview
+                },
+                WatchedAt = x.WatchedAt
+            })
+            .ToList();
+    }
+
+    public async Task<int> RemoveFromWatchHistory(string username, string slug)
     {
         using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
-                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+                var watches = context.MovieUserLinks
+                    .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+                    .Where(x => x.Movie.Slug.ToUpper() == slug.ToUpper())
+                    .ToList();
 
-                if (existingUser == null)
+                if (watches.Count == 0)
                 {
-                    Console.WriteLine($"[ERROR] - User '{username}' doesn't exist.");
-                    return null;
+                    await transaction.RollbackAsync();
+                    return 0;
                 }
 
-                var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == tmdbId);
+                context.MovieUserLinks.RemoveRange(watches);
 
-                if (existingMovie == null)
-                {
-                    Console.WriteLine($"[INFO] - Movie '{tmdbId}' doesn't exist.");
-                    return null;
-                }
-                
-                var existingMovieUserRecord = context.MovieUserLinks.FirstOrDefault(x =>
-                    x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Movie.TMDB.ToUpper() == tmdbId.ToUpper() &&
-                    x.WatchedAt >= watchedAt.AddHours(-1) &&
-                    x.WatchedAt <= watchedAt.AddHours(1)
-                );
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                return existingMovieUserRecord;
+                return watches.Count;
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+                throw;
             }
         }
-
-        return null;
     }
 
     public async Task<MovieRecord> UpdateMovie(MovieRecord movieRecord, List<GenreRecord> genres)
@@ -275,7 +309,7 @@ public class MoviesRepository : IMoviesRepository
 
                 if (existingMovie == null)
                     return movieRecord;
-                
+
                 existingMovie.Title = movieRecord.Title;
 
                 foreach (var genre in genres)
@@ -284,7 +318,7 @@ public class MoviesRepository : IMoviesRepository
 
                     if (existingGenre == null)
                         continue;
-                    
+
                     var existingMovieGenre = context.MovieGenres.FirstOrDefault(x => x.Movie.Identifier == movieRecord.Identifier && x.Genre.Identifier == genre.Identifier);
 
                     if (existingMovieGenre != null)
@@ -296,15 +330,15 @@ public class MoviesRepository : IMoviesRepository
                         Movie = existingMovie,
                         Genre = existingGenre,
                     };
-                    
+
                     context.MovieGenres.Add(movieGenreRecord);
                 }
-                
+
                 context.Movies.Update(existingMovie);
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                
+
                 return existingMovie;
             }
             catch (Exception exception)
@@ -325,7 +359,7 @@ public class MoviesRepository : IMoviesRepository
             try
             {
                 var genreRecords = new List<GenreRecord>();
-                
+
                 foreach (var genre in genres)
                 {
                     var existingGenre = context.Genres.FirstOrDefault(x => x.Name.ToUpper() == genre.ToUpper());
@@ -337,16 +371,16 @@ public class MoviesRepository : IMoviesRepository
                             Identifier = Guid.NewGuid(),
                             Name = genre,
                         };
-                        
+
                         context.Genres.Add(existingGenre);
                     }
-                    
+
                     genreRecords.Add(existingGenre);
                 }
-                
+
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                
+
                 return genreRecords;
             }
             catch (Exception exception)
@@ -361,6 +395,12 @@ public class MoviesRepository : IMoviesRepository
 
     public async Task ImportMovie(UserRecord user, MovieRecord movie,  List<GenreRecord> genres)
     {
+        if (string.IsNullOrWhiteSpace(movie.TMDB))
+        {
+            Console.WriteLine($"[ERROR] - Refusing to import movie '{movie.Title}' without a TMDB identifier.");
+            return;
+        }
+
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
         {
@@ -377,26 +417,34 @@ public class MoviesRepository : IMoviesRepository
                 var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.TMDB);
 
                 if (existingMovie == null)
-                {    
+                {
                     Console.WriteLine($"[INFO] - Movie '{movie.Title}' doesn't exist. Creating...");
-                    context.Add(movie);
+                    existingMovie = movie;
+                    context.Add(existingMovie);
                 }
-                
+
                 foreach (var genre in genres)
                 {
                     var existingGenre = context.Genres.FirstOrDefault(x => x.Identifier == genre.Identifier);
 
                     if (existingGenre == null)
-                    {    
+                    {
                         Console.WriteLine($"[INFO] - Genre '{genre.Name}' doesn't exist. Creating...");
-                        context.Add(genre);
+                        existingGenre = genre;
+                        context.Add(existingGenre);
                     }
-                    
+
+                    var existingMovieGenre = context.MovieGenres.FirstOrDefault(x =>
+                        x.Movie.Identifier == existingMovie.Identifier && x.Genre.Identifier == existingGenre.Identifier);
+
+                    if (existingMovieGenre != null)
+                        continue;
+
                     context.MovieGenres.Add(new MovieGenreRecord
                     {
                         Identifier = Guid.NewGuid(),
-                        Movie = movie,
-                        Genre = existingGenre ?? genre,
+                        Movie = existingMovie,
+                        Genre = existingGenre,
                     });
                 }
 
@@ -407,12 +455,19 @@ public class MoviesRepository : IMoviesRepository
             {
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
+                throw;
             }
         }
     }
 
     public async Task SaveMovie(MovieRecord movie)
     {
+        if (string.IsNullOrWhiteSpace(movie.TMDB))
+        {
+            Console.WriteLine($"[ERROR] - Refusing to save movie '{movie.Title}' without a TMDB identifier.");
+            return;
+        }
+
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
         {
@@ -421,7 +476,7 @@ public class MoviesRepository : IMoviesRepository
                 var existingMovie = context.Movies.FirstOrDefault(x => x.TMDB == movie.TMDB);
 
                 if (existingMovie == null)
-                {    
+                {
                     Console.WriteLine($"[INFO] - Movie '{movie.Title}' doesn't exist. Creating...");
                     context.Add(movie);
                 }

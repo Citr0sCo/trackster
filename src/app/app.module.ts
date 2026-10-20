@@ -40,6 +40,9 @@ import { ShowRepository } from "../services/show-service/show.repository";
 import { SettingsService } from '../services/settings-service/settings.service';
 import { SettingsRepository } from '../services/settings-service/settings.repository';
 import { AuthWithTraktButtonComponent } from '../components/auth-with-trakt-buton/auth-with-trakt-button.component';
+import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
+import { GlobalSearchComponent } from '../components/global-search/global-search.component';
+import { SearchPageComponent } from '../pages/search-page/search-page.component';
 
 @NgModule({
     declarations: [
@@ -59,7 +62,10 @@ import { AuthWithTraktButtonComponent } from '../components/auth-with-trakt-buto
         LoginPageComponent,
         RegisterPageComponent,
         LogoutPageComponent,
-        AuthWithTraktButtonComponent
+        AuthWithTraktButtonComponent,
+        ConfirmDialogComponent,
+        GlobalSearchComponent,
+        SearchPageComponent
     ],
     bootstrap: [AppComponent],
     imports: [

@@ -1,0 +1,33 @@
+<div class="search-page">
+    <div class="container">
+        <header class="search-page__header">
+            <span class="section-eyebrow">Your library</span>
+            <h1>Search watched media</h1>
+            <p class="text-muted">Find any movie or episode you have already watched on Trackster.</p>
+        </header>
+
+        <form class="search-page__form" (submit)="$event.preventDefault(); submit()">
+            <i class="fa fa-search search-page__form__icon" aria-hidden="true"></i>
+            <input
+                class="search-page__input"
+                type="search"
+                placeholder="Movie, show or episode title"
+                aria-label="Search your watched media"
+                [formControl]="queryControl">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+        </form>
+
+        @if (isLoading) {
+            <div class="search-page__state"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Searching…</div>
+        } @else if (hasSearched && results.length === 0) {
+            <div class="search-page__state">Nothing you have watched matches &ldquo;{{ query }}&rdquo;.</div>
+        } @else if (results.length > 0) {
+            <div class="search-page__count">{{ results.length }} result{{ results.length === 1 ? '' : 's' }} for &ldquo;{{ query }}&rdquo;</div>
+            <div class="search-page__results">
+                @for (result of results; track result.identifier + '-' + result.seasonNumber + '-' + result.episodeNumber) {
+                    <media-poster [media]="result"></media-poster>
+                }
+            </div>
+        }
+    </div>
+</div>

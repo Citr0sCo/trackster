@@ -23,8 +23,9 @@ public interface IShowsService
     GetSeasonResponse GetSeasonByNumber(string slug, int seasonNumber);
     GetEpisodeResponse GetEpisodeByNumber(string slug, int seasonNumber, int episodeNumber);
     GetEpisodeWatchedHistoryResponse GetWatchedHistoryByEpisodeNumber(string username, string slug, int seasonNumber, int episodeNumber);
-    Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt);
-    EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string idsTmdb, DateTime watchedAt);
+    Task<bool> MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt);
+    List<WatchedEpisode> SearchWatchedEpisodes(string username, string query, int results);
+    Task<int> RemoveFromWatchHistory(string username, string slug, int seasonNumber, int episodeNumber);
     ShowRecord? GetShowByReference(Guid identifier);
     SeasonRecord? GetSeasonByReference(Guid identifier);
 }
@@ -313,14 +314,19 @@ public class ShowsService : IShowsService
         return new GetEpisodeWatchedHistoryResponse();
     }
 
-    public async Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt)
+    public async Task<bool> MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt)
     {
-        await _repository.MarkEpisodeAsWatched(user, show, season, episode, watchedAt);
+        return await _repository.MarkEpisodeAsWatched(user, show, season, episode, watchedAt);
     }
 
-    public EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string idsTmdb, DateTime watchedAt)
+    public List<WatchedEpisode> SearchWatchedEpisodes(string username, string query, int results)
     {
-        return _repository.GetWatchedShowByLastWatchedAt(username, idsTmdb, watchedAt);
+        return _repository.SearchWatchedEpisodes(username, query, results);
+    }
+
+    public async Task<int> RemoveFromWatchHistory(string username, string slug, int seasonNumber, int episodeNumber)
+    {
+        return await _repository.RemoveFromWatchHistory(username, slug, seasonNumber, episodeNumber);
     }
 
     public ShowRecord? GetShowByReference(Guid identifier)

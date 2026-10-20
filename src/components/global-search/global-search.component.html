@@ -1,0 +1,40 @@
+<div class="global-search">
+    <div class="global-search__field">
+        <i class="fa fa-search global-search__icon" aria-hidden="true"></i>
+        <input
+            type="search"
+            class="global-search__input"
+            placeholder="Search your history"
+            aria-label="Search your watched media"
+            [formControl]="queryControl"
+            (focus)="isOpen = true"
+            (keydown.enter)="submit()"
+            (keydown.escape)="close()">
+        @if (isSearching) {
+            <i class="fa fa-circle-o-notch fa-spin global-search__spinner" aria-hidden="true"></i>
+        }
+    </div>
+
+    @if (isOpen && queryControl.value.trim().length >= 2) {
+        <div class="global-search__results">
+            @if (results.length > 0) {
+                @for (result of results; track result.identifier + '-' + result.seasonNumber + '-' + result.episodeNumber) {
+                    <a class="global-search__result" [routerLink]="linkFor(result)" (click)="close()">
+                        <img class="global-search__result__poster" [src]="result.posterUrl" [alt]="result.title || 'Poster'" loading="lazy">
+                        <span class="global-search__result__text">
+                            <strong>{{ result.grandParentTitle ?? result.title }}</strong>
+                            @if (result.mediaType === 'Episode') {
+                                <span>{{ result.title }} &bull; S{{ result.seasonNumber }} E{{ result.episodeNumber }}</span>
+                            } @else {
+                                <span>{{ result.year }}</span>
+                            }
+                        </span>
+                    </a>
+                }
+                <a class="global-search__all" [routerLink]="['/app/search']" [queryParams]="{ query: queryControl.value.trim() }" (click)="close()">See all results</a>
+            } @else if (!isSearching && hasSearched) {
+                <div class="global-search__empty">Nothing watched matches &ldquo;{{ queryControl.value.trim() }}&rdquo;.</div>
+            }
+        </div>
+    }
+</div>

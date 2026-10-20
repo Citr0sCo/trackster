@@ -70,4 +70,11 @@ export class MovieRepository {
                 })
             );
     }
+
+    public removeFromHistory(slug: string): Observable<void> {
+        return this._httpClient.delete(`${environment.apiBaseUrl}/api/media/history/movies/${slug}`)
+            .pipe(
+                map(() => undefined)
+            );
+    }
 }

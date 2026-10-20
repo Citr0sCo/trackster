@@ -47,6 +47,13 @@ export class MovieService {
         return this._repository.updateMovieById(slug);
     }
 
+    public removeFromHistory(slug: string): Observable<void> {
+        return this._repository.removeFromHistory(slug)
+            .pipe(
+                tap(() => this.bustCache())
+            );
+    }
+
     public bustCache(): void {
         this._cachedAllMovies = [];
     }

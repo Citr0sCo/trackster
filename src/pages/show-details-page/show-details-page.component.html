@@ -2,9 +2,16 @@
     <div class="container">
         <div class="details-toolbar">
             <button (click)="redirectBack()" class="btn btn-quiet btn-sm"><span aria-hidden="true">&#8592;</span> Back</button>
-            <button (click)="updateEpisode()" class="btn btn-primary btn-sm" [disabled]="isUpdating">
-                <i class="fa fa-sync" [ngClass]="{'fa-spin': isUpdating}"></i> Refresh metadata
-            </button>
+            <div class="details-toolbar__actions">
+                @if (episode && watchHistory.length > 0) {
+                    <button (click)="requestRemoveFromHistory()" class="btn btn-danger btn-sm" [disabled]="isRemovingFromHistory">
+                        <i class="fa fa-trash" aria-hidden="true"></i> Remove from history
+                    </button>
+                }
+                <button (click)="updateEpisode()" class="btn btn-primary btn-sm" [disabled]="isUpdating">
+                    <i class="fa fa-sync" [ngClass]="{'fa-spin': isUpdating}"></i> Refresh metadata
+                </button>
+            </div>
         </div>
 
         @if (show) {
@@ -63,6 +70,8 @@
 
                         @for (entry of watchHistory; track entry.watchedAt) {
                             <div class="last-watched"><i class="fa fa-history" aria-hidden="true"></i> Last watched {{ entry.watchedAt | timeago }} <span>{{ entry.watchedAt | date:'MMM d, y · HH:mm' }}</span></div>
+                        } @empty {
+                            <div class="last-watched last-watched--empty"><i class="fa fa-eye-slash" aria-hidden="true"></i> Not in your watched history</div>
                         }
                     </div>
                 </div>
@@ -96,4 +105,14 @@
             <div class="media-overview media-state">Media not found.</div>
         }
     </div>
+
+    <confirm-dialog
+        [isOpen]="isRemoveDialogOpen"
+        title="Remove from watched history?"
+        [message]="'This removes every watch record for “' + (episode?.title ?? '') + '” from your Trackster history. Your Trakt account is not changed.'"
+        confirmLabel="Remove"
+        [isBusy]="isRemovingFromHistory"
+        (confirmed)="confirmRemoveFromHistory()"
+        (cancelled)="cancelRemoveFromHistory()">
+    </confirm-dialog>
 </div>

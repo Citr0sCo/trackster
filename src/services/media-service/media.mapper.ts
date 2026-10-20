@@ -38,4 +38,26 @@ export class MediaMapper {
             episodeNumber: record.episode.number
         };
     }
+
+    public static fromApi(item: any) : IMedia {
+        return {
+            identifier: item.Identifier,
+            mediaType: item.Type,
+            title: item.Title,
+            slug: item.Slug,
+            parentTitle: item.ParentTitle,
+            grandParentTitle: item.GrandParentTitle,
+            year: item.Year,
+            tmdb: item.TMDB,
+            posterUrl: item.Poster,
+            overview: item.Overview,
+            watchedAt: new Date(item.WatchedAt),
+            seasonNumber: item.SeasonNumber,
+            episodeNumber: item.EpisodeNumber,
+        };
+    }
+
+    public static fromApiArray(media: Array<any>) : Array<IMedia> {
+        return media.map((item: any) => MediaMapper.fromApi(item));
+    }
 }

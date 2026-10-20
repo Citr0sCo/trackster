@@ -57,6 +57,13 @@ export class ShowService {
         return this._repository.getEpisodeWatchHistory(username, identifier, seasonNumber, episodeNumber);
     }
 
+    public removeFromHistory(identifier: string, seasonNumber: number, episodeNumber: number): Observable<void> {
+        return this._repository.removeFromHistory(identifier, seasonNumber, episodeNumber)
+            .pipe(
+                tap(() => this.bustCache())
+            );
+    }
+
     public bustCache(): void {
         this._cachedAllShows = [];
     }
