@@ -65,6 +65,14 @@ export class CustomSidebarComponent implements OnInit, OnDestroy {
             });
     }
 
+    public closeMenu(): void {
+        if (this.isDesktop) {
+            return;
+        }
+
+        this.showMenu = false;
+    }
+
     public toggleMenu(): void {
 
         if (this.isDesktop) {

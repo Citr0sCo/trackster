@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
@@ -14,6 +14,9 @@ import { IMedia } from '../../services/media-service/types/media.type';
     standalone: false
 })
 export class GlobalSearchComponent implements OnInit, OnDestroy {
+
+    @Output()
+    public navigated: EventEmitter<void> = new EventEmitter<void>();
 
     public readonly queryControl = new FormControl('', { nonNullable: true });
 
@@ -74,8 +77,13 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.close();
+        this.select();
         this._router.navigate(['/app/search'], { queryParams: { query } });
+    }
+
+    public select(): void {
+        this.close();
+        this.navigated.emit();
     }
 
     public close(): void {

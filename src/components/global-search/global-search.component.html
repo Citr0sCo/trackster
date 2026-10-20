@@ -19,7 +19,7 @@
         <div class="global-search__results">
             @if (results.length > 0) {
                 @for (result of results; track result.identifier + '-' + result.seasonNumber + '-' + result.episodeNumber) {
-                    <a class="global-search__result" [routerLink]="linkFor(result)" (click)="close()">
+                    <a class="global-search__result" [routerLink]="linkFor(result)" (click)="select()">
                         <img class="global-search__result__poster" [src]="result.posterUrl" [alt]="result.title || 'Poster'" loading="lazy">
                         <span class="global-search__result__text">
                             <strong>{{ result.grandParentTitle ?? result.title }}</strong>
@@ -31,7 +31,7 @@
                         </span>
                     </a>
                 }
-                <a class="global-search__all" [routerLink]="['/app/search']" [queryParams]="{ query: queryControl.value.trim() }" (click)="close()">See all results</a>
+                <a class="global-search__all" [routerLink]="['/app/search']" [queryParams]="{ query: queryControl.value.trim() }" (click)="select()">See all results</a>
             } @else if (!isSearching && hasSearched) {
                 <div class="global-search__empty">Nothing watched matches &ldquo;{{ queryControl.value.trim() }}&rdquo;.</div>
             }
