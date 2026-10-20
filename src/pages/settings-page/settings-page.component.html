@@ -37,10 +37,10 @@
 
                 <h4>Integrations</h4>
 
-                <div class="c-label">Import Data From Trakt</div>
+                <div class="c-label">Sync With Trakt</div>
                 <div class="o-grid o-grid--static">
                     <div class="o-grid__col">
-                        <wide-button (click)="importFromTrakt()" [title]="'Import From Trakt'" [icon]="'fas fa-plus'" [isLoading]="isImporting"></wide-button>
+                        <wide-button (click)="syncWithTrakt()" [title]="'Sync With Trakt'" [icon]="'fas fa-sync'" [isLoading]="isImporting"></wide-button>
                     </div>
                     <div class="o-grid__col o-grid__col--fixed">
                         <div class="c-input-group u-ml-2" (click)="isDebug = !isDebug">
@@ -62,7 +62,7 @@
                 }
 
                 @if (progress.length > 0) {
-                    <pre class="log-window">@for (key of progress; track key) {
+                    <pre class="log-window">@for (key of progress; track $index) {
                         {{ key }}
                     }</pre>
                 }

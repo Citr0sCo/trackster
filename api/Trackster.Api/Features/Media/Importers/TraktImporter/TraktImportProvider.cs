@@ -11,6 +11,7 @@ public class TraktImportProvider
 {
     private const int PageLimit = 100;
     private const int MaxRateLimitRetries = 5;
+    private const int MaxBodySnippetLength = 200;
 
     private readonly string _clientId;
     private readonly TraktAuthProvider _traktAuthProvider;
@@ -62,7 +63,13 @@ public class TraktImportProvider
                 Console.WriteLine($"[DEBUG] - Received response from Trakt for {label} (page {page}) {responseData}.");
 
             if (!response.IsSuccessStatusCode)
-                throw new InvalidOperationException($"Trakt returned {(int)response.StatusCode} ({response.StatusCode}) for {label} (page {page}). Body: {responseData}");
+            {
+                var description = DescribeBody(response, responseData);
+
+                Console.WriteLine($"[ERROR] - Trakt returned {(int)response.StatusCode} ({response.StatusCode}) for {label} (page {page}); received {description}");
+
+                throw new InvalidOperationException($"Trakt returned {(int)response.StatusCode} ({response.StatusCode}) for {label} (page {page}); received {description}");
+            }
 
             List<T>? parsedData;
 
@@ -122,6 +129,30 @@ public class TraktImportProvider
             return null;
 
         return int.TryParse(values.FirstOrDefault(), out var pageCount) ? pageCount : null;
+    }
+
+    /// <summary>
+    /// Describes a failed response for surfacing in the import log. Trakt answers with an
+    /// HTML anti-bot page when it rejects a request, so the raw body is never echoed back:
+    /// it would fill the log with markup and inline JavaScript.
+    /// </summary>
+    internal static string DescribeBody(HttpResponseMessage response, string? body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return "an empty response body";
+
+        var mediaType = response.Content.Headers.ContentType?.MediaType;
+        var isMarkup = mediaType is "text/html" or "application/xhtml+xml" or "text/javascript" or "application/javascript"
+            || body.TrimStart().StartsWith('<');
+
+        if (isMarkup)
+            return $"a {mediaType ?? "markup"} page ({body.Length:N0} characters) instead of JSON, which usually means an anti-bot or proxy page intercepted the request";
+
+        var singleLine = string.Join(' ', body.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Trim();
+
+        return singleLine.Length <= MaxBodySnippetLength
+            ? $"\"{singleLine}\""
+            : $"\"{singleLine[..MaxBodySnippetLength]}…\"";
     }
 
     private HttpClient CreateClient(string accessToken)
