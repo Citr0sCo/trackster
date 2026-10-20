@@ -602,7 +602,15 @@ hr {
     .line-chart {
         min-width: 0;
 
-        svg { display: block; width: 100%; height: 190px; overflow: visible; }
+        // Height follows width so the 720x220 viewBox always spans the card instead of letterboxing.
+        svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 720 / 220;
+            min-height: 140px;
+            overflow: visible;
+        }
 
         &__area { fill: rgba(151, 116, 245, .14); }
         &__line { fill: none; stroke: $brand-primary; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
@@ -623,7 +631,8 @@ hr {
             flex-direction: column;
             gap: 3px;
             min-height: 34px;
-            margin: 7px 18px 0 38px;
+            // Percentages mirror the chart's 38px/20px horizontal padding inside the 720px viewBox.
+            margin: 7px 2.78% 0 5.28%;
             color: var(--text-color-alt);
             font-size: .7rem;
 
@@ -633,7 +642,7 @@ hr {
         &__labels {
             display: flex;
             justify-content: space-between;
-            margin: 7px 18px 0 38px;
+            margin: 7px 2.78% 0 5.28%;
             color: var(--text-color-alt);
             font-size: .67rem;
         }

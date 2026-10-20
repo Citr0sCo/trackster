@@ -3,7 +3,7 @@
         <img src="assets/brand/trackster-logo.svg" alt="Trackster logo">
     </div>
 
-    <global-search></global-search>
+    <global-search (navigated)="closeMenu()"></global-search>
 
     @if (user) {
         <div class="o-grid o-grid--static">
