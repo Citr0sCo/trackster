@@ -1,5 +1,5 @@
+import { Injectable, NgZone } from "@angular/core";
 import { Observable } from "rxjs";
-import { Injectable } from "@angular/core";
 import { AuthenticationService } from '../services/authentication-service/authentication.service';
 
 @Injectable({
@@ -7,29 +7,28 @@ import { AuthenticationService } from '../services/authentication-service/authen
 })
 export class StreamService {
 
-    private eventSource: EventSource | null = null;
     private _authService: AuthenticationService;
+    private _zone: NgZone;
 
-    constructor(authService: AuthenticationService) {
+    constructor(authService: AuthenticationService, zone: NgZone) {
         this._authService = authService;
+        this._zone = zone;
     }
 
-    public startStream(url: string, isDebug: boolean): Observable<any> {
-        return new Observable((observer) => {
-            this.eventSource = new EventSource(`${url}?token=${encodeURIComponent(this._authService.getAuthToken()!)}&isDebug=${isDebug ? 'true' : 'false'}`);
+    public startStream(url: string, isDebug: boolean): Observable<string> {
+        return new Observable<string>((observer) => {
+            const eventSource = new EventSource(`${url}?token=${encodeURIComponent(this._authService.getAuthToken()!)}&isDebug=${isDebug ? 'true' : 'false'}`);
 
-            this.eventSource.onmessage = event => {
-                observer.next(event.data);
+            // EventSource callbacks run outside the Angular zone, so streamed updates
+            // only reached the view on the next unrelated change detection pass.
+            eventSource.onmessage = event => this._zone.run(() => observer.next(event.data));
+
+            eventSource.onerror = error => {
+                eventSource.close();
+                this._zone.run(() => observer.error(error));
             };
 
-            this.eventSource.onerror = error => {
-                observer.error(error);
-                this.eventSource!.close();
-            };
-
-            return () => {
-                this.eventSource!.close();
-            };
+            return () => eventSource.close();
         });
     }
 }

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { StreamService } from "../../core/event-service.service";
 import { environment } from "../../environments/environment";
 import { round } from "@popperjs/core/lib/utils/math";
@@ -8,6 +8,15 @@ import { IUser } from '../../services/user-service/types/user.type';
 import { WebhookService } from "../../services/webhook-service/webhook.service";
 import { IWebhook, WebhookProvider } from "../../services/webhook-service/types/webhook.type";
 import { Provider } from '../../core/providers.enum';
+
+const MaxLogLineLength = 300;
+
+interface IImportProgress {
+    Data: string;
+    Total: number;
+    Processed: number;
+    Type: string;
+}
 
 @Component({
     selector: 'settings-page',
@@ -30,6 +39,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     public webhook: IWebhook | null = null;
     public readonly Provider = Provider;
 
+    private syncSubscription: Subscription | null = null;
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _streamService: StreamService;
     private readonly _userService: UserService;
@@ -56,49 +66,92 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             });
     }
 
-    public importFromTrakt(): void {
+    public syncWithTrakt(): void {
+        if (this.isImporting) {
+            return;
+        }
+
         this.isImporting = true;
+        this.progress = [];
+        this.processed = 0;
+        this.total = 0;
+        this.mediaType = '';
 
-        this._streamService.startStream(`${environment.apiBaseUrl}/api/media/import`, this.isDebug)
+        this.syncSubscription = this._streamService.startStream(`${environment.apiBaseUrl}/api/media/import`, this.isDebug)
             .pipe(takeUntil(this._destroy))
-            .subscribe((data) => {
-                    const progress = JSON.parse(data);
-                    this.progress.push(`${progress.Data}\r`);
+            .subscribe({
+                next: (data: string) => this.appendProgress(data),
+                error: () => this.stopSync('Sync stopped unexpectedly. Check that you are signed in and connected to Trakt.')
+            });
+    }
 
-                    if (progress.Total > 0) {
-                        this.total = progress.Total;
-                    }
+    private appendProgress(data: string): void {
+        let progress: IImportProgress;
 
-                    if (progress.Processed > 0) {
-                        this.processed = progress.Processed;
-                    }
+        try {
+            progress = JSON.parse(data) as IImportProgress;
+        } catch {
+            this.stopSync('The server sent an unexpected response while syncing with Trakt.');
+            return;
+        }
 
-                    if (progress.Type?.length > 0) {
-                        this.mediaType = progress.Type;
-                    }
+        if (progress.Data) {
+            this.progress.push(`${this.toLogLine(progress.Data)}\r`);
+        }
 
-                    if (progress.Data?.indexOf('DONE!') > -1) {
-                        this.isImporting = false;
+        if (progress.Total > 0) {
+            this.total = progress.Total;
+        }
 
-                        setTimeout(() => {
-                            const logWindowElement = document.querySelector('.log-window');
-                            if (logWindowElement) {
-                                logWindowElement.scrollTo(0, logWindowElement.scrollHeight);
-                            }
-                        }, 100);
-                    }
+        if (progress.Processed > 0) {
+            this.processed = progress.Processed;
+        }
 
-                    setTimeout(() => {
-                        const logWindowElement = document.querySelector('.log-window');
-                        if (logWindowElement) {
-                            logWindowElement.scrollTo(0, logWindowElement.scrollHeight);
-                        }
-                    }, 100);
+        if (progress.Type) {
+            this.mediaType = progress.Type;
+        }
 
-                }, (error) => {
-                    console.error(error);
-                }
-            );
+        if (progress.Data?.includes('DONE!')) {
+            this.isImporting = false;
+            this.syncSubscription?.unsubscribe();
+        }
+
+        this.scrollLogToBottom();
+    }
+
+    private stopSync(message: string): void {
+        if (!this.isImporting) {
+            return;
+        }
+
+        this.isImporting = false;
+        this.syncSubscription?.unsubscribe();
+
+        const lastLine = this.progress[this.progress.length - 1] ?? '';
+
+        if (!lastLine.includes('[Error]')) {
+            this.progress.push(`[Error] - ${message}\r`);
+        }
+
+        this.scrollLogToBottom();
+    }
+
+    // Server messages are free-form strings; keep one line each and cap them so a stray
+    // response body can never flood the log window.
+    private toLogLine(value: string): string {
+        const singleLine = value.replace(/\s+/g, ' ').trim();
+
+        return singleLine.length <= MaxLogLineLength ? singleLine : `${singleLine.slice(0, MaxLogLineLength)}…`;
+    }
+
+    private scrollLogToBottom(): void {
+        setTimeout(() => {
+            const logWindowElement = document.querySelector('.log-window');
+
+            if (logWindowElement) {
+                logWindowElement.scrollTo(0, logWindowElement.scrollHeight);
+            }
+        }, 100);
     }
 
     public saveSettings(): void {
@@ -127,5 +180,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     public ngOnDestroy(): void {
         this._destroy.next();
+        this._destroy.complete();
+        this.syncSubscription?.unsubscribe();
     }
 }
