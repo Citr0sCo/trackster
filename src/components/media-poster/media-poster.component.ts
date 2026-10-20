@@ -1,5 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import {IMedia, MediaType} from "../../services/media-service/types/media.type";
+import {IMedia} from "../../services/media-service/types/media.type";
+import {MediaLink} from "../../services/media-service/media-link";
 
 @Component({
     selector: 'media-poster',
@@ -12,6 +13,10 @@ export class MediaPosterComponent {
 
     @Input()
     public media: IMedia | null = null;
+
+    public linkFor(media: IMedia): Array<string> {
+        return MediaLink.for(media);
+    }
 
     public trimTitle(media: IMedia) : string {
 

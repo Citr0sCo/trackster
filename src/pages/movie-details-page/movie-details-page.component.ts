@@ -6,6 +6,7 @@ import {IMovie} from "../../services/movie-service/types/movie.type";
 import {IWatchedMovie} from "../../services/movie-service/types/watched-movie.type";
 import {UserService} from "../../services/user-service/user.service";
 import {IMediaDetails} from "../../services/media-service/types/media-details.type";
+import {MediaService} from "../../services/media-service/media.service";
 
 @Component({
     selector: 'movie-details-page',
@@ -23,15 +24,22 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
     public isLoading: boolean = false;
     public isUpdating: boolean = false;
 
+    public isRemoveDialogOpen: boolean = false;
+    public isRemovingFromHistory: boolean = false;
+
+    private username: string = '';
+
     private readonly _destroy: Subject<void> = new Subject();
     private readonly _activatedRoute: ActivatedRoute;
     private readonly _movieService: MovieService;
     private readonly _userService: UserService;
+    private readonly _mediaService: MediaService;
 
-    constructor(activatedRoute: ActivatedRoute, movieService: MovieService, userService: UserService) {
+    constructor(activatedRoute: ActivatedRoute, movieService: MovieService, userService: UserService, mediaService: MediaService) {
         this._activatedRoute = activatedRoute;
         this._movieService = movieService;
         this._userService = userService;
+        this._mediaService = mediaService;
     }
 
     public ngOnInit(): void {
@@ -44,6 +52,8 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
                 this._userService.getUserBySession()
                     .pipe(takeUntil(this._destroy))
                     .subscribe((user) => {
+                        this.username = user.username;
+
                         const movie = this._movieService.getMovieBySlug(params['slug']);
                         const details = this._movieService.getMovieDetailsBySlug(params['slug']);
                         const watchHistory = this._movieService.getMovieWatchHistoryById(user.username, params['slug']);
@@ -79,6 +89,32 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
             });
     }
 
+    public requestRemoveFromHistory(): void {
+        this.isRemoveDialogOpen = true;
+    }
+
+    public cancelRemoveFromHistory(): void {
+        this.isRemoveDialogOpen = false;
+    }
+
+    public confirmRemoveFromHistory(): void {
+        this.isRemovingFromHistory = true;
+
+        this._movieService.removeFromHistory(this.movie!.slug)
+            .pipe(takeUntil(this._destroy))
+            .subscribe({
+                next: () => this.finishRemoval(),
+                error: () => this.isRemovingFromHistory = false
+            });
+    }
+
+    private finishRemoval(): void {
+        this.isRemovingFromHistory = false;
+        this.isRemoveDialogOpen = false;
+        this._mediaService.bustCache();
+        this.refreshWatchHistory();
+    }
+
     public formatRuntime(minutes: number): string {
         if (!minutes) {
             return '';
@@ -87,6 +123,12 @@ export class MovieDetailsPageComponent implements OnInit, OnDestroy {
         const hours = Math.floor(minutes / 60);
         const remainingMinutes = minutes % 60;
         return hours ? `${hours}h ${remainingMinutes}m` : `${remainingMinutes}m`;
+    }
+
+    private refreshWatchHistory(): void {
+        this._movieService.getMovieWatchHistoryById(this.username, this.movie!.slug)
+            .pipe(takeUntil(this._destroy))
+            .subscribe((watchHistory) => this.watchHistory = watchHistory);
     }
 
     public ngOnDestroy(): void {

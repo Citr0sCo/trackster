@@ -13,6 +13,12 @@
         margin-bottom: 20px;
     }
 
+    .details-toolbar__actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
     .btn-quiet {
         border-color: var(--border-color) !important;
         background: rgba(255, 255, 255, .055) !important;
@@ -171,6 +177,11 @@
 
         i { margin-right: 6px; }
         span { margin-left: 8px; color: var(--text-color-alt); font-weight: 500; }
+
+        &--empty {
+            color: var(--text-color-alt);
+            font-weight: 500;
+        }
     }
 
     .cast-section {

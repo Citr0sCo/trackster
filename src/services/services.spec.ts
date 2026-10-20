@@ -1,6 +1,7 @@
 import { EventService } from './event-service/event.service';
 import { LinkMapper } from './media-service/link.mapper';
 import { MediaMapper } from './media-service/media.mapper';
+import { MediaLink } from './media-service/media-link';
 import { MediaType } from './media-service/types/media.type';
 import { MovieMapper } from './movie-service/movie.mapper';
 import { ShowMapper } from './show-service/show.mapper';
@@ -126,6 +127,48 @@ describe('service utilities', () => {
             thirdPartyIntegrations: [{ identifier: 'integration-1', provider: 2 }]
         });
         expect(UserMapper.mapRecord(user)).toEqual(apiUser);
+    });
+
+    it('maps API media payloads for history and search results', () => {
+        const media = MediaMapper.fromApi({
+            Identifier: 'show-1',
+            Type: 'Episode',
+            Title: 'Pilot',
+            Slug: 'the-show',
+            ParentTitle: 'Season 1',
+            GrandParentTitle: 'The Show',
+            Year: 2024,
+            TMDB: 'tmdb-1',
+            Poster: '/poster.jpg',
+            Overview: 'Overview',
+            WatchedAt: '2026-01-02T03:04:05Z',
+            SeasonNumber: 1,
+            EpisodeNumber: 1
+        });
+
+        expect(media.identifier).toBe('show-1');
+        expect(media.mediaType).toBe(MediaType.Episode);
+        expect(media.grandParentTitle).toBe('The Show');
+        expect(media.watchedAt).toEqual(new Date('2026-01-02T03:04:05Z'));
+        expect(MediaMapper.fromApiArray([{ Identifier: 'movie-1', Type: 'Movie', Slug: 'the-movie' }])).toHaveLength(1);
+    });
+
+    it('builds detail routes for movies and episodes', () => {
+        const base = {
+            identifier: 'id', title: 'Title', overview: 'Overview', posterUrl: '/poster.jpg',
+            tmdb: 'tmdb', year: 2024, parentTitle: null, grandParentTitle: null,
+            watchedAt: new Date(), seasonNumber: 0, episodeNumber: 0
+        };
+
+        expect(MediaLink.for({ ...base, mediaType: MediaType.Movie, slug: 'the-movie' }))
+            .toEqual(['/app/movies', 'the-movie']);
+        expect(MediaLink.for({ ...base, mediaType: MediaType.Episode, slug: 'the-show', seasonNumber: 2, episodeNumber: 5 }))
+            .toEqual(['/app/shows', 'the-show', 'seasons', '2', 'episodes', '5']);
+
+        expect(MediaLink.for({ ...base, mediaType: MediaType.Movie, slug: null }))
+            .toEqual(['/app/movies', '']);
+        expect(MediaLink.for({ ...base, mediaType: MediaType.Episode, slug: null, seasonNumber: 1, episodeNumber: 1 }))
+            .toEqual(['/app/shows', '', 'seasons', '1', 'episodes', '1']);
     });
 
     it('publishes true and false page-scroll states', () => {

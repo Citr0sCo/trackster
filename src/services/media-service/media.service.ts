@@ -46,6 +46,14 @@ export class MediaService {
             );
     }
 
+    public search(query: string, results: number = 20): Observable<Array<IMedia>> {
+        if (!query || !query.trim()) {
+            return of([]);
+        }
+
+        return this._mediaRepository.search(query.trim(), results);
+    }
+
     public getStats(username: string): Observable<IStats> {
 
         if (this._cachedStats) {

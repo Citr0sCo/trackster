@@ -3,6 +3,7 @@ using Trackster.Api.Data;
 using Trackster.Api.Data.Records;
 using Trackster.Api.Features.Shows.Types;
 
+using Trackster.Api.Features.Media;
 namespace Trackster.Api.Features.Shows;
 
 public interface IShowsRepository
@@ -18,8 +19,9 @@ public interface IShowsRepository
     Task ImportShow(UserRecord user, ShowRecord show, List<GenreRecord> genres);
     Task ImportSeason(UserRecord user, ShowRecord show, SeasonRecord season);
     Task ImportEpisode(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode);
-    Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt);
-    EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
+    Task<bool> MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt);
+    List<WatchedEpisode> SearchWatchedEpisodes(string username, string query, int results);
+    Task<int> RemoveFromWatchHistory(string username, string slug, int seasonNumber, int episodeNumber);
     ShowRecord? GetShowByReference(Guid identifier);
     SeasonRecord? GetSeasonByReference(Guid identifier);
     Task<EpisodeRecord> UpdateEpisode(EpisodeRecord episodeRecord, List<GenreRecord> genres);
@@ -98,18 +100,18 @@ public class ShowsRepository : IShowsRepository
                     .Skip((page - 1) * results)
                     .Take(results)
                     .ToList();
-                
+
                 var showIds = userEpisodes
                     .Select(x => x.Episode.Season.Show.Identifier)
                     .Distinct()
                     .ToList();
-                
+
                 var genres = context.ShowGenres
                     .Include(showGenreRecord => showGenreRecord.Show)
                     .Include(showGenreRecord => showGenreRecord.Genre)
                     .Where(x => showIds.Contains(x.Show.Identifier))
                     .ToList();
-                
+
                 return userEpisodes
                     .Select(x => new WatchedEpisode
                     {
@@ -250,6 +252,12 @@ public class ShowsRepository : IShowsRepository
 
     public async Task ImportShow(UserRecord user, ShowRecord show, List<GenreRecord> genres)
     {
+        if (string.IsNullOrWhiteSpace(show.TMDB))
+        {
+            Console.WriteLine($"[ERROR] - Refusing to import show '{show.Title}' without a TMDB identifier.");
+            return;
+        }
+
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
         {
@@ -264,33 +272,36 @@ public class ShowsRepository : IShowsRepository
                 }
 
                 var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
-                
+
                 if (existingShow == null)
                 {
                     Console.WriteLine($"[INFO] - Show '{show.Title}' doesn't exist. Creating...");
-                    context.Add(show);
+                    existingShow = show;
+                    context.Add(existingShow);
                 }
-                
+
                 foreach (var genre in genres)
                 {
                     var existingGenre = context.Genres.FirstOrDefault(x => x.Identifier == genre.Identifier);
 
                     if (existingGenre == null)
-                    {    
+                    {
                         Console.WriteLine($"[INFO] - Genre '{genre.Name}' doesn't exist. Creating...");
-                        context.Add(genre);
+                        existingGenre = genre;
+                        context.Add(existingGenre);
                     }
-                    
-                    var existingShowGenre = context.ShowGenres.FirstOrDefault(x => x.Show.Identifier == show.Identifier && x.Genre.Identifier == genre.Identifier);
+
+                    var existingShowGenre = context.ShowGenres.FirstOrDefault(x =>
+                        x.Show.Identifier == existingShow.Identifier && x.Genre.Identifier == existingGenre.Identifier);
 
                     if (existingShowGenre != null)
                         continue;
-                    
+
                     context.ShowGenres.Add(new ShowGenreRecord
                     {
                         Identifier = Guid.NewGuid(),
-                        Show = existingShow ?? show,
-                        Genre = existingGenre ?? genre,
+                        Show = existingShow,
+                        Genre = existingGenre,
                     });
                 }
 
@@ -301,6 +312,7 @@ public class ShowsRepository : IShowsRepository
             {
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
+                throw;
             }
         }
     }
@@ -318,12 +330,15 @@ public class ShowsRepository : IShowsRepository
 
                 var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
                 if (existingShow == null)
-                    context.Add(show);
+                {
+                    existingShow = show;
+                    context.Add(existingShow);
+                }
 
                 var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB && x.Number == season.Number);
                 if (existingSeason == null)
                 {
-                    season.Show = existingShow ?? show;
+                    season.Show = existingShow;
                     context.Add(season);
                 }
 
@@ -334,6 +349,7 @@ public class ShowsRepository : IShowsRepository
             {
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
+                throw;
             }
         }
     }
@@ -351,9 +367,12 @@ public class ShowsRepository : IShowsRepository
 
                 var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == show.TMDB);
                 if (existingShow == null)
-                    context.Add(show);
+                {
+                    existingShow = show;
+                    context.Add(existingShow);
+                }
 
-                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB 
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB
                                                                          && x.Number == season.Number);
                 if (existingSeason == null)
                 {
@@ -361,13 +380,13 @@ public class ShowsRepository : IShowsRepository
                     context.Add(season);
                 }
 
-                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB 
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB
                                                                            && x.Season.Number == season.Number
                                                                            && x.Number == episode.Number);
                 if (existingEpisode == null)
                 {
                     episode.Season = existingSeason ?? season;
-                    episode.Season.Show = existingShow ?? show;
+                    episode.Season.Show = existingShow;
                     context.Add(episode);
                 }
 
@@ -378,6 +397,7 @@ public class ShowsRepository : IShowsRepository
             {
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
+                throw;
             }
         }
     }
@@ -393,7 +413,7 @@ public class ShowsRepository : IShowsRepository
                 if (existingShow == null)
                     context.Add(show);
 
-                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB 
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB
                                                                          && x.Number == season.Number);
                 if (existingSeason == null)
                 {
@@ -401,7 +421,7 @@ public class ShowsRepository : IShowsRepository
                     context.Add(season);
                 }
 
-                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB 
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB
                                                                            && x.Season.Number == season.Number
                                                                            && x.Number == episode.Number);
                 if (existingEpisode == null)
@@ -430,7 +450,7 @@ public class ShowsRepository : IShowsRepository
             try
             {
                 var genreRecords = new List<GenreRecord>();
-                
+
                 foreach (var genre in genres)
                 {
                     var existingGenre = context.Genres.FirstOrDefault(x => x.Name.ToUpper() == genre.ToUpper());
@@ -442,16 +462,16 @@ public class ShowsRepository : IShowsRepository
                             Identifier = Guid.NewGuid(),
                             Name = genre,
                         };
-                        
+
                         context.Genres.Add(existingGenre);
                     }
-                    
+
                     genreRecords.Add(existingGenre);
                 }
-                
+
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                
+
                 return genreRecords;
             }
             catch (Exception exception)
@@ -464,7 +484,7 @@ public class ShowsRepository : IShowsRepository
         }
     }
 
-    public async Task MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt)
+    public async Task<bool> MarkEpisodeAsWatched(UserRecord user, ShowRecord show, SeasonRecord season, EpisodeRecord episode, DateTime watchedAt)
     {
         using (var context = new DatabaseContext())
         using (var transaction = await context.Database.BeginTransactionAsync())
@@ -476,7 +496,7 @@ public class ShowsRepository : IShowsRepository
                 if (existingUser == null)
                 {
                     Console.WriteLine($"[ERROR] - User '{user.Username}' doesn't exist. Creating...");
-                    
+
                     existingUser = user;
                     context.Users.Add(existingUser);
                 }
@@ -491,101 +511,153 @@ public class ShowsRepository : IShowsRepository
                     context.Shows.Add(existingShow);
                 }
 
-                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB 
+                var existingSeason = context.Seasons.FirstOrDefault(x => x.Show.TMDB == show.TMDB
                                                                          && x.Number == season.Number);
 
                 if (existingSeason == null)
                 {
                     Console.WriteLine($"[INFO] - Season '{season.Number}' doesn't exist. Creating...");
-                    
+
+                    season.Show = existingShow;
                     existingSeason = season;
                     context.Seasons.Add(existingSeason);
                 }
 
-                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB 
+                var existingEpisode = context.Episodes.FirstOrDefault(x => x.Season.Show.TMDB == show.TMDB
                                                                          && x.Season.Number == season.Number
                                                                          && x.Number == episode.Number);
 
                 if (existingEpisode == null)
                 {
                     Console.WriteLine($"[INFO] - Episode '{episode.Number}' doesn't exist. Creating...");
-                    
+
+                    episode.Season = existingSeason;
                     existingEpisode = episode;
                     context.Episodes.Add(existingEpisode);
                 }
-                
-                var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
-                    x.User.Username.ToUpper() == user.Username.ToUpper() &&
-                    x.Episode.Season.Show.TMDB == show.TMDB && 
-                    x.Episode.Season.Number == season.Number && 
-                    x.Episode.Number == episode.Number &&
-                    x.WatchedAt >= watchedAt.AddHours(-1) &&
-                    x.WatchedAt <= watchedAt.AddHours(1)
-                );
 
-                if (existingEpisodeUserRecord == null)
+                var existingWatches = context.EpisodeUserLinks
+                    .Where(x => x.User.Identifier == existingUser.Identifier && x.Episode.Identifier == existingEpisode.Identifier)
+                    .Select(x => x.WatchedAt)
+                    .ToList();
+
+                if (WatchHistoryMatcher.Contains(existingWatches, watchedAt))
                 {
-                    var movieUserRecord = new EpisodeUserRecord
-                    {
-                        Identifier = Guid.NewGuid(),
-                        User = existingUser,
-                        Episode = existingEpisode,
-                        WatchedAt = watchedAt,
-                    };
-
-                    Console.WriteLine($"[INFO] - Episode-User Link '{user.Username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
-                    context.Add(movieUserRecord);
+                    await transaction.RollbackAsync();
+                    return false;
                 }
+
+                Console.WriteLine($"[INFO] - Episode-User Link '{user.Username}'-'{existingEpisode.Title}' doesn't exist. Creating...");
+
+                context.EpisodeUserLinks.Add(new EpisodeUserRecord
+                {
+                    Identifier = Guid.NewGuid(),
+                    User = existingUser,
+                    Episode = existingEpisode,
+                    WatchedAt = watchedAt,
+                });
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                return true;
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
                 await transaction.RollbackAsync();
+                throw;
             }
         }
     }
 
-    public EpisodeUserRecord? GetWatchedShowByLastWatchedAt(string username, string tmdbId, DateTime watchedAt)
+    public List<WatchedEpisode> SearchWatchedEpisodes(string username, string query, int results)
+    {
+        using var context = new DatabaseContext();
+
+        var term = query.Trim().ToUpper();
+
+        var matches = context.EpisodeUserLinks
+            .Include(x => x.Episode)
+            .ThenInclude(x => x.Season)
+            .ThenInclude(x => x.Show)
+            .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+            .Where(x => x.Episode.Season.Show.Title.ToUpper().Contains(term)
+                        || x.Episode.Title.ToUpper().Contains(term))
+            .OrderByDescending(x => x.WatchedAt)
+            .Take(Math.Max(results, 1) * 10)
+            .ToList();
+
+        return matches
+            .GroupBy(x => x.Episode.Identifier)
+            .Select(group => group.OrderByDescending(x => x.WatchedAt).First())
+            .OrderByDescending(x => x.WatchedAt)
+            .Take(results)
+            .Select(x => new WatchedEpisode
+            {
+                Episode = new Episode
+                {
+                    Identifier = x.Episode.Identifier,
+                    Title = x.Episode.Title,
+                    Number = x.Episode.Number,
+                    Season = new Season
+                    {
+                        Identifier = x.Episode.Season.Identifier,
+                        Title = x.Episode.Season.Title,
+                        Number = x.Episode.Season.Number,
+                        Show = new Show
+                        {
+                            Identifier = x.Episode.Season.Show.Identifier,
+                            Title = x.Episode.Season.Show.Title,
+                            Slug = string.IsNullOrEmpty(x.Episode.Season.Show.Slug)
+                                ? Trackster.Api.Core.Helpers.SlugHelper.GenerateSlugFor(x.Episode.Season.Show.Title)
+                                : x.Episode.Season.Show.Slug,
+                            Year = x.Episode.Season.Show.Year,
+                            TMDB = x.Episode.Season.Show.TMDB,
+                            Poster = x.Episode.Season.Show.Poster,
+                            Overview = x.Episode.Season.Show.Overview
+                        }
+                    }
+                },
+                WatchedAt = x.WatchedAt
+            })
+            .ToList();
+    }
+
+    public async Task<int> RemoveFromWatchHistory(string username, string slug, int seasonNumber, int episodeNumber)
     {
         using (var context = new DatabaseContext())
+        using (var transaction = await context.Database.BeginTransactionAsync())
         {
             try
             {
-                var existingUser = context.Users.FirstOrDefault(x => x.Username.ToUpper() == username.ToUpper());
+                var watches = context.EpisodeUserLinks
+                    .Where(x => x.User.Username.ToUpper() == username.ToUpper())
+                    .Where(x => x.Episode.Season.Show.Slug.ToUpper() == slug.ToUpper())
+                    .Where(x => x.Episode.Season.Number == seasonNumber)
+                    .Where(x => x.Episode.Number == episodeNumber)
+                    .ToList();
 
-                if (existingUser == null)
+                if (watches.Count == 0)
                 {
-                    Console.WriteLine($"[ERROR] - User '{username}' doesn't exist.");
-                    return null;
+                    await transaction.RollbackAsync();
+                    return 0;
                 }
 
-                var existingShow = context.Shows.FirstOrDefault(x => x.TMDB == tmdbId);
+                context.EpisodeUserLinks.RemoveRange(watches);
 
-                if (existingShow == null)
-                {
-                    Console.WriteLine($"[INFO] - Show '{tmdbId}' doesn't exist.");
-                    return null;
-                }
-                
-                var existingEpisodeUserRecord = context.EpisodeUserLinks.FirstOrDefault(x =>
-                    x.User.Username.ToUpper() == username.ToUpper() &&
-                    x.Episode.Season.Show.TMDB.ToUpper() == tmdbId.ToUpper() &&
-                    x.WatchedAt >= watchedAt.AddHours(-1) &&
-                    x.WatchedAt <= watchedAt.AddHours(1)
-                );
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                return existingEpisodeUserRecord;
+                return watches.Count;
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
+                await transaction.RollbackAsync();
+                throw;
             }
         }
-
-        return null;
     }
 
     public ShowRecord? GetShowByReference(Guid identifier)
@@ -634,16 +706,16 @@ public class ShowsRepository : IShowsRepository
 
                 if (existingEpisode == null)
                     return episodeRecord;
-                
+
                 existingEpisode.Title = episodeRecord.Title;
-                
+
                 foreach (var genre in genres)
                 {
                     var existingGenre = context.Genres.FirstOrDefault(x => x.Identifier == genre.Identifier);
 
                     if (existingGenre == null)
                         continue;
-                    
+
                     var existingMovieGenre = context.ShowGenres.FirstOrDefault(x => x.Show.Identifier == existingEpisode.Season.Show.Identifier && x.Genre.Identifier == genre.Identifier);
 
                     if (existingMovieGenre != null)
@@ -655,15 +727,15 @@ public class ShowsRepository : IShowsRepository
                         Show = existingEpisode.Season.Show,
                         Genre = existingGenre,
                     };
-                    
+
                     context.ShowGenres.Add(showGenreRecord);
                 }
-                
+
                 context.Episodes.Update(existingEpisode);
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                
+
                 return existingEpisode;
             }
             catch (Exception exception)

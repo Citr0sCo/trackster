@@ -43,6 +43,46 @@ public class MediaController : ControllerBase
     {
         return _service.GetStatsForCalendar(username, daysInThePast);
     }
+
+    [AuthRequired]
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery]string? query, [FromQuery]int results = 20)
+    {
+        var user = await _sessionHelper.GetUser(HttpContext);
+
+        if (user == null)
+            return Unauthorized();
+
+        return Ok(_service.SearchMedia(user.Username, query, results));
+    }
+
+    [AuthRequired]
+    [HttpDelete("history/movies/{slug}")]
+    public async Task<IActionResult> RemoveMovieFromHistory([FromRoute]string slug)
+    {
+        var user = await _sessionHelper.GetUser(HttpContext);
+
+        if (user == null)
+            return Unauthorized();
+
+        var removed = await _service.RemoveMovieFromWatchHistory(user.Username, slug);
+
+        return removed ? NoContent() : NotFound();
+    }
+
+    [AuthRequired]
+    [HttpDelete("history/shows/{slug}/seasons/{seasonNumber}/episodes/{episodeNumber}")]
+    public async Task<IActionResult> RemoveEpisodeFromHistory([FromRoute]string slug, [FromRoute]int seasonNumber, [FromRoute]int episodeNumber)
+    {
+        var user = await _sessionHelper.GetUser(HttpContext);
+
+        if (user == null)
+            return Unauthorized();
+
+        var removed = await _service.RemoveEpisodeFromWatchHistory(user.Username, slug, seasonNumber, episodeNumber);
+
+        return removed ? NoContent() : NotFound();
+    }
     
     [HttpGet("import")]
     public async Task<IActionResult> ImportMedia([FromQuery] Guid token, [FromQuery] bool isDebug = false)

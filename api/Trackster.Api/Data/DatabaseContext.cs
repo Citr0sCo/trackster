@@ -29,8 +29,17 @@ public class DatabaseContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        Directory.CreateDirectory("assets");
-        optionsBuilder.UseSqlite("Data Source=assets/trackster.db");
+        var databasePath = Environment.GetEnvironmentVariable("TRACKSTER_DATABASE_PATH");
+
+        if (string.IsNullOrWhiteSpace(databasePath))
+            databasePath = Path.Combine("assets", "trackster.db");
+
+        var directory = Path.GetDirectoryName(databasePath);
+
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        optionsBuilder.UseSqlite($"Data Source={databasePath}");
         
         var value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         if (value == "Development")

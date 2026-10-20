@@ -11,6 +11,7 @@ import { LoginPageComponent } from "../pages/login-page/login-page.component";
 import { DashboardPageComponent } from "../pages/dashboard-page/dashboard-page.component";
 import { RegisterPageComponent } from "../pages/register-page/register-page.component";
 import { LogoutPageComponent } from "../pages/logout-page/logout-page.component";
+import { SearchPageComponent } from "../pages/search-page/search-page.component";
 
 const routes: Routes = [
     {
@@ -44,6 +45,10 @@ const routes: Routes = [
             {
                 path: 'statistics',
                 component: StatisticsPageComponent
+            },
+            {
+                path: 'search',
+                component: SearchPageComponent
             },
             {
                 path: 'settings',

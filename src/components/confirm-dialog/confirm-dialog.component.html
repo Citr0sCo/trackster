@@ -1,0 +1,17 @@
+@if (isOpen) {
+    <div class="confirm-dialog" (click)="cancel()">
+        <div class="confirm-dialog__panel" role="dialog" aria-modal="true" [attr.aria-label]="title" (click)="$event.stopPropagation()">
+            <h2 class="confirm-dialog__title">{{ title }}</h2>
+            <p class="confirm-dialog__message">{{ message }}</p>
+            <div class="confirm-dialog__actions">
+                <button type="button" class="btn btn-quiet" (click)="cancel()" [disabled]="isBusy">{{ cancelLabel }}</button>
+                <button type="button" class="btn btn-danger" (click)="confirm()" [disabled]="isBusy">
+                    @if (isBusy) {
+                        <i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i>
+                    }
+                    {{ confirmLabel }}
+                </button>
+            </div>
+        </div>
+    </div>
+}

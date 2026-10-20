@@ -1,0 +1,40 @@
+@import "../../styles/utility/variables";
+
+.confirm-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(7, 8, 12, .72);
+    backdrop-filter: blur(4px);
+
+    &__panel {
+        width: min(100%, 440px);
+        padding: 26px;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(26, 29, 40, .98), rgba(15, 17, 25, .98));
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .45);
+    }
+
+    &__title {
+        margin: 0 0 10px;
+        font-size: 1.15rem;
+        color: var(--text-color);
+    }
+
+    &__message {
+        margin: 0 0 22px;
+        color: var(--text-color-alt);
+        line-height: 1.55;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+}

@@ -4,6 +4,7 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { IMedia } from "./types/media.type";
 import { IStats } from './types/stats.type';
+import { MediaMapper } from './media.mapper';
 
 @Injectable()
 export class MediaRepository {
@@ -27,23 +28,16 @@ export class MediaRepository {
         return this._httpClient.get(`${environment.apiBaseUrl}/api/media/history?username=${username}&results=${results}&page=${page}`).pipe()
             .pipe(
                 map((response: any) => {
-                    return response.Media.map((media: any) => {
-                        return {
-                            identifier: media.Identifier,
-                            mediaType: media.Type,
-                            title: media.Title,
-                            slug: media.Slug,
-                            parentTitle: media.ParentTitle,
-                            grandParentTitle: media.GrandParentTitle,
-                            year: media.Year,
-                            tmdb: media.TMDB,
-                            posterUrl: media.Poster,
-                            overview: media.Overview,
-                            watchedAt: new Date(media.WatchedAt),
-                            seasonNumber: media.SeasonNumber,
-                            episodeNumber: media.EpisodeNumber,
-                        };
-                    });
+                    return MediaMapper.fromApiArray(response.Media);
+                })
+            );
+    }
+
+    public search(query: string, results: number): Observable<Array<IMedia>> {
+        return this._httpClient.get(`${environment.apiBaseUrl}/api/media/search?query=${encodeURIComponent(query)}&results=${results}`)
+            .pipe(
+                map((response: any) => {
+                    return MediaMapper.fromApiArray(response.Media);
                 })
             );
     }

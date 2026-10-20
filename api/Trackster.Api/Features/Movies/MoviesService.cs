@@ -16,8 +16,9 @@ public interface IMoviesService
 
     GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug);
     MovieRecord? GetMovieByTmdbId(string tmdbId);
-    Task MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt);
-    MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt);
+    Task<bool> MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt);
+    List<WatchedMovie> SearchWatchedMovies(string username, string query, int results);
+    Task<int> RemoveFromWatchHistory(string username, string slug);
     Task<List<GenreRecord>> FindOrCreateGenres(List<string> genres);
 }
 
@@ -31,7 +32,7 @@ public class MoviesService : IMoviesService
         _repository = repository;
         _detailsProvider = new TmdbImportProvider();
     }
-    
+
     public GetAllMoviesResponse GetAllWatchedMovies(string username, int results, int page)
     {
         var movies = _repository.GetAllWatchedMovies(username, results, page);
@@ -41,7 +42,7 @@ public class MoviesService : IMoviesService
             WatchedMovies = movies
         };
     }
-    
+
     public GetMovieResponse GetMovieBySlug(string slug)
     {
         var movie = _repository.GetMovieBySlug(slug);
@@ -53,7 +54,7 @@ public class MoviesService : IMoviesService
                 Movie = movie
             };
         }
-        
+
         return new GetMovieResponse();
     }
 
@@ -131,7 +132,7 @@ public class MoviesService : IMoviesService
         };
 
         await _repository.SaveMovie(movie);
-        
+
         return movie;
     }
 
@@ -139,7 +140,7 @@ public class MoviesService : IMoviesService
     {
         await _repository.ImportMovie(user, movie, genres);
     }
-    
+
     public GetMovieWatchedHistoryResponse GetWatchedHistoryBySlug(string username, string slug)
     {
         var movieWatchHistory = _repository.GetWatchedHistoryBySlug(username, slug);
@@ -157,7 +158,7 @@ public class MoviesService : IMoviesService
                 })
             };
         }
-        
+
         return new GetMovieWatchedHistoryResponse();
     }
 
@@ -166,14 +167,19 @@ public class MoviesService : IMoviesService
         return _repository.GetMovieByTmdbId(tmdbId);
     }
 
-    public async Task MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt)
+    public async Task<bool> MarkMovieAsWatched(UserRecord user, MovieRecord movie, DateTime watchedAt)
     {
-        await _repository.MarkMovieAsWatched(user, movie, watchedAt);
+        return await _repository.MarkMovieAsWatched(user, movie, watchedAt);
     }
 
-    public MovieUserRecord? GetWatchedMovieByLastWatchedAt(string username, string tmdbId, DateTime watchedAt)
+    public List<WatchedMovie> SearchWatchedMovies(string username, string query, int results)
     {
-       return _repository.GetWatchedMovieByLastWatchedAt(username, tmdbId, watchedAt);
+        return _repository.SearchWatchedMovies(username, query, results);
+    }
+
+    public async Task<int> RemoveFromWatchHistory(string username, string slug)
+    {
+        return await _repository.RemoveFromWatchHistory(username, slug);
     }
 
     public async Task<List<GenreRecord>> FindOrCreateGenres(List<string> genres)
@@ -190,7 +196,7 @@ public class MoviesService : IMoviesService
             var details = await _detailsProvider.GetDetailsForMovie(movie.TMDB);
 
             var genres = await _repository.FindOrCreateGenres(details.Genres.ConvertAll((genre) => genre.Name));
-            
+
             var updatedMovie = await _repository.UpdateMovie(new MovieRecord
             {
                 Identifier = movie.Identifier,
@@ -202,7 +208,7 @@ public class MoviesService : IMoviesService
                 Movie = MovieMapper.Map(updatedMovie, genres)
             };
         }
-        
+
         return new GetMovieResponse();
     }
 }
