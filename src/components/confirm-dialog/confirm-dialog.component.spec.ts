@@ -51,4 +51,32 @@ describe('ConfirmDialogComponent', () => {
 
         expect(events).toEqual([]);
     });
+
+    it('cancels on escape unless busy', () => {
+        const events: Array<string> = [];
+        fixture.componentInstance.cancelled.subscribe(() => events.push('cancelled'));
+        fixture.componentInstance.isOpen = true;
+        fixture.detectChanges();
+
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        expect(events).toEqual(['cancelled']);
+
+        fixture.componentInstance.isBusy = true;
+        fixture.detectChanges();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        expect(events).toEqual(['cancelled']);
+    });
+
+    it('cancels when the backdrop is clicked', () => {
+        const events: Array<string> = [];
+        fixture.componentInstance.cancelled.subscribe(() => events.push('cancelled'));
+        fixture.componentInstance.isOpen = true;
+        fixture.detectChanges();
+
+        (fixture.nativeElement.querySelector('.confirm-dialog') as HTMLElement).click();
+        expect(events).toEqual(['cancelled']);
+
+        (fixture.nativeElement.querySelector('.confirm-dialog__panel') as HTMLElement).click();
+        expect(events).toEqual(['cancelled']);
+    });
 });

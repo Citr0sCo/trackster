@@ -164,6 +164,11 @@ describe('service utilities', () => {
             .toEqual(['/app/movies', 'the-movie']);
         expect(MediaLink.for({ ...base, mediaType: MediaType.Episode, slug: 'the-show', seasonNumber: 2, episodeNumber: 5 }))
             .toEqual(['/app/shows', 'the-show', 'seasons', '2', 'episodes', '5']);
+
+        expect(MediaLink.for({ ...base, mediaType: MediaType.Movie, slug: null }))
+            .toEqual(['/app/movies', '']);
+        expect(MediaLink.for({ ...base, mediaType: MediaType.Episode, slug: null, seasonNumber: 1, episodeNumber: 1 }))
+            .toEqual(['/app/shows', '', 'seasons', '1', 'episodes', '1']);
     });
 
     it('publishes true and false page-scroll states', () => {
