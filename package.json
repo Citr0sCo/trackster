@@ -43,7 +43,7 @@
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.72.1",
     "@vitest/coverage-v8": "^4.1.12",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-plugin-import": "^2.32.0",
     "istanbul-lib-instrument": "^6.0.3",
     "jasmine-core": "~6.3.0",
