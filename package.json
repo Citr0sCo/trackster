@@ -24,7 +24,7 @@
     "@angular/router": "^22.2.5",
     "@angular/service-worker": "^22.2.5",
     "@popperjs/core": "^2.11.8",
-    "bootstrap": "^5.3.8",
+    "bootstrap": "^5.3.9",
     "font-awesome": "4.7.0",
     "fontawesome-free": "^1.0.4",
     "net": "^1.0.2",
