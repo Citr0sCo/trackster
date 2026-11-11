@@ -83,7 +83,7 @@ jobs:
   build-be:
     runs-on: self-hosted
     container:
-      image: mcr.microsoft.com/dotnet/sdk:10.0
+      image: mcr.microsoft.com/dotnet/sdk:11.0
     steps:
       - uses: actions/checkout@v4
 
@@ -97,7 +97,7 @@ jobs:
   test-be:
     runs-on: self-hosted
     container:
-      image: mcr.microsoft.com/dotnet/sdk:10.0
+      image: mcr.microsoft.com/dotnet/sdk:11.0
     steps:
       - uses: actions/checkout@v4
 
